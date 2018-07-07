@@ -42,3 +42,19 @@ AbyleBotter.exe
 ```
 
 The Bot should now connect to the Discord Gateway and should be ready to use. 
+
+## Using Docker
+
+If you want try out AbyleBotter in a Docker container you can use the provided Dockerfile to build a Docker image using
+
+```
+docker build -t abylebotter .
+```
+
+After the successful build of the docker image, it can be started using
+
+```
+docker run -i -t --name abylebotter --rm -e DISCORD_BOT_TOKEN=token abylebotter
+```
+
+where token has to be replaced with your Discord Bot token.
