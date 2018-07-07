@@ -10,7 +10,7 @@ At the moment the Bot is in a proof of concept/API/interface development phase w
 
 Make sure your $GOPATH is set.
 
-Checkout AbyleEDA with
+Checkout AbyleBotter with
 
     go get github.com/torlenor/AbyleBotter
 
