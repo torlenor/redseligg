@@ -49,12 +49,18 @@ func (b Bot) GetReceiveMessageChannel() chan events.ReceiveMessage {
 func (b Bot) apiCall(path string, method string, body string) (r []byte, e error) {
 	client := &http.Client{}
 
-	req, _ := http.NewRequest(method, "https://discordapp.com/api"+path, strings.NewReader(body))
+	req, err := http.NewRequest(method, "https://discordapp.com/api"+path, strings.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
 
 	req.Header.Add("Authorization", "Bot "+b.token)
 	req.Header.Add("Content-Type", "application/json")
 
-	response, _ := client.Do(req)
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
 
 	return ioutil.ReadAll(response.Body)
 }
