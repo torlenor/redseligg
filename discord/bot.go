@@ -33,6 +33,7 @@ var (
 type Bot struct {
 	ws                 *websocket.Conn
 	receiveMessageChan chan events.ReceiveMessage
+	sendMessageChan    chan events.SendMessage
 	knownChannels      map[string]channelCreate
 	token              string
 	ownSnowflakeID     string
@@ -44,6 +45,13 @@ type Bot struct {
 // can be normal channel messages, whispers
 func (b Bot) GetReceiveMessageChannel() chan events.ReceiveMessage {
 	return b.receiveMessageChan
+}
+
+// GetSendMessageChannel returns the channel which is used to
+// send messages using the bot. For DiscordBot these messages
+// can be normal channel messages, whispers
+func (b Bot) GetSendMessageChannel() chan events.SendMessage {
+	return b.sendMessageChan
 }
 
 func (b Bot) apiCall(path string, method string, body string) (r []byte, e error) {
@@ -65,10 +73,10 @@ func (b Bot) apiCall(path string, method string, body string) (r []byte, e error
 	return ioutil.ReadAll(response.Body)
 }
 
-func (b *Bot) startDiscordBot(doneChannel chan struct{}, ws *websocket.Conn) {
+func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 	defer close(doneChannel)
 	for {
-		_, message, err := ws.ReadMessage()
+		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				log.Println("DiscordBot: Connection closed normally: ", err)
@@ -87,9 +95,9 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}, ws *websocket.Conn) {
 
 		if data["op"].(float64) == 10 { // Hello from Discord Gateway
 			log.Println("DiscordBot: Received HELLO from gateway")
-			sendIdent(b.token, ws)
+			sendIdent(b.token, b.ws)
 			heartbeatInterval := int(data["d"].(map[string]interface{})["heartbeat_interval"].(float64))
-			go b.heartBeat(heartbeatInterval, ws) // Start sending heartbeats
+			go b.heartBeat(heartbeatInterval, b.ws) // Start sending heartbeats
 			log.Println("DiscordBot: DiscordBot is READY")
 		} else if data["op"].(float64) == 0 { // Dispatch to event handlers
 			switch data["t"] {
@@ -144,15 +152,36 @@ func CreateDiscordBot(token string) *Bot {
 	b.ws = dialGateway(url)
 
 	b.receiveMessageChan = make(chan events.ReceiveMessage)
+	b.sendMessageChan = make(chan events.SendMessage)
 	b.knownChannels = make(map[string]channelCreate)
 
 	return &b
 }
 
+func (b *Bot) startSendChannelReceiver() {
+	for sendMsg := range b.sendMessageChan {
+		log.Println("received")
+		switch sendMsg.Type {
+		case events.MESSAGE:
+			err := b.sendMessage(sendMsg.Ident, sendMsg.Content)
+			if err != nil {
+				log.Println("DiscordBot: Error sending message:", err)
+			}
+		case events.WHISPER:
+			err := b.sendWhisper(sendMsg.Ident, sendMsg.Content)
+			if err != nil {
+				log.Println("DiscordBot: Error sending whisper:", err)
+			}
+		default:
+		}
+	}
+}
+
 // Start the Discord Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
 	log.Println("DiscordBot: DiscordBot is STARTING")
-	go b.startDiscordBot(doneChannel, b.ws)
+	go b.startDiscordBot(doneChannel)
+	go b.startSendChannelReceiver()
 }
 
 // Stop the Discord Bot

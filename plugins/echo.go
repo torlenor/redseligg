@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"log"
+	"strings"
 
 	"github.com/torlenor/AbyleBotter/botinterface"
 	"github.com/torlenor/AbyleBotter/events"
@@ -16,13 +17,15 @@ type Plugin interface {
 // EchoPlugin struct holds the private variables for a EchoPlugin
 type EchoPlugin struct {
 	botReceiveChannel chan events.ReceiveMessage
+	botSendChannel    chan events.SendMessage
 	onlyOnWhisper     bool
 }
 
 // CreateEchoPlugin returns the struct for a new EchoPlugin
-func CreateEchoPlugin(receiveChannel chan events.ReceiveMessage) EchoPlugin {
+func CreateEchoPlugin(receiveChannel chan events.ReceiveMessage, sendChannel chan events.SendMessage) EchoPlugin {
 	log.Printf("EchoBot: EchoBot is CREATING itself")
-	ep := EchoPlugin{botReceiveChannel: receiveChannel}
+	ep := EchoPlugin{botReceiveChannel: receiveChannel,
+		botSendChannel: sendChannel}
 	return ep
 }
 
@@ -32,10 +35,19 @@ func (p *EchoPlugin) SetOnlyOnWhisper(onlyOnWhisper bool) {
 	p.onlyOnWhisper = onlyOnWhisper
 }
 
+func stripCmd(str string, cmd string) string {
+	return strings.TrimLeft(str, "!"+cmd)
+}
+
 func (p EchoPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
 	log.Printf("EchoBot: Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.Ident, receivedMessage.Content)
-	if !p.onlyOnWhisper || receivedMessage.Type == events.WHISPER {
-		log.Printf("EchoBot: Echoing message back to user = %s, content = %s", receivedMessage.Ident, receivedMessage.Content)
+	msg := strings.Trim(receivedMessage.Content, " ")
+	if (!p.onlyOnWhisper || receivedMessage.Type == events.WHISPER) && strings.HasPrefix(msg, "!echo") {
+		log.Printf("EchoBot: Echoing message back to user = %s, content = %s", receivedMessage.Ident, stripCmd(msg, "echo"))
+		select {
+		case p.botSendChannel <- events.SendMessage{Type: events.WHISPER, Ident: receivedMessage.Ident, Content: stripCmd(msg, "echo")}:
+		default:
+		}
 	}
 }
 

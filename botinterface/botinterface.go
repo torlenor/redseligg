@@ -8,4 +8,5 @@ type Bot interface {
 	Stop()
 
 	GetReceiveMessageChannel() chan events.ReceiveMessage
+	GetSendMessageChannel() chan events.SendMessage
 }

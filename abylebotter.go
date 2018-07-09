@@ -23,7 +23,7 @@ func main() {
 	var bot botinterface.Bot = discord.CreateDiscordBot(token)
 	bot.Start(done)
 
-	echoPlugin := plugins.CreateEchoPlugin(bot.GetReceiveMessageChannel())
+	echoPlugin := plugins.CreateEchoPlugin(bot.GetReceiveMessageChannel(), bot.GetSendMessageChannel())
 	echoPlugin.SetOnlyOnWhisper(true)
 	echoPlugin.Start()
 

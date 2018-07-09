@@ -50,17 +50,6 @@ func (b Bot) handleMessageCreate(data map[string]interface{}) {
 
 	if snowflakeID != b.ownSnowflakeID {
 		b.dispatchMessage(newMessageCreate)
-		if b.getMessageType(newMessageCreate) == events.WHISPER {
-			err := b.sendWhisper(snowflakeID, "Private Hello!!")
-			if err != nil {
-				log.Println("DiscordBot: Error sending whisper:", err)
-			}
-		} else if b.getMessageType(newMessageCreate) == events.MESSAGE {
-			err := b.sendMessage(newMessageCreate.ChannelID, "Public Hello!!")
-			if err != nil {
-				log.Println("DiscordBot: Error sending message:", err)
-			}
-		}
 	}
 }
 
