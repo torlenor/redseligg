@@ -1,0 +1,9 @@
+# stage 1
+FROM alpine:3.6 as alpine
+RUN apk add -U --no-cache ca-certificates
+
+#stage 2 - final
+FROM scratch
+COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+ADD abylebotter /
+CMD ["/abylebotter"]
