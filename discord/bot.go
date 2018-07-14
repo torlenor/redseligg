@@ -34,6 +34,7 @@ type Bot struct {
 	ws                 *websocket.Conn
 	receiveMessageChan chan events.ReceiveMessage
 	sendMessageChan    chan events.SendMessage
+	commandChan        chan events.Command
 	knownChannels      map[string]channelCreate
 	token              string
 	ownSnowflakeID     string
@@ -52,6 +53,12 @@ func (b Bot) GetReceiveMessageChannel() chan events.ReceiveMessage {
 // can be normal channel messages, whispers
 func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
+}
+
+// GetCommandChannel gives a channel to control the bot from
+// a plugin
+func (b Bot) GetCommandChannel() chan events.Command {
+	return b.commandChan
 }
 
 func (b Bot) apiCall(path string, method string, body string) (r []byte, e error) {
@@ -153,6 +160,8 @@ func CreateDiscordBot(token string) *Bot {
 
 	b.receiveMessageChan = make(chan events.ReceiveMessage)
 	b.sendMessageChan = make(chan events.SendMessage)
+	b.commandChan = make(chan events.Command)
+
 	b.knownChannels = make(map[string]channelCreate)
 
 	return &b
@@ -177,11 +186,23 @@ func (b *Bot) startSendChannelReceiver() {
 	}
 }
 
+func (b *Bot) startCommandChannelReceiver() {
+	for cmd := range b.commandChan {
+		switch cmd.Command {
+		case string("DemoCommand"):
+			log.Println("Received DemoCommand with server name" + cmd.Payload)
+		default:
+			log.Println("Received unhandeled command" + cmd.Command)
+		}
+	}
+}
+
 // Start the Discord Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
 	log.Println("DiscordBot: DiscordBot is STARTING")
 	go b.startDiscordBot(doneChannel)
 	go b.startSendChannelReceiver()
+	go b.startCommandChannelReceiver()
 }
 
 // Stop the Discord Bot

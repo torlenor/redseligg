@@ -63,7 +63,7 @@ func (b *Bot) handleReady(data map[string]interface{}) {
 		log.Println("DiscordBot: UNHANDELED ERROR: READY", err)
 	}
 	// log.Println("READY: ", newReady.toString())
-	log.Printf("DiscordBot: Received: READY for User = %s with SnowflakeID = %s", newReady.User.Username, b.ownSnowflakeID)
+	log.Printf("DiscordBot: Received: READY for Bot User = %s, UserID = %s, SnowflakeID = %s", newReady.User.Username, newReady.User.ID, b.ownSnowflakeID)
 }
 
 func handleGuildCreate(data map[string]interface{}) {

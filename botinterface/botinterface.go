@@ -9,4 +9,5 @@ type Bot interface {
 
 	GetReceiveMessageChannel() chan events.ReceiveMessage
 	GetSendMessageChannel() chan events.SendMessage
+	GetCommandChannel() chan events.Command
 }
