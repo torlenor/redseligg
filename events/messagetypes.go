@@ -1,13 +1,16 @@
 package events
 
+// MessageType enum
 type MessageType int
 
+// Known MessageTypes
 const ( // iota is reset to 0
 	UNKNOWN MessageType = iota
 	WHISPER
 	MESSAGE
 )
 
+// MessageTypes as strings
 var MessageTypes = [...]string{
 	"UNKNOWN",
 	"WHISPER",
