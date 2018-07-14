@@ -8,8 +8,41 @@ import (
 
 	"github.com/torlenor/AbyleBotter/botinterface"
 	"github.com/torlenor/AbyleBotter/discord"
+	"github.com/torlenor/AbyleBotter/matrix"
 	"github.com/torlenor/AbyleBotter/plugins"
 )
+
+func discordBotCreator(done chan struct{}) *discord.Bot {
+	discordToken := os.Getenv("DISCORD_BOT_TOKEN")
+
+	bot := discord.CreateDiscordBot(discordToken)
+	// if err != nil {
+	// 	log.Println("DiscordBot: ERROR: ", err)
+	// }
+	bot.Start(done)
+
+	return bot
+}
+
+func matrixBotCreator(done chan struct{}) *matrix.Bot {
+	matrixUsername := os.Getenv("MATRIX_BOT_USERNAME")
+	matrixPassword := os.Getenv("MATRIX_BOT_PASSWORD")
+	matrixToken := os.Getenv("MATRIX_BOT_TOKEN")
+
+	bot, err := matrix.CreateMatrixBot("https://matrix.abyle.org", matrixUsername, matrixPassword, matrixToken)
+	if err != nil {
+		log.Println("MatrixBot: ERROR: ", err)
+	}
+	bot.Start(done)
+
+	return bot
+}
+
+func connectPlugins(bot botinterface.Bot) {
+	echoPlugin := plugins.CreateEchoPlugin(bot.GetReceiveMessageChannel(), bot.GetSendMessageChannel())
+	echoPlugin.SetOnlyOnWhisper(true)
+	echoPlugin.Start()
+}
 
 func main() {
 	log.Println("AbyleBotter is STARTING")
@@ -18,14 +51,20 @@ func main() {
 
 	done := make(chan struct{})
 
-	token := os.Getenv("DISCORD_BOT_TOKEN")
+	discordBot := os.Getenv("DISCORD_BOT")
+	matrixBot := os.Getenv("MATRIX_BOT")
 
-	var bot botinterface.Bot = discord.CreateDiscordBot(token)
-	bot.Start(done)
+	var bot botinterface.Bot
 
-	echoPlugin := plugins.CreateEchoPlugin(bot.GetReceiveMessageChannel(), bot.GetSendMessageChannel())
-	echoPlugin.SetOnlyOnWhisper(true)
-	echoPlugin.Start()
+	if len(discordBot) > 0 {
+		bot = discordBotCreator(done)
+	} else if len(matrixBot) > 0 {
+		bot = matrixBotCreator(done)
+	} else {
+		log.Fatal("No Bot chosen to start. Set DISCORD_BOT or MATRIX_BOT env variables")
+	}
+
+	connectPlugins(bot)
 
 	for {
 		select {
