@@ -12,7 +12,7 @@ export GOBIN := ${PWD}/vendor/bin
 NAME := abylebotter
 VERSION := $(shell cat VERSION)
 LDFLAGS := -X main.version=${VERSION}
-SRCPATH := .
+SRCPATH := src
 DOCKERBASETAG := hpsch/abylebotter
 
 default: build
