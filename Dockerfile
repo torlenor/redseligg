@@ -1,15 +1,9 @@
-FROM golang:1.10
+FROM scratch
 
-# Copy the local package files to the container's workspace
-ADD . /go/src/github.com/torlenor/AbyleBotter
+COPY bin/abylebotter  /usr/bin/
+CMD ["/usr/bin/abylebotter"]
 
-# Fetch dependencies and build AbyleBotter inside the container
-RUN go get -v ./...
-RUN go install github.com/torlenor/AbyleBotter
-
-# Run the command by default when the container starts
-ENTRYPOINT /go/bin/AbyleBotter
-
-# Document that the service listens on port 8080
-# Not necessary, yet
-# EXPOSE 8080
+LABEL org.label-schema.vendor="Abyle.org" \
+      org.label-schema.url="https://github.com/torlenor/AbyleBotter" \
+      org.label-schema.name="Abylebotter" \
+      org.label-schema.description="An extensible chat bot for Discord written in GO" 

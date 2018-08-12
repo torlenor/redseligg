@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/torlenor/AbyleBotter/events"
+	"../events"
 
 	"github.com/mitchellh/mapstructure"
 )

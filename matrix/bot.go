@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"../events"
+
 	"github.com/pkg/errors"
-	"github.com/torlenor/AbyleBotter/events"
 )
 
 var (

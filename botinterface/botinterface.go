@@ -1,6 +1,6 @@
 package botinterface
 
-import "github.com/torlenor/AbyleBotter/events"
+import "../events"
 
 // Bot type interface
 type Bot interface {

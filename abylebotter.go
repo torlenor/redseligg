@@ -6,11 +6,16 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/torlenor/AbyleBotter/botinterface"
-	"github.com/torlenor/AbyleBotter/discord"
-	"github.com/torlenor/AbyleBotter/matrix"
-	"github.com/torlenor/AbyleBotter/plugins"
+	"./botinterface"
+	"./discord"
+	"./matrix"
+	"./plugins"
 )
+
+/**
+ * Version should be set while build using ldflags (see Makefile)
+ */
+var version string
 
 func discordBotCreator(done chan struct{}) *discord.Bot {
 	discordToken := os.Getenv("DISCORD_BOT_TOKEN")
@@ -45,7 +50,7 @@ func connectPlugins(bot botinterface.Bot) {
 }
 
 func main() {
-	log.Println("AbyleBotter is STARTING")
+	log.Println("AbyleBotter (" + version + ") is STARTING")
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 

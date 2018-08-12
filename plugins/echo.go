@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/torlenor/AbyleBotter/botinterface"
-	"github.com/torlenor/AbyleBotter/events"
+	"../botinterface"
+	"../events"
 )
 
 // Plugin type interface
@@ -23,7 +23,7 @@ type EchoPlugin struct {
 
 // CreateEchoPlugin returns the struct for a new EchoPlugin
 func CreateEchoPlugin(receiveChannel chan events.ReceiveMessage, sendChannel chan events.SendMessage) EchoPlugin {
-	log.Printf("EchoBot: EchoBot is CREATING itself")
+	log.Printf("EchoPlugin: EchoPlugin is CREATING itself")
 	ep := EchoPlugin{botReceiveChannel: receiveChannel,
 		botSendChannel: sendChannel}
 	return ep
@@ -35,15 +35,11 @@ func (p *EchoPlugin) SetOnlyOnWhisper(onlyOnWhisper bool) {
 	p.onlyOnWhisper = onlyOnWhisper
 }
 
-func stripCmd(str string, cmd string) string {
-	return strings.TrimLeft(str, "!"+cmd)
-}
-
 func (p EchoPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
-	log.Printf("EchoBot: Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.Ident, receivedMessage.Content)
+	log.Printf("EchoPlugin: Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.Ident, receivedMessage.Content)
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if (!p.onlyOnWhisper || receivedMessage.Type == events.WHISPER) && strings.HasPrefix(msg, "!echo") {
-		log.Printf("EchoBot: Echoing message back to user = %s, content = %s", receivedMessage.Ident, stripCmd(msg, "echo"))
+		log.Printf("EchoPlugin: Echoing message back to user = %s, content = %s", receivedMessage.Ident, stripCmd(msg, "echo"))
 		select {
 		case p.botSendChannel <- events.SendMessage{Type: events.WHISPER, Ident: receivedMessage.Ident, Content: stripCmd(msg, "echo")}:
 		default:
@@ -55,7 +51,7 @@ func (p EchoPlugin) receiveMessageRunner() {
 	for receivedMessage := range p.botReceiveChannel {
 		p.handleReceivedMessage(receivedMessage)
 	}
-	log.Printf("EchoBot: Automatically SHUTTING DOWN because bot closed the receive channel")
+	log.Printf("EchoPlugin: Automatically SHUTTING DOWN because bot closed the receive channel")
 }
 
 // Start the EchoPlugin
