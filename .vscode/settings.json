@@ -1,3 +1,3 @@
 {
-    "go.gopath": "${workspaceFolder}"
+    "go.gopath": "${workspaceFolder};${workspaceFolder}/vendor/"
 }
