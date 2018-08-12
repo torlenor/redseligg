@@ -1,5 +1,7 @@
 # AbyleBotter
 
+[![Build Status](https://travis-ci.org/torlenor/AbyleBotter.svg?branch=master)](https://travis-ci.org/torlenor/AbyleBotter)
+
 ## Description
 
 This is AbyleBotter, an extensible Chat Bot for Discord (and in the future other chat platforms).
