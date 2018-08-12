@@ -1,6 +1,9 @@
 # AbyleBotter
 
 [![Build Status](https://travis-ci.org/torlenor/AbyleBotter.svg?branch=master)](https://travis-ci.org/torlenor/AbyleBotter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/AbyleBotter)](https://goreportcard.com/report/github.com/torlenor/AbyleBotter)
+[![Docker](https://img.shields.io/docker/pulls/hpsch/abylebotter.svg)](https://hub.docker.com/r/hpsch/abylebotter/)
+[![License](https://img.shields.io/badge/license-GPL-blue.svg)](/LICENSE)
 
 ## Description
 
