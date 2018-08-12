@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	"../botinterface"
-	"../events"
+	"botinterface"
+	"events"
 )
 
 // Plugin type interface

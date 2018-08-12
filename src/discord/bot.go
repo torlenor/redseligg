@@ -8,7 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"../events"
+	"events"
+
 	"github.com/gorilla/websocket"
 	"golang.org/x/oauth2"
 )

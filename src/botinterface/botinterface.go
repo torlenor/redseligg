@@ -1,6 +1,6 @@
 package botinterface
 
-import "../events"
+import "events"
 
 // Bot type interface
 type Bot interface {

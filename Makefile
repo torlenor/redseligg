@@ -37,7 +37,7 @@ run: build
 	./bin/$(NAME)
 
 test:
-	@go test test/*.go
+	@go test -v -covermode=count -coverprofile=coverage.out ./...
 
 install: build
 	install -d ${DESTDIR}/usr/local/bin/
@@ -60,6 +60,7 @@ deps: clean-deps
 	go get -v github.com/mitchellh/mapstructure
 	go get -v github.com/pkg/errors
 	go get -v golang.org/x/oauth2
+	go get -v github.com/BurntSushi/toml
 
 clean-dist:
 	rm -rf ./dist/${VERSION}

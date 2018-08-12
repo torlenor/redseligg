@@ -1,46 +1,34 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"time"
 
-	"./botinterface"
-	"./discord"
-	"./matrix"
-	"./plugins"
+	"botinterface"
+	"config"
+	"plugins"
+
+	"github.com/BurntSushi/toml"
+)
+
+const (
+	defaultConfigPath = "./abylebotter.toml"
 )
 
 /**
  * Version should be set while build using ldflags (see Makefile)
  */
 var version string
+var configPath string
 
-func discordBotCreator(done chan struct{}) *discord.Bot {
-	discordToken := os.Getenv("DISCORD_BOT_TOKEN")
+func init() {
+	flag.StringVar(&configPath, "c", defaultConfigPath, "Path to toml config file")
 
-	bot := discord.CreateDiscordBot(discordToken)
-	// if err != nil {
-	// 	log.Println("DiscordBot: ERROR: ", err)
-	// }
-	bot.Start(done)
-
-	return bot
-}
-
-func matrixBotCreator(done chan struct{}) *matrix.Bot {
-	matrixUsername := os.Getenv("MATRIX_BOT_USERNAME")
-	matrixPassword := os.Getenv("MATRIX_BOT_PASSWORD")
-	matrixToken := os.Getenv("MATRIX_BOT_TOKEN")
-
-	bot, err := matrix.CreateMatrixBot("https://matrix.abyle.org", matrixUsername, matrixPassword, matrixToken)
-	if err != nil {
-		log.Println("MatrixBot: ERROR: ", err)
-	}
-	bot.Start(done)
-
-	return bot
+	flag.Parse()
 }
 
 func connectPlugins(bot botinterface.Bot) {
@@ -53,6 +41,16 @@ func main() {
 	log.Println("AbyleBotter (" + version + ") is STARTING")
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
+
+	var config config.Config
+	if _, err := toml.DecodeFile(configPath, &config); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Print("\n", config.Bots.Discord.Plugins.Echo.Enabled, "\n")
+
+	fmt.Print("\n", config.Bots.Discord.Enabled, "\n")
 
 	done := make(chan struct{})
 

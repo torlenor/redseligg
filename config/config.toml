@@ -1,0 +1,27 @@
+#
+# AbyleBotter example configuration
+#
+
+[bots]
+
+  [bots.discord]
+  enabled = true
+  token = "INSERT_DISCORD_TOKEN_HERE" # can be overwritten via env variable DISCORD_TOKEN
+
+    [bots.discord.plugins.echo]
+    enabled = true
+
+    [bots.discord.plugins.giveaway]
+    enabled = true
+
+  [bots.matrix]
+  enabled = false
+  server = "INSERT_MATRIX_SERVER_HERE" # can be overwritten via env variable MATRIX_SERVER
+  username = "INSERT_MATRIX_USER_HERE" # can be overwritten via env variable MATRIX_USERNAME
+  password = "INSERT_MATRIX_PASSWORD_HERE" # can be overwritten via env variable MATRIX_PASSWORD
+
+    [bots.matrix.plugins.echo]
+    enabled = false
+
+    [bots.matrix.plugins.giveaway]
+    enabled = false

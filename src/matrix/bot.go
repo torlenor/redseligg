@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"../events"
+	"events"
 
 	"github.com/pkg/errors"
 )

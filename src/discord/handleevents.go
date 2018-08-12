@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"../events"
+	"events"
 
 	"github.com/mitchellh/mapstructure"
 )
