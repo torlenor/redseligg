@@ -1,4 +1,5 @@
 {
     "go.gocodeAutoBuild": false,
-    "go.inferGopath": true
+    "go.inferGopath": true,
+    "files.eol": "\n"
 }

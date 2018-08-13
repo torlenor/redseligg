@@ -20,6 +20,7 @@ type Config struct {
 			Server   string `toml:"server"`
 			Username string `toml:"username"`
 			Password string `toml:"password"`
+			Token    string `toml:"token"`
 			Plugins  struct {
 				Echo struct {
 					Enabled bool `toml:"enabled"`
