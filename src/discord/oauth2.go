@@ -2,7 +2,6 @@ package discord
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"golang.org/x/oauth2"

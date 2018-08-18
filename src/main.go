@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"time"
 
 	"botinterface"
 	"config"
+	"logging"
 	"plugins"
 
 	"github.com/BurntSushi/toml"
@@ -25,24 +25,50 @@ const (
 var version string
 var configPath string
 
+var bots = struct {
+	m map[string]botinterface.Bot
+}{m: make(map[string]botinterface.Bot)}
+
 func init() {
 	flag.StringVar(&configPath, "c", defaultConfigPath, "Path to toml config file")
 	flag.Parse()
 }
 
 func connectPlugins(cfg config.Config, bot botinterface.Bot) {
-	echoPlugin := plugins.CreateEchoPlugin(bot.GetReceiveMessageChannel(), bot.GetSendMessageChannel())
-	echoPlugin.SetOnlyOnWhisper(true)
-	echoPlugin.Start()
+
 }
 
-func start(bots []botinterface.Bot, done chan struct{}) {
-	for _, bot := range bots {
+func start(done chan struct{}) {
+	for _, bot := range bots.m {
 		bot.Start(done)
 	}
 }
 
+func createBots(cfg config.Config) {
+	if cfg.Bots.Discord.Enabled {
+		bots.m["discord"] = discordBotCreator(cfg)
+		if cfg.Bots.Discord.Plugins.Echo.Enabled {
+			echoPlugin := plugins.CreateEchoPlugin()
+			echoPlugin.SetOnlyOnWhisper(true)
+			bots.m["discord"].AddPlugin(&echoPlugin)
+		}
+	} else if cfg.Bots.Matrix.Enabled {
+		bots.m["matrix"] = matrixBotCreator(cfg)
+	} else if cfg.Bots.Fake.Enabled {
+		bots.m["fake"] = fakeBotCreator(cfg)
+		if cfg.Bots.Fake.Plugins.Echo.Enabled {
+			echoPlugin := plugins.CreateEchoPlugin()
+			echoPlugin.SetOnlyOnWhisper(true)
+			bots.m["fake"].AddPlugin(&echoPlugin)
+		}
+	}
+}
+
 func main() {
+	logging.Init()
+
+	log := logging.Get("main")
+
 	log.Println("AbyleBotter (" + version + ") is STARTING")
 
 	interrupt := make(chan os.Signal, 1)
@@ -54,34 +80,42 @@ func main() {
 		return
 	}
 
-	var bots []botinterface.Bot
-	if cfg.Bots.Discord.Enabled {
-		bots = append(bots, discordBotCreator(cfg))
-		connectPlugins(cfg, bots[len(bots)-1])
-	} else if cfg.Bots.Matrix.Enabled {
-		bots = append(bots, matrixBotCreator(cfg))
-		connectPlugins(cfg, bots[len(bots)-1])
-	}
+	createBots(cfg)
 
-	if len(bots) == 0 {
+	if len(bots.m) == 0 {
 		log.Fatal("No Bot enabled. Check config file: ", configPath)
 	}
 
+	log.Println("AbyleBotter: Number of started bots:", len(bots.m))
+
 	done := make(chan struct{})
-	start(bots, done)
+	start(done)
+
+	ticker := time.NewTicker(500 * time.Millisecond)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				for botname, bot := range bots.m {
+					if bot.Status().Fatal {
+						log.Println("Status of bot", botname, " it FATAL, trying to recover...")
+						bot.Stop()
+						bot.Start(done)
+					}
+				}
+			}
+		}
+	}()
 
 	for {
 		select {
 		case <-done:
 			return
 		case <-interrupt:
-			for _, bot := range bots {
+			for _, bot := range bots.m {
 				bot.Stop()
 			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-			}
+			ticker.Stop()
 			log.Println("AbyleBotter gracefully shut down")
 			break
 		}

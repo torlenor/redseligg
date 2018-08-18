@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"log"
 	"time"
 
 	"events"

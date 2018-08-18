@@ -2,7 +2,6 @@ package discord
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/pkg/errors"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fake"
 	"log"
 	"os"
 
@@ -44,6 +45,15 @@ func matrixBotCreator(config config.Config) *matrix.Bot {
 	bot, err := matrix.CreateMatrixBot("https://matrix.abyle.org", matrixUsername, matrixPassword, matrixToken)
 	if err != nil {
 		log.Println("MatrixBot: ERROR: ", err)
+	}
+
+	return bot
+}
+
+func fakeBotCreator(config config.Config) *fake.Bot {
+	bot, err := fake.CreateFakeBot()
+	if err != nil {
+		log.Println("FakeBot: ERROR: ", err)
 	}
 
 	return bot

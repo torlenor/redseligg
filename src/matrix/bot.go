@@ -1,10 +1,12 @@
 package matrix
 
 import (
+	"botinterface"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"plugins"
 	"strings"
 	"time"
 
@@ -27,7 +29,7 @@ type Bot struct {
 	pollingDone        chan bool
 }
 
-type LoginResponse struct {
+type loginResponse struct {
 	AccessToken string `json:"access_token"`
 	HomeServer  string `json:"home_server"`
 	UserID      string `json:"user_id"`
@@ -98,7 +100,7 @@ func (b *Bot) login(username string, password string) (string, error) {
 
 	log.Println(string(response))
 
-	var channelResponseData LoginResponse
+	var channelResponseData loginResponse
 	if err := json.Unmarshal(response, &channelResponseData); err != nil {
 		return "", errors.Wrap(err, "json unmarshal failed")
 	}
@@ -183,4 +185,13 @@ func (b Bot) Stop() {
 	b.pollingDone <- true
 
 	defer close(b.receiveMessageChan)
+}
+
+// Status returns the current status of MatrixBot
+func (b *Bot) Status() botinterface.BotStatus {
+	return botinterface.BotStatus{Running: true}
+}
+
+func (b *Bot) AddPlugin(plugin plugins.Plugin) {
+
 }

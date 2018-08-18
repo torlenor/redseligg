@@ -15,6 +15,17 @@ type Config struct {
 				} `toml:"giveaway"`
 			} `toml:"plugins"`
 		} `toml:"discord"`
+		Fake struct {
+			Enabled bool `toml:"enabled"`
+			Plugins struct {
+				Echo struct {
+					Enabled bool `toml:"enabled"`
+				} `toml:"echo"`
+				Giveaway struct {
+					Enabled bool `toml:"enabled"`
+				} `toml:"giveaway"`
+			} `toml:"plugins"`
+		} `toml:"fake"`
 		Matrix struct {
 			Enabled  bool   `toml:"enabled"`
 			Server   string `toml:"server"`

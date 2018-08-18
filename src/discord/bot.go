@@ -1,11 +1,13 @@
 package discord
 
 import (
+	"botinterface"
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	"logging"
 	"net/http"
 	"os"
+	"plugins"
 	"strings"
 
 	"events"
@@ -28,6 +30,8 @@ var (
 
 	// Some random string, random for each request
 	oauthStateString = "random"
+
+	log = logging.Get("DiscordBot")
 )
 
 // The Bot struct holds parameters related to the bot
@@ -214,4 +218,17 @@ func (b Bot) Stop() {
 		log.Println("write close:", err)
 	}
 	defer close(b.receiveMessageChan)
+}
+
+// Status returns the current status of the DiscordBot
+func (b *Bot) Status() botinterface.BotStatus {
+	status := botinterface.BotStatus{
+		Running: true,
+		Fail:    false,
+		Fatal:   false}
+	return status
+}
+
+func (b *Bot) AddPlugin(plugin plugins.Plugin) {
+
 }

@@ -5,14 +5,23 @@
 [bots]
 
   [bots.discord]
-  enabled = true
+  enabled = false
   token = "INSERT_DISCORD_TOKEN_HERE" # can be overwritten via env variable DISCORD_TOKEN
 
     [bots.discord.plugins.echo]
-    enabled = true
+    enabled = false
 
     [bots.discord.plugins.giveaway]
+    enabled = false
+
+  [bots.fake]
+  enabled = true
+
+    [bots.fake.plugins.echo]
     enabled = true
+
+    [bots.fake.plugins.giveaway]
+    enabled = false
 
   [bots.matrix]
   enabled = false

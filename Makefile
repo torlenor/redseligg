@@ -61,6 +61,7 @@ deps: clean-deps
 	go get -v github.com/pkg/errors
 	go get -v golang.org/x/oauth2
 	go get -v github.com/BurntSushi/toml
+	go get -v github.com/sirupsen/logrus
 
 clean-dist:
 	rm -rf ./dist/${VERSION}
