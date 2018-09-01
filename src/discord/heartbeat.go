@@ -7,21 +7,37 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func (b *Bot) heartBeat(interval int, ws *websocket.Conn) {
+type heartBeatSender interface {
+	sendHeartBeat(seqNumber int) error
+}
+
+type discordHeartBeatSender struct {
+	ws *websocket.Conn
+}
+
+func heartBeat(interval int, hbSender heartBeatSender, stop chan struct{}, seqNumber chan int) {
 	log.Printf("DiscordBot: Starting heartbeat with interval: %d ms", interval)
-	ticker := time.NewTicker(time.Duration(interval/1000) * time.Second)
+	ticker := time.NewTicker(time.Duration(interval) * time.Millisecond)
+
+	var currentSeqNumber int
+
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			hb := []byte(`{"op":1,"d":` + strconv.Itoa(b.currentSeqNumber) + `}`)
-
-			log.Printf("DiscordBot: Sending heartbeat (seq number = %d)", b.currentSeqNumber)
-			err := ws.WriteMessage(websocket.TextMessage, hb)
+			log.Printf("DiscordBot: Sending heartbeat (seq number = %d)", currentSeqNumber)
+			err := hbSender.sendHeartBeat(currentSeqNumber)
 			if err != nil {
 				log.Println("DiscordBot: UNHANDELED ERROR in heartbeat:", err)
-				return
 			}
+		case currentSeqNumber = <-seqNumber:
+		case <-stop:
+			return
 		}
 	}
+}
+
+func (hbs *discordHeartBeatSender) sendHeartBeat(seqNumber int) error {
+	hb := []byte(`{"op":1,"d":` + strconv.Itoa(seqNumber) + `}`)
+	return hbs.ws.WriteMessage(websocket.TextMessage, hb)
 }

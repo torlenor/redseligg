@@ -44,6 +44,9 @@ type Bot struct {
 	token              string
 	ownSnowflakeID     string
 	currentSeqNumber   int
+	heartBeatSender    *discordHeartBeatSender
+	heartBeatStopChan  chan struct{}
+	seqNumberChan      chan int
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -109,7 +112,8 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 			log.Println("DiscordBot: Received HELLO from gateway")
 			sendIdent(b.token, b.ws)
 			heartbeatInterval := int(data["d"].(map[string]interface{})["heartbeat_interval"].(float64))
-			go b.heartBeat(heartbeatInterval, b.ws) // Start sending heartbeats
+			b.heartBeatSender = &discordHeartBeatSender{ws: b.ws}
+			go heartBeat(heartbeatInterval, b.heartBeatSender, b.heartBeatStopChan, b.seqNumberChan)
 			log.Println("DiscordBot: DiscordBot is READY")
 		} else if data["op"].(float64) == 0 { // Dispatch to event handlers
 			switch data["t"] {
@@ -145,6 +149,7 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 				handleUnknown(data)
 			}
 			b.currentSeqNumber = int(data["s"].(float64))
+			b.seqNumberChan <- b.currentSeqNumber
 		} else if data["op"].(float64) == 9 { // Invalid Session
 			log.Printf("DiscordBot: Invalid Session received. Please try again...")
 			return
@@ -168,6 +173,9 @@ func CreateDiscordBot(token string) *Bot {
 	b.commandChan = make(chan events.Command)
 
 	b.knownChannels = make(map[string]channelCreate)
+
+	b.heartBeatStopChan = make(chan struct{})
+	b.seqNumberChan = make(chan int)
 
 	return &b
 }
@@ -211,8 +219,9 @@ func (b *Bot) Start(doneChannel chan struct{}) {
 }
 
 // Stop the Discord Bot
-func (b Bot) Stop() {
+func (b *Bot) Stop() {
 	log.Println("DiscordBot: DiscordBot is SHUTING DOWN")
+	close(b.heartBeatStopChan)
 	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
 		log.Println("write close:", err)
@@ -229,6 +238,9 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return status
 }
 
+// AddPlugin takes as argument a plugin interface and
+// adds it to the DiscordBot by connecting all the required
+// channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-
+	// TODO
 }
