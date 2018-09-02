@@ -47,6 +47,8 @@ type Bot struct {
 	heartBeatSender    *discordHeartBeatSender
 	heartBeatStopChan  chan struct{}
 	seqNumberChan      chan int
+
+	knownPlugins []plugins.Plugin
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -242,5 +244,6 @@ func (b *Bot) Status() botinterface.BotStatus {
 // adds it to the DiscordBot by connecting all the required
 // channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	// TODO
+	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel(), b.GetCommandChannel())
+	b.knownPlugins = append(b.knownPlugins, plugin)
 }

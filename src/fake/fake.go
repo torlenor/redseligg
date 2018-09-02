@@ -19,6 +19,8 @@ type Bot struct {
 	commandChan        chan events.Command
 
 	pollingDone chan bool
+
+	knownPlugins []plugins.Plugin
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -113,8 +115,8 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return botinterface.BotStatus{Running: true}
 }
 
-// AddPlugin adds the give plugin to the current bot and starts it
+// AddPlugin adds the give plugin to the current bot
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
 	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel(), b.GetCommandChannel())
-	plugin.Start()
+	b.knownPlugins = append(b.knownPlugins, plugin)
 }

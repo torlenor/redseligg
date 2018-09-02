@@ -51,15 +51,23 @@ func createBots(cfg config.Config) {
 			echoPlugin := plugins.CreateEchoPlugin()
 			echoPlugin.SetOnlyOnWhisper(true)
 			bots.m["discord"].AddPlugin(&echoPlugin)
+			echoPlugin.Start()
 		}
 	} else if cfg.Bots.Matrix.Enabled {
 		bots.m["matrix"] = matrixBotCreator(cfg)
+		if cfg.Bots.Matrix.Plugins.Echo.Enabled {
+			echoPlugin := plugins.CreateEchoPlugin()
+			echoPlugin.SetOnlyOnWhisper(true)
+			bots.m["matrix"].AddPlugin(&echoPlugin)
+			echoPlugin.Start()
+		}
 	} else if cfg.Bots.Fake.Enabled {
 		bots.m["fake"] = fakeBotCreator(cfg)
 		if cfg.Bots.Fake.Plugins.Echo.Enabled {
 			echoPlugin := plugins.CreateEchoPlugin()
 			echoPlugin.SetOnlyOnWhisper(true)
 			bots.m["fake"].AddPlugin(&echoPlugin)
+			echoPlugin.Start()
 		}
 	}
 }
