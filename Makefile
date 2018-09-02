@@ -90,14 +90,14 @@ dist:
 	  fi \
 	done
 
-build-container-latest: build
+build-container-latest: build-static
 	@echo Building docker container ${DOCKERBASETAG}:latest
 	docker build -t ${DOCKERBASETAG}:latest .
 
-build-container-tagged: build
+build-container-tagged: build-static
 	@echo Building docker container ${DOCKERBASETAG}:${VERSION}
 	docker build -t ${DOCKERBASETAG}:${VERSION} .
 
-build-container-gitcommit: build
+build-container-gitcommit: build-static
 	@echo Building docker container ${DOCKERBASETAG}:${VERSION}
 	docker build -t ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} .
