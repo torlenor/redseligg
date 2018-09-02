@@ -14,6 +14,8 @@ VERSION := $(shell cat VERSION)
 LDFLAGS := -X main.version=${VERSION}
 SRCPATH := src
 DOCKERBASETAG := hpsch/abylebotter
+CURRENTGITCOMMIT := $(shell git log -1 --format=%h)
+CURRENTGITUNTRACKED := $(shell git diff-index --quiet HEAD -- || echo "_untracked")
 
 default: build
 
@@ -95,3 +97,7 @@ build-container-latest: build
 build-container-tagged: build
 	@echo Building docker container ${DOCKERBASETAG}:${VERSION}
 	docker build -t ${DOCKERBASETAG}:${VERSION} .
+
+build-container-gitcommit: build
+	@echo Building docker container ${DOCKERBASETAG}:${VERSION}
+	docker build -t ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} .
