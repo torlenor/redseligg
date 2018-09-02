@@ -32,7 +32,7 @@ build:
 
 build-static:
 	@echo Building...
-	CGO_ENABLED=1 go build -v -o ./bin/$(NAME) -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go
+	CGO_ENABLED=0 go build -v -o ./bin/$(NAME) -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go
 	@echo Done.
 
 run: build
