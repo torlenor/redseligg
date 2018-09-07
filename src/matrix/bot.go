@@ -28,6 +28,8 @@ type Bot struct {
 	token              string
 	pollingDone        chan bool
 
+	pollingInterval time.Duration
+
 	knownPlugins []plugins.Plugin
 }
 
@@ -77,17 +79,24 @@ func (b Bot) GetCommandChannel() chan events.Command {
 	return b.commandChan
 }
 
+func (b *Bot) handlePolling() {
+	log.Println(logPrefix + "TODO: IMPLEMENT SERVER POLLING")
+	err := b.sendRoomMessage(string("!cJQhJDXTxLzZeuoHzw:matrix.abyle.org"), string("Hello Matrix World!"))
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (b *Bot) startBot(doneChannel chan struct{}) {
 	defer close(doneChannel)
 	// do some message polling or whatever until stopped
-	tickChan := time.Tick(1 * time.Second)
+	tickChan := time.Tick(b.pollingInterval)
 
 	for {
 		select {
 		case <-tickChan:
-			log.Println(logPrefix + "Ticker ticked")
+			b.handlePolling()
 		case <-b.pollingDone:
-			log.Println(logPrefix + "polling stopped")
 			return
 		}
 	}
@@ -129,18 +138,10 @@ func CreateMatrixBot(server string, username string, password string, token stri
 		b.token = token
 	}
 
-	response, err := b.apiCall("/client/r0/join/!cJQhJDXTxLzZeuoHzw:matrix.abyle.org?access_token="+b.token, "POST", `{}`)
-	if err != nil {
-		return nil, errors.Wrap(err, "apiCall failed")
-	}
-	log.Println(string(response))
-
-	err = b.sendRoomMessage(string("!cJQhJDXTxLzZeuoHzw:matrix.abyle.org"), string("Hello Matrix World!"))
-	if err != nil {
-		log.Println(err)
-	}
+	b.connectToMatrixServer()
 
 	b.pollingDone = make(chan bool)
+	b.pollingInterval = 1000 * time.Millisecond
 
 	b.receiveMessageChan = make(chan events.ReceiveMessage)
 	b.sendMessageChan = make(chan events.SendMessage)
@@ -149,13 +150,25 @@ func CreateMatrixBot(server string, username string, password string, token stri
 	return &b, nil
 }
 
+func (b *Bot) connectToMatrixServer() error {
+	response, err := b.apiCall("/client/r0/join/!cJQhJDXTxLzZeuoHzw:matrix.abyle.org?access_token="+b.token, "POST", `{}`)
+	if err != nil {
+		return errors.Wrap(err, "apiCall failed")
+	}
+	log.Println(string(response))
+	return nil
+}
+
 func (b *Bot) startSendChannelReceiver() {
 	for sendMsg := range b.sendMessageChan {
 		switch sendMsg.Type {
 		case events.MESSAGE:
-			// do something
+			err := b.sendRoomMessage(sendMsg.Ident, sendMsg.Content)
+			if err != nil {
+				log.Println(err)
+			}
 		case events.WHISPER:
-			// do something
+			log.Println(logPrefix + "events.WHISPER not implemented")
 		default:
 		}
 	}
