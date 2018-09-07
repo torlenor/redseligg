@@ -13,6 +13,7 @@ import (
 	"plugins"
 
 	"github.com/BurntSushi/toml"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -28,6 +29,10 @@ var configPath string
 var bots = struct {
 	m map[string]botinterface.Bot
 }{m: make(map[string]botinterface.Bot)}
+
+var interrupt chan os.Signal
+
+var log *logrus.Entry
 
 func init() {
 	flag.StringVar(&configPath, "c", defaultConfigPath, "Path to toml config file")
@@ -72,29 +77,8 @@ func createBots(cfg config.Config) {
 	}
 }
 
-func main() {
-	logging.Init()
-
-	log := logging.Get("main")
-
-	log.Println("AbyleBotter (" + version + ") is STARTING")
-
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-
-	var cfg config.Config
-	if _, err := toml.DecodeFile(configPath, &cfg); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	createBots(cfg)
-
-	if len(bots.m) == 0 {
-		log.Fatal("No Bot enabled. Check config file: ", configPath)
-	}
-
-	log.Println("AbyleBotter: Number of started bots:", len(bots.m))
+func startAbyleBotter() {
+	log.Println("Starting the bots")
 
 	done := make(chan struct{})
 	start(done)
@@ -128,4 +112,32 @@ func main() {
 			break
 		}
 	}
+}
+
+func main() {
+	logging.Init()
+
+	log = logging.Get("main")
+
+	log.Println("AbyleBotter (" + version + ") is STARTING")
+
+	interrupt = make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+
+	var cfg config.Config
+	if _, err := toml.DecodeFile(configPath, &cfg); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	createBots(cfg)
+
+	if len(bots.m) == 0 {
+		log.Fatal("No Bot enabled. Check config file: ", configPath)
+	}
+
+	log.Println("AbyleBotter: Number of configured bots:", len(bots.m))
+
+	startAbyleBotter()
+
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fake"
-	"log"
 	"os"
 
 	"config"
