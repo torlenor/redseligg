@@ -39,10 +39,6 @@ func init() {
 	flag.Parse()
 }
 
-func connectPlugins(cfg config.Config, bot botinterface.Bot) {
-
-}
-
 func start(done chan struct{}) {
 	for _, bot := range bots.m {
 		bot.Start(done)
