@@ -2,21 +2,18 @@ package matrix
 
 import (
 	"botinterface"
-	"encoding/json"
 	"io/ioutil"
-	"log"
+	"logging"
 	"net/http"
 	"plugins"
 	"strings"
 	"time"
 
 	"events"
-
-	"github.com/pkg/errors"
 )
 
 var (
-	logPrefix = "MatrixBot: "
+	log = logging.Get("MatrixBot")
 )
 
 // The Bot struct holds parameters related to the bot
@@ -31,16 +28,15 @@ type Bot struct {
 	pollingInterval time.Duration
 
 	knownPlugins []plugins.Plugin
+
+	// We are wasting a little bit of memory and keep maps in both directions
+	knownRooms   map[string]string // mapping of Room to RoomID
+	knownRoomIDs map[string]string // mapping of RoomID to Room
+
+	nextBatch string // contains the next batch to fetch in sync
 }
 
-type loginResponse struct {
-	AccessToken string `json:"access_token"`
-	HomeServer  string `json:"home_server"`
-	UserID      string `json:"user_id"`
-	DeviceID    string `json:"device_id"`
-}
-
-func (b Bot) apiCall(path string, method string, body string) (r []byte, e error) {
+func (b Bot) apiCall(path string, method string, body string, auth bool) (r []byte, e error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(method, b.server+"/_matrix"+path, strings.NewReader(body))
@@ -48,7 +44,9 @@ func (b Bot) apiCall(path string, method string, body string) (r []byte, e error
 		return nil, err
 	}
 
-	// req.Header.Add("Authorization", "Bot "+b.token)
+	if auth == true {
+		req.Header.Add("Authorization", "Bearer "+b.token)
+	}
 	req.Header.Add("Content-Type", "application/json")
 
 	response, err := client.Do(req)
@@ -80,52 +78,12 @@ func (b Bot) GetCommandChannel() chan events.Command {
 }
 
 func (b *Bot) handlePolling() {
-	log.Println(logPrefix + "TODO: IMPLEMENT SERVER POLLING")
-	err := b.sendRoomMessage(string("!cJQhJDXTxLzZeuoHzw:matrix.abyle.org"), string("Hello Matrix World!"))
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func (b *Bot) startBot(doneChannel chan struct{}) {
-	defer close(doneChannel)
-	// do some message polling or whatever until stopped
-	tickChan := time.Tick(b.pollingInterval)
-
-	for {
-		select {
-		case <-tickChan:
-			b.handlePolling()
-		case <-b.pollingDone:
-			return
-		}
-	}
-}
-
-func (b *Bot) login(username string, password string) (string, error) {
-	// get login server
-	response, err := b.apiCall("/client/r0/login", "POST", `{"type":"m.login.password", "user":"`+username+`", "password":"`+password+`"}`)
-	if err != nil {
-		return "", errors.Wrap(err, "apiCall failed")
-	}
-
-	log.Println(string(response))
-
-	var channelResponseData loginResponse
-	if err := json.Unmarshal(response, &channelResponseData); err != nil {
-		return "", errors.Wrap(err, "json unmarshal failed")
-	}
-
-	if len(channelResponseData.AccessToken) > 0 {
-		return channelResponseData.AccessToken, nil
-	}
-
-	return string(""), errors.New("could not login")
+	b.callSync()
 }
 
 // CreateMatrixBot creates a new instance of a DiscordBot
 func CreateMatrixBot(server string, username string, password string, token string) (*Bot, error) {
-	log.Printf(logPrefix + "MatrixBot is CREATING itself")
+	log.Printf("MatrixBot is CREATING itself")
 	b := Bot{server: server}
 	if len(token) == 0 {
 		token, err := b.login(username, password)
@@ -147,59 +105,10 @@ func CreateMatrixBot(server string, username string, password string, token stri
 	b.sendMessageChan = make(chan events.SendMessage)
 	b.commandChan = make(chan events.Command)
 
+	b.knownRooms = make(map[string]string)
+	b.knownRoomIDs = make(map[string]string)
+
 	return &b, nil
-}
-
-func (b *Bot) connectToMatrixServer() error {
-	response, err := b.apiCall("/client/r0/join/!cJQhJDXTxLzZeuoHzw:matrix.abyle.org?access_token="+b.token, "POST", `{}`)
-	if err != nil {
-		return errors.Wrap(err, "apiCall failed")
-	}
-	log.Println(string(response))
-	return nil
-}
-
-func (b *Bot) startSendChannelReceiver() {
-	for sendMsg := range b.sendMessageChan {
-		switch sendMsg.Type {
-		case events.MESSAGE:
-			err := b.sendRoomMessage(sendMsg.Ident, sendMsg.Content)
-			if err != nil {
-				log.Println(err)
-			}
-		case events.WHISPER:
-			log.Println(logPrefix + "events.WHISPER not implemented")
-		default:
-		}
-	}
-}
-
-func (b *Bot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		switch cmd.Command {
-		case string("DemoCommand"):
-			log.Println(logPrefix + "Received DemoCommand with server name" + cmd.Payload)
-		default:
-			log.Println(logPrefix + "Received unhandeled command" + cmd.Command)
-		}
-	}
-}
-
-// Start the Matrix Bot
-func (b *Bot) Start(doneChannel chan struct{}) {
-	log.Println(logPrefix + "MatrixBot is STARTING")
-	go b.startBot(doneChannel)
-	go b.startSendChannelReceiver()
-	go b.startCommandChannelReceiver()
-}
-
-// Stop the Matrix Bot
-func (b Bot) Stop() {
-	log.Println(logPrefix + "MatrixBot is SHUTING DOWN")
-
-	b.pollingDone <- true
-
-	defer close(b.receiveMessageChan)
 }
 
 // Status returns the current status of MatrixBot
@@ -211,4 +120,9 @@ func (b *Bot) Status() botinterface.BotStatus {
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
 	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel(), b.GetCommandChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
+}
+
+func (b *Bot) updateRoom(roomID string, room string) {
+	b.knownRooms[room] = roomID
+	b.knownRoomIDs[roomID] = room
 }
