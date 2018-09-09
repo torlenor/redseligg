@@ -214,21 +214,23 @@ func (b *Bot) startCommandChannelReceiver() {
 
 // Start the Discord Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
-	log.Println("DiscordBot: DiscordBot is STARTING")
+	log.Println("DiscordBot is STARTING")
 	go b.startDiscordBot(doneChannel)
 	go b.startSendChannelReceiver()
 	go b.startCommandChannelReceiver()
+	log.Println("DiscordBot is RUNNING")
 }
 
 // Stop the Discord Bot
 func (b *Bot) Stop() {
-	log.Println("DiscordBot: DiscordBot is SHUTING DOWN")
+	log.Println("DiscordBot is SHUTING DOWN")
 	close(b.heartBeatStopChan)
 	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
 		log.Println("write close:", err)
 	}
 	defer close(b.receiveMessageChan)
+	log.Println("DiscordBot is SHUT DOWN")
 }
 
 // Status returns the current status of the DiscordBot
