@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+func (b *Bot) handlePolling() {
+	b.callSync()
+}
+
 func (b *Bot) startBot(doneChannel chan struct{}) {
 	defer close(doneChannel)
 	// do some message polling or whatever until stopped

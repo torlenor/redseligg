@@ -26,7 +26,7 @@ func (b Bot) sendRoomMessage(roomIdent string, content string) error {
 		roomID = roomIdent
 	}
 
-	response, err := b.apiCall("/client/r0/rooms/"+roomID+"/send/m.room.message?access_token="+b.token, "POST", `{"msgtype":"m.text", "body":"`+content+`"}`, false)
+	response, err := b.api.call("/client/r0/rooms/"+roomID+"/send/m.room.message", "POST", `{"msgtype":"m.text", "body":"`+content+`"}`, true)
 	if err != nil {
 		return errors.Wrap(err, "apiCall failed")
 	}
