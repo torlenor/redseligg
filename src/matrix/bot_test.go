@@ -8,8 +8,9 @@ import (
 )
 
 type mockAPI struct {
-	letLoginFail bool
-	apiResponse  string
+	letLoginFail   bool
+	letAPICallFail bool
+	apiResponse    string
 
 	server    string
 	authToken string
@@ -28,6 +29,9 @@ func (api *mockAPI) call(path string, method string, body string, auth bool) (r 
 	api.lastAPICallMethod = method
 	api.lastAPICallBody = body
 	api.lastAPICallAuth = auth
+	if api.letAPICallFail == true {
+		return []byte(""), errors.New("Fake API call fail")
+	}
 	return []byte(api.apiResponse), nil
 }
 
@@ -50,6 +54,7 @@ func (api *mockAPI) login(username string, password string) error {
 
 func (api *mockAPI) reset() {
 	api.letLoginFail = false
+	api.letAPICallFail = false
 	api.loginCalled = false
 	api.connectToMatrixServerCalled = false
 	api.authToken = ""
