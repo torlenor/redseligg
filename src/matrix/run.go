@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-func (b *Bot) handlePolling() {
-	b.callSync()
+func (b *Bot) handlePolling() error {
+	return b.callSync()
 }
 
 func (b *Bot) startBot(doneChannel chan struct{}) {

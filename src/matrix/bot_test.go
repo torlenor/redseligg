@@ -2,22 +2,33 @@ package matrix
 
 import (
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 )
 
 type mockAPI struct {
 	letLoginFail bool
+	apiResponse  string
 
 	server    string
 	authToken string
 
 	loginCalled                 bool
 	connectToMatrixServerCalled bool
+
+	lastAPICallPath   string
+	lastAPICallMethod string
+	lastAPICallBody   string
+	lastAPICallAuth   bool
 }
 
 func (api *mockAPI) call(path string, method string, body string, auth bool) (r []byte, e error) {
-	return []byte(""), nil
+	api.lastAPICallPath = path
+	api.lastAPICallMethod = method
+	api.lastAPICallBody = body
+	api.lastAPICallAuth = auth
+	return []byte(api.apiResponse), nil
 }
 
 func (api *mockAPI) updateAuthToken(token string) {
@@ -42,6 +53,10 @@ func (api *mockAPI) reset() {
 	api.loginCalled = false
 	api.connectToMatrixServerCalled = false
 	api.authToken = ""
+	api.lastAPICallPath = ""
+	api.lastAPICallMethod = ""
+	api.lastAPICallBody = ""
+	api.lastAPICallAuth = false
 }
 
 func TestCreateMatrixBot(t *testing.T) {
@@ -102,4 +117,100 @@ func TestCreateMatrixBot(t *testing.T) {
 		t.Fatalf("Auth token was not updated")
 	}
 
+}
+
+func TestMatrixBotPolling(t *testing.T) {
+	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
+	api.reset()
+
+	bot, err := createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
+	if bot == nil || err != nil {
+		t.Fatalf("Could not create Matrix Bot")
+	}
+
+	// Polling without valid response from API has to fail
+	err = bot.handlePolling()
+	if api.lastAPICallPath != `/client/r0/sync?filter={"room":{"timeline":{"limit":1}}}` {
+		t.Fatalf("handlePolling api call path wrong: %s", api.lastAPICallPath)
+	}
+	if api.lastAPICallMethod != `GET` {
+		t.Fatalf("handlePolling api call method wrong: %s", api.lastAPICallMethod)
+	}
+	if api.lastAPICallBody != `{}` {
+		t.Fatalf("handlePolling api call body wrong: %s", api.lastAPICallBody)
+	}
+	if api.lastAPICallAuth != true {
+		t.Fatalf("handlePolling api call auth not set")
+	}
+	if err == nil {
+		t.Fatalf("Initial sync somehow not failed even though it should")
+	}
+
+	// Polling with valid JSON response from API should not fail
+	api.apiResponse = `{}`
+	err = bot.handlePolling()
+	if api.lastAPICallPath != `/client/r0/sync?filter={"room":{"timeline":{"limit":1}}}` {
+		t.Fatalf("handlePolling api call path wrong: %s", api.lastAPICallPath)
+	}
+	if api.lastAPICallMethod != `GET` {
+		t.Fatalf("handlePolling api call method wrong: %s", api.lastAPICallMethod)
+	}
+	if api.lastAPICallBody != `{}` {
+		t.Fatalf("handlePolling api call body wrong: %s", api.lastAPICallBody)
+	}
+	if api.lastAPICallAuth != true {
+		t.Fatalf("handlePolling api call auth not set")
+	}
+	if err != nil {
+		t.Fatalf("Initial sync failed")
+	}
+
+}
+
+func TestMatrixBotStartingAndStopping(t *testing.T) {
+	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
+	api.reset()
+
+	bot, err := createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
+	if bot == nil || err != nil {
+		t.Fatalf("Could not create Matrix Bot")
+	}
+
+	var done = make(chan struct{})
+	go bot.Start(done)
+	time.Sleep(time.Millisecond * 100)
+	go bot.Stop()
+	time.Sleep(time.Millisecond * 100)
+
+	_, opened := <-done
+	if opened != false {
+		t.Fatalf("done channel was not closed by MatrixBot on quit")
+	}
+}
+
+func TestMatrixBotAddRemoveRoom(t *testing.T) {
+	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
+	api.reset()
+
+	bot, err := createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
+	if bot == nil || err != nil {
+		t.Fatalf("Could not create Matrix Bot")
+	}
+
+	if len(bot.knownRooms) != 0 || len(bot.knownRoomIDs) != 0 {
+		t.Fatalf("Initial room lists not empty")
+	}
+
+	bot.addKnownRoom("ID", "NAME")
+	if len(bot.knownRooms) != 1 || len(bot.knownRoomIDs) != 1 {
+		t.Fatalf("Room not successfully added, still zero rooms in list")
+	}
+	if bot.knownRooms["NAME"] != "ID" || bot.knownRoomIDs["ID"] != "NAME" {
+		t.Fatalf("Room ID or Name not correctly added")
+	}
+
+	bot.removeKnownRoom("ID", "NAME")
+	if len(bot.knownRooms) != 0 || len(bot.knownRoomIDs) != 0 {
+		t.Fatalf("Room list not empty after removing the last room")
+	}
 }

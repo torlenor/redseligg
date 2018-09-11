@@ -11,18 +11,6 @@ func checkEventsOK(repsonse []byte) bool {
 	return true
 }
 
-func (b *Bot) addKnownRoom(roomID string, room string) {
-	log.Debugln("Added new known Room:", roomID, room)
-	b.knownRoomIDs[roomID] = room
-	b.knownRooms[room] = roomID
-}
-
-func (b *Bot) removeKnownRoom(roomID string, room string) {
-	log.Debugln("Removed known Room:", roomID, room)
-	delete(b.knownRoomIDs, roomID)
-	delete(b.knownRooms, room)
-}
-
 func (b *Bot) handleJoinRooms(rooms []room) {
 	for _, room := range rooms {
 		for _, event := range room.State.Events {

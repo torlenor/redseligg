@@ -94,13 +94,20 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return botinterface.BotStatus{Running: true}
 }
 
-// AddPlugin adds the give plugin to the current bot
+// AddPlugin adds the given plugin to the current bot
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
 	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel(), b.GetCommandChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
 }
 
-func (b *Bot) updateRoom(roomID string, room string) {
-	b.knownRooms[room] = roomID
+func (b *Bot) addKnownRoom(roomID string, room string) {
+	log.Debugln("Added new known Room:", roomID, room)
 	b.knownRoomIDs[roomID] = room
+	b.knownRooms[room] = roomID
+}
+
+func (b *Bot) removeKnownRoom(roomID string, room string) {
+	log.Debugln("Removed known Room:", roomID, room)
+	delete(b.knownRoomIDs, roomID)
+	delete(b.knownRooms, room)
 }
