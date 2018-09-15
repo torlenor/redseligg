@@ -13,7 +13,7 @@ import (
 // has to be called only once
 func Init() {
 	logrus.SetFormatter(new(MyFormatter))
-	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(os.Stdout)
 }
 

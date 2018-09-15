@@ -33,7 +33,7 @@ type typingStart struct {
 func (t typingStart) toString() string {
 	data, err := json.Marshal(t)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -60,7 +60,7 @@ type presenceUpdate struct {
 func (p presenceUpdate) toString() string {
 	data, err := json.Marshal(p)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 
@@ -100,7 +100,7 @@ type messageCreate struct {
 func (mc messageCreate) toString() string {
 	data, err := json.Marshal(mc)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -181,7 +181,7 @@ type guildCreate struct {
 func (gc guildCreate) toString() string {
 	data, err := json.Marshal(gc)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -219,7 +219,7 @@ type ready struct {
 func (r ready) toString() string {
 	data, err := json.Marshal(r)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -244,7 +244,7 @@ type channelCreate struct {
 func (cc channelCreate) toString() string {
 	data, err := json.Marshal(cc)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -263,7 +263,7 @@ type messageDelete struct {
 func (md messageDelete) toString() string {
 	data, err := json.Marshal(md)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -288,7 +288,7 @@ type messageReactionAdd struct {
 func (mra messageReactionAdd) toString() string {
 	data, err := json.Marshal(mra)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -313,7 +313,7 @@ type messageReactionRemove struct {
 func (mrr messageReactionRemove) toString() string {
 	data, err := json.Marshal(mrr)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -350,7 +350,7 @@ type messageUpdate struct {
 func (mu messageUpdate) toString() string {
 	data, err := json.Marshal(mu)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -369,7 +369,7 @@ type channelPinsUpdate struct {
 func (cpu channelPinsUpdate) toString() string {
 	data, err := json.Marshal(cpu)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -395,7 +395,7 @@ type guildMemberUpdate struct {
 func (gmu guildMemberUpdate) toString() string {
 	data, err := json.Marshal(gmu)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+		log.Println("UNHANDELED ERROR: ", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
