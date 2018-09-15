@@ -82,8 +82,10 @@ func (p *GiveawayPlugin) Stop() {
 }
 
 // ConnectChannels connects the given receive, send and command channels to the plugin
-func (p *GiveawayPlugin) ConnectChannels(receiveChannel chan events.ReceiveMessage, sendChannel chan events.SendMessage, commandCHannel chan events.Command) {
+func (p *GiveawayPlugin) ConnectChannels(receiveChannel chan events.ReceiveMessage, sendChannel chan events.SendMessage, commandCHannel chan events.Command) error {
 	p.botReceiveChannel = receiveChannel
 	p.botSendChannel = sendChannel
 	p.botCommandChannel = commandCHannel
+
+	return nil
 }

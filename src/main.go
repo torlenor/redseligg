@@ -49,7 +49,10 @@ func createBots(cfg config.Config) {
 	if cfg.Bots.Discord.Enabled {
 		bots.m["discord"] = discordBotCreator(cfg)
 		if cfg.Bots.Discord.Plugins.Echo.Enabled {
-			echoPlugin := plugins.CreateEchoPlugin()
+			echoPlugin, err := plugins.CreateEchoPlugin()
+			if err != nil {
+				log.Errorln("Could not create EchoPlugin: ", err)
+			}
 			echoPlugin.SetOnlyOnWhisper(true)
 			bots.m["discord"].AddPlugin(&echoPlugin)
 			echoPlugin.Start()
@@ -57,7 +60,10 @@ func createBots(cfg config.Config) {
 	} else if cfg.Bots.Matrix.Enabled {
 		bots.m["matrix"] = matrixBotCreator(cfg)
 		if cfg.Bots.Matrix.Plugins.Echo.Enabled {
-			echoPlugin := plugins.CreateEchoPlugin()
+			echoPlugin, err := plugins.CreateEchoPlugin()
+			if err != nil {
+				log.Errorln("Could not create EchoPlugin: ", err)
+			}
 			echoPlugin.SetOnlyOnWhisper(true)
 			bots.m["matrix"].AddPlugin(&echoPlugin)
 			echoPlugin.Start()
@@ -65,7 +71,10 @@ func createBots(cfg config.Config) {
 	} else if cfg.Bots.Fake.Enabled {
 		bots.m["fake"] = fakeBotCreator(cfg)
 		if cfg.Bots.Fake.Plugins.Echo.Enabled {
-			echoPlugin := plugins.CreateEchoPlugin()
+			echoPlugin, err := plugins.CreateEchoPlugin()
+			if err != nil {
+				log.Errorln("Could not create EchoPlugin: ", err)
+			}
 			echoPlugin.SetOnlyOnWhisper(true)
 			bots.m["fake"].AddPlugin(&echoPlugin)
 			echoPlugin.Start()
