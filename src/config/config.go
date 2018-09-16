@@ -3,7 +3,8 @@ package config
 // Plugins holds the plugins part of the AbyleBotter configuration
 type Plugins struct {
 	Echo struct {
-		Enabled bool `toml:"enabled"`
+		Enabled      bool `toml:"enabled"`
+		OnlyWhispers bool `toml:"onlywhispers"`
 	} `toml:"echo"`
 	Giveaway struct {
 		Enabled bool `toml:"enabled"`

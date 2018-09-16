@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
+	"api"
 	"events"
 	"logging"
 )
@@ -35,7 +35,7 @@ func (p *SendMessagesPlugin) handleReceivedMessage(receivedMessage events.Receiv
 }
 
 func (p *SendMessagesPlugin) handleSendMessage(ident string, content string) {
-	if p.isStarted {
+	if p.IsStarted() {
 		select {
 		case p.botSendChannel <- events.SendMessage{Type: events.MESSAGE, Ident: ident, Content: content}:
 		default:
@@ -64,16 +64,14 @@ func (p *SendMessagesPlugin) sendMessage(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(message)
 }
 
-func (p *SendMessagesPlugin) startRestAPI() {
-	router := mux.NewRouter()
-	router.HandleFunc("/plugins/sendmessages", p.sendMessage).Methods("POST")
-	p.log.Fatal(http.ListenAndServe(":8000", router))
+// RegisterToRestAPI registers all endpoints of the plugin to the AbyleBotter REST API
+func (p *SendMessagesPlugin) RegisterToRestAPI() {
+	api.AttachModulePost("/plugins/sendmessages", p.sendMessage)
 }
 
 // Start the SendMessagesPlugin
 func (p *SendMessagesPlugin) Start() {
 	p.isStarted = true
-	go p.startRestAPI()
 	go p.receiveMessageRunner()
 }
 
