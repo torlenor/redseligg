@@ -1,7 +1,6 @@
 package main
 
 import (
-	"api"
 	"errors"
 	"flag"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	"api"
 	"botinterface"
 	"config"
 	"logging"
@@ -161,7 +161,7 @@ func main() {
 	log.Println("AbyleBotter: Number of configured bots:", len(bots.m))
 
 	// Start API
-	go api.Start()
+	go api.Start(cfg.General.API)
 
 	startAbyleBotter()
 

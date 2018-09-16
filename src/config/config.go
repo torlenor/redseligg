@@ -1,5 +1,20 @@
 package config
 
+// API holds the API settings for the AbyleBotter configuration
+type API struct {
+	Enabled bool `toml:"enabled"`
+	// IP Address the REST API listens on
+	// If empty or non-existing listen on all interfaces
+	IP string `toml:"ip"`
+	// Port the REST API listens on
+	Port string `toml:"port"`
+}
+
+// General holds the general settings for the AbyleBotter configuration
+type General struct {
+	API API `toml:"api"`
+}
+
 // Plugins holds the plugins part of the AbyleBotter configuration
 type Plugins struct {
 	Echo struct {
@@ -16,7 +31,8 @@ type Plugins struct {
 
 // Config holds the complete AbyleBotter config
 type Config struct {
-	Bots struct {
+	General General `toml:"general"`
+	Bots    struct {
 		Discord struct {
 			Enabled bool    `toml:"enabled"`
 			Token   string  `toml:"token"`

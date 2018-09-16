@@ -6,9 +6,11 @@
 package api
 
 import (
+	"net/http"
+
+	"config"
 	"io"
 	"logging"
-	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -43,10 +45,23 @@ func AttachModulePost(path string, f func(http.ResponseWriter, *http.Request)) {
 }
 
 // Start the REST API
-func Start() {
-	log.Info("Starting up REST API")
+func Start(cfg config.API) {
+	if cfg.Enabled == true {
 
-	attachPublic(router)
+		attachPublic(router)
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+		var listenAddress string
+		if len(cfg.IP) > 0 && len(cfg.Port) > 0 {
+			listenAddress = cfg.IP + ":" + cfg.Port
+		} else if len(cfg.Port) > 0 {
+			listenAddress = ":" + cfg.Port
+		} else {
+			log.Fatal("REST API activated but no valid configuration found. At least port has to specified in config file!")
+		}
+
+		log.Infof("REST API running on %s", listenAddress)
+		log.Fatal(http.ListenAndServe(listenAddress, router))
+	} else {
+		log.Info("NOT starting REST API")
+	}
 }
