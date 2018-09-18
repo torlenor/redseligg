@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -15,7 +16,6 @@ import (
 type SendMessagesPlugin struct {
 	log *logrus.Entry
 
-	botReceiveChannel chan events.ReceiveMessage
 	botSendChannel    chan events.SendMessage
 	botCommandChannel chan events.Command
 
@@ -30,10 +30,6 @@ func CreateSendMessagesPlugin() (SendMessagesPlugin, error) {
 	return ep, nil
 }
 
-func (p *SendMessagesPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
-	p.log.Printf("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.Ident, receivedMessage.Content)
-}
-
 func (p *SendMessagesPlugin) handleSendMessage(ident string, content string) {
 	if p.IsStarted() {
 		select {
@@ -41,14 +37,6 @@ func (p *SendMessagesPlugin) handleSendMessage(ident string, content string) {
 		default:
 		}
 	}
-}
-
-func (p *SendMessagesPlugin) receiveMessageRunner() {
-	for receivedMessage := range p.botReceiveChannel {
-		p.handleReceivedMessage(receivedMessage)
-	}
-	p.log.Printf("Automatically SHUTTING DOWN because bot closed the receive channel")
-	p.isStarted = false
 }
 
 // Message is a simple struct holding Ident and Content for a message to send
@@ -59,9 +47,13 @@ type Message struct {
 
 func (p *SendMessagesPlugin) sendMessage(w http.ResponseWriter, r *http.Request) {
 	var message Message
-	_ = json.NewDecoder(r.Body).Decode(&message)
-	p.handleSendMessage(message.Ident, message.Content)
-	json.NewEncoder(w).Encode(message)
+	err := json.NewDecoder(r.Body).Decode(&message)
+	if err == nil && len(message.Ident) > 0 {
+		p.handleSendMessage(message.Ident, message.Content)
+		io.WriteString(w, `{"sent":true}`)
+	} else {
+		io.WriteString(w, `{"sent":false, "error":"Invalid Request"}`)
+	}
 }
 
 // RegisterToRestAPI registers all endpoints of the plugin to the AbyleBotter REST API
@@ -72,7 +64,6 @@ func (p *SendMessagesPlugin) RegisterToRestAPI() {
 // Start the SendMessagesPlugin
 func (p *SendMessagesPlugin) Start() {
 	p.isStarted = true
-	go p.receiveMessageRunner()
 }
 
 // Stop the SendMessagesPlugin
@@ -89,7 +80,6 @@ func (p *SendMessagesPlugin) IsStarted() bool {
 func (p *SendMessagesPlugin) ConnectChannels(receiveChannel chan events.ReceiveMessage,
 	sendChannel chan events.SendMessage,
 	commandCHannel chan events.Command) error {
-	p.botReceiveChannel = receiveChannel
 	p.botSendChannel = sendChannel
 	p.botCommandChannel = commandCHannel
 
