@@ -15,16 +15,14 @@ type mockBot struct {
 	lastReceivedCommand events.Command
 }
 
-func (b *mockBot) startSendChannelReceiver() {
-	for sendMsg := range b.sendMessageChan {
-		b.lastSendMessage = sendMsg
-	}
+func (b *mockBot) startSendChannelReceiver(done chan bool) {
+	b.lastSendMessage = <-b.sendMessageChan
+	done <- true
 }
 
-func (b *mockBot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		b.lastReceivedCommand = cmd
-	}
+func (b *mockBot) startCommandChannelReceiver(done chan bool) {
+	b.lastReceivedCommand = <-b.commandChan
+	done <- true
 }
 
 func (b *mockBot) reset() {
@@ -51,10 +49,12 @@ func TestEcho(t *testing.T) {
 	bot.sendMessageChan = make(chan events.SendMessage)
 	bot.commandChan = make(chan events.Command)
 
-	go bot.startSendChannelReceiver()
-	go bot.startCommandChannelReceiver()
+	doneSend := make(chan bool)
+	defer close(doneSend)
 
 	bot.reset()
+
+	go bot.startSendChannelReceiver(doneSend)
 
 	err = echoPlugin.ConnectChannels(bot.receiveMessageChan, bot.sendMessageChan, bot.commandChan)
 	if err != nil {
@@ -106,8 +106,7 @@ func TestEcho(t *testing.T) {
 		Content: "!echo TEST_MESSAGE"}
 	bot.sendMessage(msg)
 
-	time.Sleep(time.Millisecond * 20)
-
+	<-doneSend
 	if bot.lastSendMessage.Ident != "TEST_IDENT" ||
 		bot.lastSendMessage.Content != "TEST_MESSAGE" ||
 		bot.lastSendMessage.Type != events.MESSAGE {
@@ -115,14 +114,14 @@ func TestEcho(t *testing.T) {
 	}
 
 	bot.reset()
+	go bot.startSendChannelReceiver(doneSend)
 
 	msg = events.ReceiveMessage{Type: events.WHISPER,
 		Ident:   "TEST_IDENT_WHISPER",
 		Content: "!echo TEST_WHISPER"}
 	bot.sendMessage(msg)
 
-	time.Sleep(time.Millisecond * 20)
-
+	<-doneSend
 	if bot.lastSendMessage.Ident != "TEST_IDENT_WHISPER" ||
 		bot.lastSendMessage.Content != "TEST_WHISPER" ||
 		bot.lastSendMessage.Type != events.WHISPER {
@@ -130,6 +129,7 @@ func TestEcho(t *testing.T) {
 	}
 
 	bot.reset()
+	go bot.startSendChannelReceiver(doneSend)
 	echoPlugin.SetOnlyOnWhisper(true)
 
 	msg = events.ReceiveMessage{Type: events.MESSAGE,
@@ -150,8 +150,7 @@ func TestEcho(t *testing.T) {
 		Content: "!echo TEST_ANOTHER_WHISPER"}
 	bot.sendMessage(msg)
 
-	time.Sleep(time.Millisecond * 20)
-
+	<-doneSend
 	if bot.lastSendMessage.Ident != "TEST_IDENT_ANOTHER_WHISPER" ||
 		bot.lastSendMessage.Content != "TEST_ANOTHER_WHISPER" ||
 		bot.lastSendMessage.Type != events.WHISPER {

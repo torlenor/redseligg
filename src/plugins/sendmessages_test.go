@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestSendMessages(t *testing.T) {
@@ -21,8 +20,10 @@ func TestSendMessages(t *testing.T) {
 	bot.sendMessageChan = make(chan events.SendMessage)
 	bot.commandChan = make(chan events.Command)
 
-	go bot.startSendChannelReceiver()
-	go bot.startCommandChannelReceiver()
+	doneSend := make(chan bool)
+	defer close(doneSend)
+
+	go bot.startSendChannelReceiver(doneSend)
 
 	bot.reset()
 
@@ -58,8 +59,7 @@ func TestSendMessages(t *testing.T) {
 	// directly and pass in our Request and ResponseRecorder.
 	handler.ServeHTTP(rr, req)
 
-	time.Sleep(time.Millisecond * 100)
-
+	<-doneSend
 	if bot.lastSendMessage.Ident != "ROOM_NAME" ||
 		bot.lastSendMessage.Content != "TEST_MESSAGE" ||
 		bot.lastSendMessage.Type != events.MESSAGE {
@@ -80,6 +80,7 @@ func TestSendMessages(t *testing.T) {
 	}
 
 	bot.reset()
+	go bot.startSendChannelReceiver(doneSend)
 
 	// Test faulty request
 	req, err = http.NewRequest("POST", "/plugins/sendmessages", strings.NewReader(`{"Idsdfsfent":"ROOM_NAME","Condsfsdftent":"TEST_MESSAGE"}`))
@@ -94,8 +95,6 @@ func TestSendMessages(t *testing.T) {
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
 	handler.ServeHTTP(rr, req)
-
-	time.Sleep(time.Millisecond * 100)
 
 	if bot.lastSendMessage.Ident != "" ||
 		bot.lastSendMessage.Content != "" {
