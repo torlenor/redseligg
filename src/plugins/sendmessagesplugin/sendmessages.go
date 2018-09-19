@@ -1,7 +1,8 @@
-package plugins
+package sendmessagesplugin
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -11,6 +12,10 @@ import (
 	"events"
 	"logging"
 )
+
+var registerToAPI = func(path string, f func(http.ResponseWriter, *http.Request)) {
+	api.AttachModulePost(path, f)
+}
 
 // SendMessagesPlugin struct holds the private variables for a SendMessagesPlugin
 type SendMessagesPlugin struct {
@@ -31,11 +36,9 @@ func CreateSendMessagesPlugin() (SendMessagesPlugin, error) {
 }
 
 func (p *SendMessagesPlugin) handleSendMessage(ident string, content string) {
-	if p.IsStarted() {
-		select {
-		case p.botSendChannel <- events.SendMessage{Type: events.MESSAGE, Ident: ident, Content: content}:
-		default:
-		}
+	select {
+	case p.botSendChannel <- events.SendMessage{Type: events.MESSAGE, Ident: ident, Content: content}:
+	default:
 	}
 }
 
@@ -45,20 +48,32 @@ type Message struct {
 	Content string `json:"content,omitempty"`
 }
 
-func (p *SendMessagesPlugin) sendMessage(w http.ResponseWriter, r *http.Request) {
+func (p *SendMessagesPlugin) sendMessage(message Message) error {
+	if p.IsStarted() == false {
+		return errors.New("Plugin not started")
+	} else if len(message.Ident) == 0 {
+		return errors.New("Invalid Request, Ident is empty")
+	}
+
+	p.handleSendMessage(message.Ident, message.Content)
+	return nil
+}
+
+func (p *SendMessagesPlugin) sendMessageRequest(w http.ResponseWriter, r *http.Request) {
 	var message Message
 	err := json.NewDecoder(r.Body).Decode(&message)
-	if err == nil && len(message.Ident) > 0 {
-		p.handleSendMessage(message.Ident, message.Content)
-		io.WriteString(w, `{"sent":true}`)
-	} else {
+	if err != nil {
 		io.WriteString(w, `{"sent":false, "error":"Invalid Request"}`)
 	}
+	if err := p.sendMessage(message); err != nil {
+		io.WriteString(w, `{"sent":false, "error":"`+err.Error()+`"}`)
+	}
+	io.WriteString(w, `{"sent":true}`)
 }
 
 // RegisterToRestAPI registers all endpoints of the plugin to the AbyleBotter REST API
 func (p *SendMessagesPlugin) RegisterToRestAPI() {
-	api.AttachModulePost("/plugins/sendmessages", p.sendMessage)
+	registerToAPI("/plugins/sendmessages", p.sendMessageRequest)
 }
 
 // Start the SendMessagesPlugin

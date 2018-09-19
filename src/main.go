@@ -12,7 +12,9 @@ import (
 	"botinterface"
 	"config"
 	"logging"
-	"plugins"
+
+	"plugins/echoplugin"
+	"plugins/sendmessagesplugin"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
@@ -49,7 +51,7 @@ func start(done chan struct{}) {
 
 func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
 	if cfg.Echo.Enabled {
-		echoPlugin, err := plugins.CreateEchoPlugin()
+		echoPlugin, err := echoplugin.CreateEchoPlugin()
 		if err != nil {
 			log.Errorln("Could not create EchoPlugin: ", err)
 			return err
@@ -59,7 +61,7 @@ func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
 		echoPlugin.Start()
 	}
 	if cfg.SendMessage.Enabled {
-		sendMessagesPlugin, err := plugins.CreateSendMessagesPlugin()
+		sendMessagesPlugin, err := sendmessagesplugin.CreateSendMessagesPlugin()
 		sendMessagesPlugin.RegisterToRestAPI()
 		if err != nil {
 			log.Errorln("Could not create SendMessagesPlugin: ", err)
