@@ -39,6 +39,9 @@ run: build
 	./bin/$(NAME)
 
 test:
+	@go test -covermode=count -coverprofile=coverage.out ./...
+
+test-verbose:
 	@go test -v -covermode=count -coverprofile=coverage.out ./...
 
 install: build
