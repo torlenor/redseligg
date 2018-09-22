@@ -45,10 +45,7 @@ func (p *EchoPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && (!p.onlyOnWhisper || receivedMessage.Type == events.WHISPER) && strings.HasPrefix(msg, "!echo") {
 		log.Printf("Echoing message back to user = %s, content = %s", receivedMessage.Ident, stripCmd(msg, "echo"))
-		select {
-		case p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, Ident: receivedMessage.Ident, Content: stripCmd(msg, "echo")}:
-		default:
-		}
+		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, Ident: receivedMessage.Ident, Content: stripCmd(msg, "echo")}
 	}
 }
 

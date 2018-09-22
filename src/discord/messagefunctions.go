@@ -2,6 +2,7 @@ package discord
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"time"
 
@@ -52,16 +53,19 @@ func (b *Bot) sendWhisper(snowflakeID string, content string) error {
 		return errors.Wrap(err, "json unmarshal failed")
 	}
 
-	response, err = b.apiCall("/channels/"+channelResponseData["id"].(string)+"/messages", "POST", `{"content": "`+content+`"}`)
-	if err != nil {
-		return errors.Wrap(err, "apiCall failed")
+	var channelID string
+	if id, ok := channelResponseData["id"].(string); ok {
+		channelID = id
+	} else {
+		return errors.Wrap(err, "no valid channel id found")
 	}
-	if checkRateLimit(response) > 0 {
-		return errors.New("sending failed (sending whisper)")
+
+	err = b.messageRunner(channelID, content)
+	if err == nil {
+		b.stats.whispersSent++
 	}
-	log.Printf("DiscordBot: Sent: WHISPER to UserID = %s, Content = %s", snowflakeID, content)
-	b.stats.whispersSent++
-	return nil
+
+	return err
 }
 
 func (b *Bot) sendMessage(receiver string, content string) error {
@@ -93,15 +97,37 @@ func (b *Bot) sendMessage(receiver string, content string) error {
 		}
 	}
 
-	response, err := b.apiCall("/channels/"+channelID+"/messages", "POST", `{"content": "`+content+`"}`)
-	if err != nil {
-		return errors.Wrap(err, "apiCall failed")
+	err := b.messageRunner(channelID, content)
+	if err == nil {
+		b.stats.messagesSent++
 	}
-	if checkRateLimit(response) > 0 {
-		return errors.New("sending failed (sending message)")
+
+	return err
+}
+
+func (b *Bot) messageRunner(channelID string, content string) error {
+	finished := false
+	tries := 0
+	for !finished {
+		tries++
+		if tries > 3 {
+			return errors.New("Message sending still failing after 3 tries, giving up")
+		}
+
+		response, err := b.apiCall("/channels/"+channelID+"/messages", "POST", `{"content": "`+content+`"}`)
+		if err != nil {
+			return errors.Wrap(err, "apiCall failed")
+		}
+		var retryAfter int
+		if retryAfter = checkRateLimit(response); retryAfter > 0 {
+			log.Warn("Sending failed because we are rate limited. Trying to resend after: " + strconv.Itoa(retryAfter))
+			time.Sleep(time.Duration(retryAfter) * time.Millisecond)
+			continue
+		}
+		log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
+		finished = true
 	}
-	log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
-	b.stats.messagesSent++
+
 	return nil
 }
 
