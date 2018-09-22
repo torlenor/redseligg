@@ -34,6 +34,13 @@ var (
 	log = logging.Get("DiscordBot")
 )
 
+type guild struct {
+	snowflakeID string
+	name        string
+	memberCount int
+	channel     []channel
+}
+
 // The Bot struct holds parameters related to the bot
 type Bot struct {
 	ws                 *websocket.Conn
@@ -49,6 +56,9 @@ type Bot struct {
 	seqNumberChan      chan int
 
 	knownPlugins []plugins.Plugin
+
+	guilds        map[string]guild
+	guildNameToID map[string]string
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -124,7 +134,7 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 			case "READY":
 				b.handleReady(data)
 			case "GUILD_CREATE":
-				handleGuildCreate(data)
+				b.handleGuildCreate(data)
 			case "PRESENCE_UPDATE":
 				handlePresenceUpdate(data)
 			case "PRESENCE_REPLACE":
@@ -178,6 +188,9 @@ func CreateDiscordBot(token string) *Bot {
 
 	b.heartBeatStopChan = make(chan struct{})
 	b.seqNumberChan = make(chan int)
+
+	b.guilds = make(map[string]guild)
+	b.guildNameToID = make(map[string]string)
 
 	return &b
 }

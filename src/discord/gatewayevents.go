@@ -105,6 +105,20 @@ func (mc messageCreate) toString() string {
 	return fmt.Sprintf("%s", data)
 }
 
+type channel struct {
+	Type                 int           `json:"type"`
+	Topic                string        `json:"topic,omitempty"`
+	Position             int           `json:"position"`
+	PermissionOverwrites []interface{} `json:"permission_overwrites"`
+	Name                 string        `json:"name"`
+	LastPinTimestamp     time.Time     `json:"last_pin_timestamp,omitempty"`
+	LastMessageID        string        `json:"last_message_id,omitempty"`
+	ID                   string        `json:"id"`
+	UserLimit            int           `json:"user_limit,omitempty"`
+	ParentID             string        `json:"parent_id,omitempty"`
+	Bitrate              int           `json:"bitrate,omitempty"`
+}
+
 type guildCreate struct {
 	// T  string `json:"t"`
 	// S  int    `json:"s"`
@@ -159,22 +173,10 @@ type guildCreate struct {
 	ExplicitContentFilter       int           `json:"explicit_content_filter"`
 	Emojis                      []interface{} `json:"emojis"`
 	DefaultMessageNotifications int           `json:"default_message_notifications"`
-	Channels                    []struct {
-		Type                 int           `json:"type"`
-		Topic                string        `json:"topic,omitempty"`
-		Position             int           `json:"position"`
-		PermissionOverwrites []interface{} `json:"permission_overwrites"`
-		Name                 string        `json:"name"`
-		LastPinTimestamp     time.Time     `json:"last_pin_timestamp,omitempty"`
-		LastMessageID        string        `json:"last_message_id,omitempty"`
-		ID                   string        `json:"id"`
-		UserLimit            int           `json:"user_limit,omitempty"`
-		ParentID             string        `json:"parent_id,omitempty"`
-		Bitrate              int           `json:"bitrate,omitempty"`
-	} `json:"channels"`
-	ApplicationID interface{} `json:"application_id"`
-	AfkTimeout    int         `json:"afk_timeout"`
-	AfkChannelID  interface{} `json:"afk_channel_id"`
+	Channels                    []channel     `json:"channels"`
+	ApplicationID               interface{}   `json:"application_id"`
+	AfkTimeout                  int           `json:"afk_timeout"`
+	AfkChannelID                interface{}   `json:"afk_channel_id"`
 	// } `json:"d"`
 }
 

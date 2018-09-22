@@ -1,43 +1,12 @@
-package plugins
+package echoplugin
 
 import (
 	"events"
 	"testing"
 	"time"
+
+	"botinterface"
 )
-
-type mockBot struct {
-	receiveMessageChan chan events.ReceiveMessage
-	sendMessageChan    chan events.SendMessage
-	commandChan        chan events.Command
-
-	lastSendMessage     events.SendMessage
-	lastReceivedCommand events.Command
-}
-
-func (b *mockBot) startSendChannelReceiver() {
-	for sendMsg := range b.sendMessageChan {
-		b.lastSendMessage = sendMsg
-	}
-}
-
-func (b *mockBot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		b.lastReceivedCommand = cmd
-	}
-}
-
-func (b *mockBot) reset() {
-	b.lastSendMessage = events.SendMessage{Type: events.UNKNOWN, Ident: "", Content: ""}
-	b.lastReceivedCommand = events.Command{Command: "", Payload: ""}
-}
-
-func (b *mockBot) sendMessage(msg events.ReceiveMessage) {
-	select {
-	case b.receiveMessageChan <- msg:
-	default:
-	}
-}
 
 func TestEcho(t *testing.T) {
 	echoPlugin, err := CreateEchoPlugin()
@@ -46,17 +15,16 @@ func TestEcho(t *testing.T) {
 		t.Fatalf("Could not create EchoPlugin")
 	}
 
-	var bot mockBot
-	bot.receiveMessageChan = make(chan events.ReceiveMessage)
-	bot.sendMessageChan = make(chan events.SendMessage)
-	bot.commandChan = make(chan events.Command)
+	var bot botinterface.MockBot
+	bot.ReceiveMessageChan = make(chan events.ReceiveMessage)
+	bot.SendMessageChan = make(chan events.SendMessage)
+	bot.CommandChan = make(chan events.Command)
 
-	go bot.startSendChannelReceiver()
-	go bot.startCommandChannelReceiver()
+	bot.Reset()
 
-	bot.reset()
+	go bot.StartSendChannelReceiver()
 
-	err = echoPlugin.ConnectChannels(bot.receiveMessageChan, bot.sendMessageChan, bot.commandChan)
+	err = echoPlugin.ConnectChannels(bot.ReceiveMessageChan, bot.SendMessageChan, bot.CommandChan)
 	if err != nil {
 		t.Fatalf("Error connecting channels")
 	}
@@ -64,13 +32,13 @@ func TestEcho(t *testing.T) {
 	msg := events.ReceiveMessage{Type: events.MESSAGE,
 		Ident:   "TEST_IDENT_BEFORE_START",
 		Content: "TEST_MESSAGE_BEFORE_START"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "" ||
-		bot.lastSendMessage.Content != "" ||
-		bot.lastSendMessage.Type != events.UNKNOWN {
+	if bot.LastSendMessage.Ident != "" ||
+		bot.LastSendMessage.Content != "" ||
+		bot.LastSendMessage.Type != events.UNKNOWN {
 		t.Fatalf("mockBot already received a SendMessage request")
 	}
 
@@ -82,83 +50,85 @@ func TestEcho(t *testing.T) {
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "" ||
-		bot.lastSendMessage.Content != "" ||
-		bot.lastSendMessage.Type != events.UNKNOWN {
+	if bot.LastSendMessage.Ident != "" ||
+		bot.LastSendMessage.Content != "" ||
+		bot.LastSendMessage.Type != events.UNKNOWN {
 		t.Fatalf("mockBot already received a SendMessage request")
 	}
 
 	msg = events.ReceiveMessage{Type: events.MESSAGE,
 		Ident:   "TEST_IDENT_NO_ECHO",
 		Content: "TEST_MESSAGE_NO_ECHO"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "" ||
-		bot.lastSendMessage.Content != "" ||
-		bot.lastSendMessage.Type != events.UNKNOWN {
+	if bot.LastSendMessage.Ident != "" ||
+		bot.LastSendMessage.Content != "" ||
+		bot.LastSendMessage.Type != events.UNKNOWN {
 		t.Fatalf("mockBot received a SendMessage request even though message did not start with !echo")
 	}
 
 	msg = events.ReceiveMessage{Type: events.MESSAGE,
 		Ident:   "TEST_IDENT",
 		Content: "!echo TEST_MESSAGE"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "TEST_IDENT" ||
-		bot.lastSendMessage.Content != "TEST_MESSAGE" ||
-		bot.lastSendMessage.Type != events.MESSAGE {
+	if bot.LastSendMessage.Ident != "TEST_IDENT" ||
+		bot.LastSendMessage.Content != "TEST_MESSAGE" ||
+		bot.LastSendMessage.Type != events.MESSAGE {
 		t.Fatalf("mockBot did not receive a SendMessage request even though the EchoPlugin should have echoed it")
 	}
 
-	bot.reset()
+	bot.Reset()
+	go bot.StartSendChannelReceiver()
 
 	msg = events.ReceiveMessage{Type: events.WHISPER,
 		Ident:   "TEST_IDENT_WHISPER",
 		Content: "!echo TEST_WHISPER"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "TEST_IDENT_WHISPER" ||
-		bot.lastSendMessage.Content != "TEST_WHISPER" ||
-		bot.lastSendMessage.Type != events.WHISPER {
+	if bot.LastSendMessage.Ident != "TEST_IDENT_WHISPER" ||
+		bot.LastSendMessage.Content != "TEST_WHISPER" ||
+		bot.LastSendMessage.Type != events.WHISPER {
 		t.Fatalf("EchoBot did not echo WHISPER")
 	}
 
-	bot.reset()
+	bot.Reset()
+	go bot.StartSendChannelReceiver()
 	echoPlugin.SetOnlyOnWhisper(true)
 
 	msg = events.ReceiveMessage{Type: events.MESSAGE,
 		Ident:   "TEST_IDENT",
 		Content: "!echo TEST_YET_ANOTHER_MESSAGE"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "" ||
-		bot.lastSendMessage.Content != "" ||
-		bot.lastSendMessage.Type != events.UNKNOWN {
+	if bot.LastSendMessage.Ident != "" ||
+		bot.LastSendMessage.Content != "" ||
+		bot.LastSendMessage.Type != events.UNKNOWN {
 		t.Fatalf("EchoBot echoed a MESSAGE even though it is set to Whisper Only")
 	}
 
 	msg = events.ReceiveMessage{Type: events.WHISPER,
 		Ident:   "TEST_IDENT_ANOTHER_WHISPER",
 		Content: "!echo TEST_ANOTHER_WHISPER"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "TEST_IDENT_ANOTHER_WHISPER" ||
-		bot.lastSendMessage.Content != "TEST_ANOTHER_WHISPER" ||
-		bot.lastSendMessage.Type != events.WHISPER {
+	if bot.LastSendMessage.Ident != "TEST_IDENT_ANOTHER_WHISPER" ||
+		bot.LastSendMessage.Content != "TEST_ANOTHER_WHISPER" ||
+		bot.LastSendMessage.Type != events.WHISPER {
 		t.Fatalf("EchoBot did not echo WHISPER")
 	}
 
-	bot.reset()
+	bot.Reset()
 	echoPlugin.Stop()
 
 	if echoPlugin.IsStarted() != false {
@@ -168,29 +138,28 @@ func TestEcho(t *testing.T) {
 	msg = events.ReceiveMessage{Type: events.MESSAGE,
 		Ident:   "TEST_IDENT",
 		Content: "!echo TEST_YET_YET_ANOTHER_MESSAGE"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	msg = events.ReceiveMessage{Type: events.WHISPER,
 		Ident:   "TEST_IDENT_WHISPER",
 		Content: "!echo TEST_YET_ANOTHER_WHISPER"}
-	bot.sendMessage(msg)
+	bot.SendMessage(msg)
 
 	time.Sleep(time.Millisecond * 20)
 
-	if bot.lastSendMessage.Ident != "" ||
-		bot.lastSendMessage.Content != "" ||
-		bot.lastSendMessage.Type != events.UNKNOWN {
+	if bot.LastSendMessage.Ident != "" ||
+		bot.LastSendMessage.Content != "" ||
+		bot.LastSendMessage.Type != events.UNKNOWN {
 		t.Fatalf("EchoBot echoed something even though it is stopped")
 	}
 
-	bot.reset()
+	bot.Reset()
 	echoPlugin.Start()
-	close(bot.receiveMessageChan)
+	close(bot.ReceiveMessageChan)
 
 	time.Sleep(time.Millisecond * 20)
 
 	if echoPlugin.IsStarted() != false {
 		t.Fatalf("EchoBot should have been stopped automatically on receiveChannel close")
 	}
-
 }

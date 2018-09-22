@@ -39,6 +39,9 @@ run: build
 	./bin/$(NAME)
 
 test:
+	@go test -covermode=count -coverprofile=coverage.out ./...
+
+test-verbose:
 	@go test -v -covermode=count -coverprofile=coverage.out ./...
 
 install: build
@@ -64,6 +67,7 @@ deps: clean-deps
 	go get -v golang.org/x/oauth2
 	go get -v github.com/BurntSushi/toml
 	go get -v github.com/sirupsen/logrus
+	go get -v github.com/gorilla/mux
 
 clean-dist:
 	rm -rf ./dist/${VERSION}

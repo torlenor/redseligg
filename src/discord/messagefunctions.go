@@ -63,14 +63,25 @@ func (b Bot) sendWhisper(snowflakeID string, content string) error {
 }
 
 func (b Bot) sendMessage(channelID string, content string) error {
-	response, err := b.apiCall("/channels/"+channelID+"/messages", "POST", `{"content": "`+content+`"}`)
+
+	var roomID string
+	if _, ok := b.guildNameToID[channelID]; ok {
+		roomID = channelID
+	} else if val, ok := b.guilds[channelID]; ok {
+		roomID = val.snowflakeID
+	} else {
+		log.Warnf("Unknown roomIdent %s. We will try to use it as a roomID", channelID)
+		roomID = channelID
+	}
+
+	response, err := b.apiCall("/channels/"+roomID+"/messages", "POST", `{"content": "`+content+`"}`)
 	if err != nil {
 		return errors.Wrap(err, "apiCall failed")
 	}
 	if checkRateLimit(response) > 0 {
 		return errors.New("sending failed (sending message)")
 	}
-	log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
+	log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", roomID, content)
 	return nil
 }
 

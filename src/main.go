@@ -1,16 +1,20 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"time"
 
+	"api"
 	"botinterface"
 	"config"
 	"logging"
-	"plugins"
+
+	"plugins/echoplugin"
+	"plugins/sendmessagesplugin"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
@@ -45,41 +49,53 @@ func start(done chan struct{}) {
 	}
 }
 
-func createBots(cfg config.Config) {
+func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
+	if cfg.Echo.Enabled {
+		echoPlugin, err := echoplugin.CreateEchoPlugin()
+		if err != nil {
+			log.Errorln("Could not create EchoPlugin: ", err)
+			return err
+		}
+		echoPlugin.SetOnlyOnWhisper(cfg.Echo.OnlyWhispers)
+		bot.AddPlugin(&echoPlugin)
+		echoPlugin.Start()
+	}
+	if cfg.SendMessage.Enabled {
+		sendMessagesPlugin, err := sendmessagesplugin.CreateSendMessagesPlugin()
+		sendMessagesPlugin.RegisterToRestAPI()
+		if err != nil {
+			log.Errorln("Could not create SendMessagesPlugin: ", err)
+			return err
+		}
+		bot.AddPlugin(&sendMessagesPlugin)
+		sendMessagesPlugin.Start()
+	}
+
+	return nil
+}
+
+func createBots(cfg config.Config) error {
 	if cfg.Bots.Discord.Enabled {
 		bots.m["discord"] = discordBotCreator(cfg)
-		if cfg.Bots.Discord.Plugins.Echo.Enabled {
-			echoPlugin, err := plugins.CreateEchoPlugin()
-			if err != nil {
-				log.Errorln("Could not create EchoPlugin: ", err)
-			}
-			echoPlugin.SetOnlyOnWhisper(true)
-			bots.m["discord"].AddPlugin(&echoPlugin)
-			echoPlugin.Start()
+		if bots.m["discord"] == nil {
+			return errors.New("Could not create Discord Bot")
 		}
+		createPlugins(cfg.Bots.Discord.Plugins, bots.m["discord"])
 	} else if cfg.Bots.Matrix.Enabled {
 		bots.m["matrix"] = matrixBotCreator(cfg)
-		if cfg.Bots.Matrix.Plugins.Echo.Enabled {
-			echoPlugin, err := plugins.CreateEchoPlugin()
-			if err != nil {
-				log.Errorln("Could not create EchoPlugin: ", err)
-			}
-			echoPlugin.SetOnlyOnWhisper(true)
-			bots.m["matrix"].AddPlugin(&echoPlugin)
-			echoPlugin.Start()
+		if bots.m["matrix"] == nil {
+			return errors.New("Could not create Matrix Bot")
 		}
+		createPlugins(cfg.Bots.Matrix.Plugins, bots.m["matrix"])
 	} else if cfg.Bots.Fake.Enabled {
 		bots.m["fake"] = fakeBotCreator(cfg)
-		if cfg.Bots.Fake.Plugins.Echo.Enabled {
-			echoPlugin, err := plugins.CreateEchoPlugin()
-			if err != nil {
-				log.Errorln("Could not create EchoPlugin: ", err)
-			}
-			echoPlugin.SetOnlyOnWhisper(true)
-			bots.m["fake"].AddPlugin(&echoPlugin)
-			echoPlugin.Start()
+		if bots.m["fake"] == nil {
+			return errors.New("Could not create Fake Bot")
 		}
+		createPlugins(cfg.Bots.Matrix.Plugins, bots.m["fake"])
 	}
+
+	return nil
 }
 
 func startAbyleBotter() {
@@ -135,13 +151,19 @@ func main() {
 		return
 	}
 
-	createBots(cfg)
+	err := createBots(cfg)
+	if err != nil {
+		log.Fatalln("Error initializing the bots and plugins:" + err.Error() + "Quitting...")
+	}
 
 	if len(bots.m) == 0 {
 		log.Fatal("No Bot enabled. Check config file: ", configPath)
 	}
 
 	log.Println("AbyleBotter: Number of configured bots:", len(bots.m))
+
+	// Start API
+	go api.Start(cfg.General.API)
 
 	startAbyleBotter()
 

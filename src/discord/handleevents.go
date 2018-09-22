@@ -65,15 +65,25 @@ func (b *Bot) handleReady(data map[string]interface{}) {
 	log.Printf("DiscordBot: Received: READY for Bot User = %s, UserID = %s, SnowflakeID = %s", newReady.User.Username, newReady.User.ID, b.ownSnowflakeID)
 }
 
-func handleGuildCreate(data map[string]interface{}) {
+func (b *Bot) handleGuildCreate(data map[string]interface{}) {
 	// log.Printf("GUILD_CREATE: data['t']: %s, data['d']: %s", data["t"], data["d"])
 	var newGuildCreate guildCreate
 	err := mapstructure.Decode(data["d"], &newGuildCreate)
 	if err != nil {
 		log.Println("DiscordBot: UNHANDELED ERROR: GUILD_CREATE", err)
+		return
 	}
-	// log.Println("GUILD_CREATE: ", newGuildCreate.toString())
-	log.Println("DiscordBot: Received: GUILD_CREATE")
+
+	newGuild := guild{}
+	newGuild.channel = newGuildCreate.Channels
+	newGuild.memberCount = newGuildCreate.MemberCount
+	newGuild.name = newGuildCreate.Name
+	newGuild.snowflakeID = newGuildCreate.ID
+
+	b.guilds[newGuild.name] = newGuild
+	b.guildNameToID[newGuild.name] = newGuild.snowflakeID
+
+	log.Println("GUILD_CREATE: Added new Guild:", newGuild.name)
 }
 
 func handlePresenceUpdate(data map[string]interface{}) {
