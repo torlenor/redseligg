@@ -2,8 +2,11 @@ package discord
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type typingStart struct {
@@ -30,10 +33,43 @@ type typingStart struct {
 	// } `json:"d"`
 }
 
+func decodeTypingStart(data map[string]interface{}) (typingStart, error) {
+	var newTypingStart typingStart
+	err := mapstructure.Decode(data["d"], &newTypingStart)
+	if err != nil {
+		return typingStart{}, errors.New("decodeTypingStart: " + err.Error())
+	}
+
+	// FIXME: Workaround for GuildID not decoded correctly
+	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
+		newTypingStart.UserID = str
+	}
+	// FIXME: Workaround for GuildID not decoded correctly
+	if str, ok := data["d"].(map[string]interface{})["guild_id"].(string); ok {
+		newTypingStart.GuildID = str
+	}
+	// FIXME: Workaround for ChannelID not decoded correctly
+	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
+		newTypingStart.ChannelID = str
+	}
+	// FIXME: Workaround for JoinedAt not decoded correctly
+	if val, ok := data["d"].(map[string]interface{})["member"]; ok {
+		if str, ok := val.(map[string]interface{})["join_at"].(string); ok {
+			t, err := time.Parse(time.RFC3339, str)
+			if err != nil {
+				log.Println("UNHANDELED ERROR: TYPING_START", err)
+			}
+			newTypingStart.Member.JoinedAt = t
+		}
+	}
+
+	return newTypingStart, nil
+}
+
 func (t typingStart) toString() string {
 	data, err := json.Marshal(t)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -57,15 +93,25 @@ type presenceUpdate struct {
 	// } `json:"d"`
 }
 
+func decodePresenceUpdate(data map[string]interface{}) (presenceUpdate, error) {
+	var newPresenceUpdate presenceUpdate
+	err := mapstructure.Decode(data["d"], &newPresenceUpdate)
+	if err != nil {
+		return presenceUpdate{}, errors.New("decodePresenceUpdate: " + err.Error())
+	}
+
+	// FIXME: Workaround for GuildID not decoded correctly
+	newPresenceUpdate.GuildID = data["d"].(map[string]interface{})["guild_id"].(string)
+
+	return newPresenceUpdate, nil
+}
+
 func (p presenceUpdate) toString() string {
 	data, err := json.Marshal(p)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
-
-	// return fmt.Sprintf("ID: %s, Status: %s, Roles: %s, GuildID: %s, Game: [Type: %d, Name: %s]",
-	// 	p.User.ID, p.Status, p.Roles, p.GuildID, p.Game.Type, p.Game.Name)
 }
 
 type messageCreate struct {
@@ -97,10 +143,32 @@ type messageCreate struct {
 	// } `json:"d"`
 }
 
+func decodeMessageCreate(data map[string]interface{}) (messageCreate, error) {
+	var newMessageCreate messageCreate
+	err := mapstructure.Decode(data["d"], &newMessageCreate)
+	if err != nil {
+		return messageCreate{}, errors.New("decodeMessageCreate:" + err.Error())
+	}
+
+	// FIXME: Workaround for ChannelID not decoded correctly
+	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
+		newMessageCreate.ChannelID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["timestamp"].(string); ok {
+		t, err := time.Parse(time.RFC3339, str)
+		if err != nil {
+			return messageCreate{}, errors.New("decodeMessageCreate:" + err.Error())
+		}
+		newMessageCreate.Timestamp = t
+	}
+
+	return newMessageCreate, nil
+}
+
 func (mc messageCreate) toString() string {
 	data, err := json.Marshal(mc)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -180,10 +248,20 @@ type guildCreate struct {
 	// } `json:"d"`
 }
 
+func decodeGuildCreate(data map[string]interface{}) (guildCreate, error) {
+	var newGuildCreate guildCreate
+	err := mapstructure.Decode(data["d"], &newGuildCreate)
+	if err != nil {
+		return guildCreate{}, errors.New("decodeGuildCreate" + err.Error())
+	}
+
+	return newGuildCreate, nil
+}
+
 func (gc guildCreate) toString() string {
 	data, err := json.Marshal(gc)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -218,10 +296,19 @@ type ready struct {
 	// } `json:"d"`
 }
 
+func decodeReady(data map[string]interface{}) (ready, error) {
+	var newReady ready
+	err := mapstructure.Decode(data["d"], &newReady)
+	if err != nil {
+		return ready{}, errors.New("decodeReady" + err.Error())
+	}
+	return newReady, nil
+}
+
 func (r ready) toString() string {
 	data, err := json.Marshal(r)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -243,10 +330,20 @@ type channelCreate struct {
 	// } `json:"d"`
 }
 
+func decodeChannelCreate(data map[string]interface{}) (channelCreate, error) {
+	var newChannelCreate channelCreate
+	err := mapstructure.Decode(data["d"], &newChannelCreate)
+	if err != nil {
+		return channelCreate{}, errors.New("decodeChannelCreate: " + err.Error())
+	}
+
+	return newChannelCreate, nil
+}
+
 func (cc channelCreate) toString() string {
 	data, err := json.Marshal(cc)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -262,10 +359,20 @@ type messageDelete struct {
 	// } `json:"d"`
 }
 
+func decodeMessageDelete(data map[string]interface{}) (messageDelete, error) {
+	var newMessageDelete messageDelete
+	err := mapstructure.Decode(data["d"], &newMessageDelete)
+	if err != nil {
+		return messageDelete{}, errors.New("decodeMessageDelete: " + err.Error())
+	}
+
+	return newMessageDelete, nil
+}
+
 func (md messageDelete) toString() string {
 	data, err := json.Marshal(md)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -287,10 +394,20 @@ type messageReactionAdd struct {
 	// } `json:"d"`
 }
 
+func decodeMessageReactionAdd(data map[string]interface{}) (messageReactionAdd, error) {
+	var newMessageReactionAdd messageReactionAdd
+	err := mapstructure.Decode(data["d"], &newMessageReactionAdd)
+	if err != nil {
+		return messageReactionAdd{}, errors.New("decodeMessageReactionAdd: " + err.Error())
+	}
+
+	return newMessageReactionAdd, nil
+}
+
 func (mra messageReactionAdd) toString() string {
 	data, err := json.Marshal(mra)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -312,10 +429,20 @@ type messageReactionRemove struct {
 	// } `json:"d"`
 }
 
+func decodeMessageReactionRemove(data map[string]interface{}) (messageReactionRemove, error) {
+	var newMessageReactionRemove messageReactionRemove
+	err := mapstructure.Decode(data["d"], &newMessageReactionRemove)
+	if err != nil {
+		return messageReactionRemove{}, errors.New("decodeMessageReactionRemove: " + err.Error())
+	}
+
+	return newMessageReactionRemove, nil
+}
+
 func (mrr messageReactionRemove) toString() string {
 	data, err := json.Marshal(mrr)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -349,10 +476,20 @@ type messageUpdate struct {
 	// } `json:"d"`
 }
 
+func decodeMessageUpdate(data map[string]interface{}) (messageUpdate, error) {
+	var newMessageUpdate messageUpdate
+	err := mapstructure.Decode(data["d"], &newMessageUpdate)
+	if err != nil {
+		return messageUpdate{}, errors.New("decodeMessageUpdate: " + err.Error())
+	}
+
+	return newMessageUpdate, nil
+}
+
 func (mu messageUpdate) toString() string {
 	data, err := json.Marshal(mu)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -368,10 +505,20 @@ type channelPinsUpdate struct {
 	// } `json:"d"`
 }
 
+func decodeChannelPinsUpdate(data map[string]interface{}) (channelPinsUpdate, error) {
+	var newChannelPinsUpdate channelPinsUpdate
+	err := mapstructure.Decode(data["d"], &newChannelPinsUpdate)
+	if err != nil {
+		return channelPinsUpdate{}, errors.New("decodeChannelPinsUpdate: " + err.Error())
+	}
+
+	return newChannelPinsUpdate, nil
+}
+
 func (cpu channelPinsUpdate) toString() string {
 	data, err := json.Marshal(cpu)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }
@@ -394,10 +541,20 @@ type guildMemberUpdate struct {
 	// } `json:"d"`
 }
 
+func decodeGuildMemberUpdate(data map[string]interface{}) (guildMemberUpdate, error) {
+	var newGuildMemberUpdate guildMemberUpdate
+	err := mapstructure.Decode(data["d"], &newGuildMemberUpdate)
+	if err != nil {
+		return guildMemberUpdate{}, errors.New("decodeGuildMemberUpdate: " + err.Error())
+	}
+
+	return newGuildMemberUpdate, nil
+}
+
 func (gmu guildMemberUpdate) toString() string {
 	data, err := json.Marshal(gmu)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR:", err)
 	}
 	return fmt.Sprintf("%s", data)
 }

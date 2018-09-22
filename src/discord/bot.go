@@ -109,9 +109,9 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-				log.Println("Connection closed normally: ", err)
+				log.Debugln("Connection closed normally: ", err)
 			} else {
-				log.Println("UNHANDELED ERROR: ", err)
+				log.Errorln("UNHANDELED ERROR: ", err)
 			}
 			break
 		}
@@ -119,17 +119,17 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 		var data map[string]interface{}
 
 		if err := json.Unmarshal(message, &data); err != nil {
-			log.Println("UNHANDELED ERROR: ", err)
+			log.Errorln("UNHANDELED ERROR: ", err)
 			continue
 		}
 
 		if data["op"].(float64) == 10 { // Hello from Discord Gateway
-			log.Println("Received HELLO from gateway")
+			log.Debugln("Received HELLO from gateway")
 			sendIdent(b.token, b.ws)
 			heartbeatInterval := int(data["d"].(map[string]interface{})["heartbeat_interval"].(float64))
 			b.heartBeatSender = &discordHeartBeatSender{ws: b.ws}
 			go heartBeat(heartbeatInterval, b.heartBeatSender, b.heartBeatStopChan, b.seqNumberChan)
-			log.Println("DiscordBot is READY")
+			log.Infoln("DiscordBot is READY")
 		} else if data["op"].(float64) == 0 { // Dispatch to event handlers
 			switch data["t"] {
 			case "MESSAGE_CREATE":
@@ -139,39 +139,38 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 			case "GUILD_CREATE":
 				b.handleGuildCreate(data)
 			case "PRESENCE_UPDATE":
-				handlePresenceUpdate(data)
+				b.handlePresenceUpdate(data)
 			case "PRESENCE_REPLACE":
-				log.Println(string(message))
-				handlePresenceReplace(data)
+				b.handlePresenceReplace(data)
 			case "TYPING_START":
-				handleTypingStart(data)
+				b.handleTypingStart(data)
 			case "CHANNEL_CREATE":
 				b.handleChannelCreate(data)
 			case "MESSAGE_REACTION_ADD":
-				handleMessageReactionAdd(data)
+				b.handleMessageReactionAdd(data)
 			case "MESSAGE_REACTION_REMOVE":
-				handleMessageReactionRemove(data)
+				b.handleMessageReactionRemove(data)
 			case "MESSAGE_DELETE":
-				handleMessageDelete(data)
+				b.handleMessageDelete(data)
 			case "MESSAGE_UPDATE":
-				handleMessageUpdate(data)
+				b.handleMessageUpdate(data)
 			case "CHANNEL_PINS_UPDATE":
-				handleCHannelPinsUpdate(data)
+				b.handleChannelPinsUpdate(data)
 			case "GUILD_MEMBER_UPDATE":
-				handleGuildMemberUpdate(data)
+				b.handleGuildMemberUpdate(data)
 			default:
-				log.Println(string(message))
-				handleUnknown(data)
+				log.Errorln("Unhandeled message:", string(message))
+				b.handleUnknown(data)
 			}
 			b.currentSeqNumber = int(data["s"].(float64))
 			b.seqNumberChan <- b.currentSeqNumber
 		} else if data["op"].(float64) == 9 { // Invalid Session
-			log.Printf("Invalid Session received. Please try again...")
+			log.Errorln("Invalid Session received. Please try again...")
 			return
 		} else if data["op"].(float64) == 11 { // Heartbeat ACK
-			log.Printf("Heartbeat ACKed from Gateway")
+			log.Debugln("Heartbeat ACKed from Gateway")
 		} else { // opcode which is not handled, yet
-			log.Printf("data: %s", data)
+			log.Errorf("data: %s", data)
 		}
 	}
 }
@@ -201,17 +200,16 @@ func CreateDiscordBot(token string) (*Bot, error) {
 
 func (b *Bot) startSendChannelReceiver() {
 	for sendMsg := range b.sendMessageChan {
-		log.Println("received")
 		switch sendMsg.Type {
 		case events.MESSAGE:
 			err := b.sendMessage(sendMsg.Ident, sendMsg.Content)
 			if err != nil {
-				log.Println("Error sending message:", err)
+				log.Errorln("Error sending message:", err)
 			}
 		case events.WHISPER:
 			err := b.sendWhisper(sendMsg.Ident, sendMsg.Content)
 			if err != nil {
-				log.Println("Error sending whisper:", err)
+				log.Errorln("Error sending whisper:", err)
 			}
 		default:
 		}
@@ -222,34 +220,34 @@ func (b *Bot) startCommandChannelReceiver() {
 	for cmd := range b.commandChan {
 		switch cmd.Command {
 		case string("DemoCommand"):
-			log.Println("Received DemoCommand with server name" + cmd.Payload)
+			log.Infoln("Received DemoCommand with server name" + cmd.Payload)
 		default:
-			log.Println("Received unhandeled command" + cmd.Command)
+			log.Errorln("Received unhandeled command" + cmd.Command)
 		}
 	}
 }
 
 // Start the Discord Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
-	log.Println("DiscordBot is STARTING")
+	log.Infoln("DiscordBot is STARTING")
 	go b.startDiscordBot(doneChannel)
 	go b.startSendChannelReceiver()
 	go b.startCommandChannelReceiver()
-	log.Println("DiscordBot is RUNNING")
+	log.Infoln("DiscordBot is RUNNING")
 }
 
 // Stop the Discord Bot
 func (b *Bot) Stop() {
-	log.Println("DiscordBot is SHUTING DOWN")
+	log.Infoln("DiscordBot is SHUTING DOWN")
 	close(b.heartBeatStopChan)
 	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
-		log.Println("write close:", err)
+		log.Errorln("write close:", err)
 	}
 
 	b.disconnectReceivers()
 
-	log.Println("DiscordBot is SHUT DOWN")
+	log.Infoln("DiscordBot is SHUT DOWN")
 }
 
 // Status returns the current status of the DiscordBot
