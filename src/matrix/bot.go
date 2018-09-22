@@ -114,3 +114,9 @@ func (b *Bot) removeKnownRoom(roomID string, room string) {
 	delete(b.knownRoomIDs, roomID)
 	delete(b.knownRooms, room)
 }
+
+func (b *Bot) removeKnownRoomFromID(roomID string) {
+	log.Debugln("Removed known Room with ID:", roomID)
+	delete(b.knownRooms, b.knownRoomIDs[roomID])
+	delete(b.knownRoomIDs, roomID)
+}

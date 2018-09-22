@@ -22,8 +22,13 @@ func (b *Bot) handleJoinRooms(rooms []room) {
 }
 
 func (b *Bot) handleLeaveRooms(rooms []room) {
-	if len(rooms) > 0 {
-		log.Println("UNHANDLED: Got", len(rooms), "rooms to leave")
+	for _, room := range rooms {
+		response, err := b.api.call("/client/r0/rooms/"+room.RoomID+"/forget", "POST", `{}`, true)
+		if err != nil {
+			log.Errorf("leave room failed, err = %s, response = %s", err, response)
+			return
+		}
+		b.removeKnownRoomFromID(room.RoomID)
 	}
 }
 
