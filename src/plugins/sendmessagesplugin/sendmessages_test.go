@@ -141,3 +141,11 @@ func TestSendMessagesPlugin_ConnectChannels(t *testing.T) {
 		t.Errorf("SendMessagesPlugin.ConnectChannels() commandCHannel not connected")
 	}
 }
+
+func TestSendMessagesPlugin_GetName(t *testing.T) {
+	want := "SendMessagesPlugin"
+	p := &SendMessagesPlugin{}
+	if got := p.GetName(); got != want {
+		t.Errorf("SendMessagesPlugin.GetName() = %v, want %v", got, want)
+	}
+}

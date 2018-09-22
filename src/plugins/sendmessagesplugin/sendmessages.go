@@ -27,6 +27,11 @@ type SendMessagesPlugin struct {
 	isStarted bool
 }
 
+// GetName returns the name of the plugin
+func (p *SendMessagesPlugin) GetName() string {
+	return "SendMessagesPlugin"
+}
+
 // CreateSendMessagesPlugin returns the struct for a new SendMessagesPlugin
 func CreateSendMessagesPlugin() (SendMessagesPlugin, error) {
 	ep := SendMessagesPlugin{}

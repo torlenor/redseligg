@@ -8,6 +8,8 @@ type Plugin interface {
 		sendChannel chan events.SendMessage,
 		commandCHannel chan events.Command) error
 
+	GetName() string
+
 	Start()
 	Stop()
 }

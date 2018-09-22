@@ -33,12 +33,19 @@ func (b *Bot) Start(doneChannel chan struct{}) {
 }
 
 // Stop the Matrix Bot
-func (b Bot) Stop() {
+func (b *Bot) Stop() {
 	log.Println("MatrixBot is SHUTING DOWN")
 
 	b.pollingDone <- true
 
-	defer close(b.receiveMessageChan)
+	b.disconnectReceivers()
 
 	log.Println("MatrixBot is SHUT DOWN")
+}
+
+func (b *Bot) disconnectReceivers() {
+	for plugin, pluginChannel := range b.receivers {
+		log.Debugln("Disconnecting Plugin", plugin.GetName())
+		defer close(pluginChannel)
+	}
 }

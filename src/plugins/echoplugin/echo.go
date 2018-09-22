@@ -18,6 +18,11 @@ type EchoPlugin struct {
 	isStarted bool
 }
 
+// GetName returns the name of the plugin
+func (p *EchoPlugin) GetName() string {
+	return "EchoPlugin"
+}
+
 // CreateEchoPlugin returns the struct for a new EchoPlugin
 func CreateEchoPlugin() (EchoPlugin, error) {
 	log := logging.Get("EchoPlugin")

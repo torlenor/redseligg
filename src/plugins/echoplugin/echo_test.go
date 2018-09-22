@@ -163,3 +163,11 @@ func TestEcho(t *testing.T) {
 		t.Fatalf("EchoBot should have been stopped automatically on receiveChannel close")
 	}
 }
+
+func TestEchoPlugin_GetName(t *testing.T) {
+	want := "EchoPlugin"
+	p := &EchoPlugin{}
+	if got := p.GetName(); got != want {
+		t.Errorf("EchoPlugin.GetName() = %v, want %v", got, want)
+	}
+}

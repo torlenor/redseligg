@@ -1,7 +1,6 @@
 package botinterface
 
 import (
-	"events"
 	"plugins"
 )
 
@@ -12,10 +11,6 @@ type Bot interface {
 	Status() BotStatus
 
 	AddPlugin(plugin plugins.Plugin)
-
-	GetReceiveMessageChannel() chan events.ReceiveMessage
-	GetSendMessageChannel() chan events.SendMessage
-	GetCommandChannel() chan events.Command
 }
 
 // BotStatus gives information about the current status of the bot
