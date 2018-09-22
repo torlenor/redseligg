@@ -16,8 +16,10 @@ func (b Bot) getMessageType(mc messageCreate) events.MessageType {
 func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
 	var receiveMessage events.ReceiveMessage
 	if b.getMessageType(newMessageCreate) == events.MESSAGE {
+		b.stats.messagesReceived++
 		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	} else {
+		b.stats.whispersReceived++
 		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
 	}
 

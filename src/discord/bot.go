@@ -3,6 +3,7 @@ package discord
 import (
 	"botinterface"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"logging"
 	"net/http"
@@ -41,6 +42,19 @@ type guild struct {
 	channel     []channel
 }
 
+type stats struct {
+	messagesSent int64
+	whispersSent int64
+
+	messagesReceived int64
+	whispersReceived int64
+}
+
+func (s stats) toString() string {
+	return fmt.Sprintf("Messages Sent: %d\nMessages Received: %d\nWhispers Sent: %d\nWhispers Received: %d",
+		s.messagesSent, s.messagesReceived, s.whispersSent, s.whispersReceived)
+}
+
 // The Bot struct holds parameters related to the bot
 type Bot struct {
 	ws *websocket.Conn
@@ -62,6 +76,8 @@ type Bot struct {
 
 	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
+
+	stats stats
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -242,6 +258,7 @@ func (b *Bot) Start(doneChannel chan struct{}) {
 // Stop the Discord Bot
 func (b *Bot) Stop() {
 	log.Infoln("DiscordBot is SHUTING DOWN")
+	log.Infof("DiscordBot Stats:\n%s", b.stats.toString())
 	close(b.heartBeatStopChan)
 	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {

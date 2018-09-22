@@ -38,7 +38,7 @@ type successfulSentResponse struct {
 	Type         int           `json:"type"`
 }
 
-func (b Bot) sendWhisper(snowflakeID string, content string) error {
+func (b *Bot) sendWhisper(snowflakeID string, content string) error {
 	response, err := b.apiCall("/users/@me/channels", "POST", `{"recipient_id": "`+snowflakeID+`"}`)
 	if err != nil {
 		return errors.Wrap(err, "apiCall failed")
@@ -60,10 +60,11 @@ func (b Bot) sendWhisper(snowflakeID string, content string) error {
 		return errors.New("sending failed (sending whisper)")
 	}
 	log.Printf("DiscordBot: Sent: WHISPER to UserID = %s, Content = %s", snowflakeID, content)
+	b.stats.whispersSent++
 	return nil
 }
 
-func (b Bot) sendMessage(receiver string, content string) error {
+func (b *Bot) sendMessage(receiver string, content string) error {
 	var channelID string
 
 	splitString := strings.Split(receiver, "#")
@@ -100,6 +101,7 @@ func (b Bot) sendMessage(receiver string, content string) error {
 		return errors.New("sending failed (sending message)")
 	}
 	log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
+	b.stats.messagesSent++
 	return nil
 }
 
