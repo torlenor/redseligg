@@ -60,7 +60,7 @@ type Bot struct {
 
 	knownPlugins []plugins.Plugin
 
-	guilds        map[string]guild
+	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
 }
 
@@ -193,7 +193,7 @@ func CreateDiscordBot(token string) (*Bot, error) {
 	b.heartBeatStopChan = make(chan struct{})
 	b.seqNumberChan = make(chan int)
 
-	b.guilds = make(map[string]guild)
+	b.guilds = make(map[string]guildCreate)
 	b.guildNameToID = make(map[string]string)
 
 	b.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)

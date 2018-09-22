@@ -14,7 +14,13 @@ func (b Bot) getMessageType(mc messageCreate) events.MessageType {
 }
 
 func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
-	receiveMessage := events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
+	var receiveMessage events.ReceiveMessage
+	if b.getMessageType(newMessageCreate) == events.MESSAGE {
+		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
+	} else {
+		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
+	}
+
 	for plugin, pluginChannel := range b.receivers {
 		log.Debugln("Notifying plugin", plugin.GetName(), "about new message/whisper")
 		select {
@@ -58,16 +64,10 @@ func (b *Bot) handleGuildCreate(data map[string]interface{}) {
 		return
 	}
 
-	newGuild := guild{}
-	newGuild.channel = newGuildCreate.Channels
-	newGuild.memberCount = newGuildCreate.MemberCount
-	newGuild.name = newGuildCreate.Name
-	newGuild.snowflakeID = newGuildCreate.ID
+	b.guilds[newGuildCreate.ID] = newGuildCreate
+	b.guildNameToID[newGuildCreate.Name] = newGuildCreate.ID
 
-	b.guilds[newGuild.name] = newGuild
-	b.guildNameToID[newGuild.name] = newGuild.snowflakeID
-
-	log.Debugln("GUILD_CREATE: Added new Guild:", newGuild.name)
+	log.Debugln("GUILD_CREATE: Added new Guild:", newGuildCreate.Name)
 }
 
 func (b *Bot) handlePresenceUpdate(data map[string]interface{}) {

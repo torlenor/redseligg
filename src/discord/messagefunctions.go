@@ -2,6 +2,7 @@ package discord
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -62,26 +63,43 @@ func (b Bot) sendWhisper(snowflakeID string, content string) error {
 	return nil
 }
 
-func (b Bot) sendMessage(channelID string, content string) error {
+func (b Bot) sendMessage(receiver string, content string) error {
+	var channelID string
 
-	var roomID string
-	if _, ok := b.guildNameToID[channelID]; ok {
-		roomID = channelID
-	} else if val, ok := b.guilds[channelID]; ok {
-		roomID = val.snowflakeID
+	splitString := strings.Split(receiver, "#")
+	if len(splitString) != 2 {
+		log.Errorf("Error decoding '%s' into Guild/Server and Channel. Format must be Guild#Channel. We will try using it as a channelID", receiver)
+		channelID = receiver
 	} else {
-		log.Warnf("Unknown roomIdent %s. We will try to use it as a roomID", channelID)
-		roomID = channelID
+		guild := splitString[0]
+		channel := strings.ToLower(splitString[1])
+
+		var guildID string
+
+		if _, ok := b.guilds[guild]; ok {
+			guildID = guild
+		} else if val, ok := b.guildNameToID[guild]; ok {
+			guildID = val
+		} else {
+			return errors.New("Unknown Guild " + guild + ". Cannot send message")
+		}
+
+		for _, entry := range b.guilds[guildID].Channels {
+			if entry.ID == channel || entry.Name == channel {
+				channelID = entry.ID
+				break
+			}
+		}
 	}
 
-	response, err := b.apiCall("/channels/"+roomID+"/messages", "POST", `{"content": "`+content+`"}`)
+	response, err := b.apiCall("/channels/"+channelID+"/messages", "POST", `{"content": "`+content+`"}`)
 	if err != nil {
 		return errors.Wrap(err, "apiCall failed")
 	}
 	if checkRateLimit(response) > 0 {
 		return errors.New("sending failed (sending message)")
 	}
-	log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", roomID, content)
+	log.Printf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
 	return nil
 }
 

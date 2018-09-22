@@ -127,6 +127,12 @@ type messageCreate struct {
 	Mentions        []interface{} `json:"mentions"`
 	MentionRoles    []interface{} `json:"mention_roles"`
 	MentionEveryone bool          `json:"mention_everyone"`
+	Member          struct {
+		Roles    []string  `json:"roles"`
+		Mute     bool      `json:"mute"`
+		JoinedAt time.Time `json:"joined_at"`
+		Deaf     bool      `json:"deaf"`
+	} `json:"member"`
 	ID              string        `json:"id"`
 	Embeds          []interface{} `json:"embeds"`
 	EditedTimestamp interface{}   `json:"edited_timestamp"`
@@ -140,6 +146,7 @@ type messageCreate struct {
 		Avatar        interface{} `json:"avatar"`
 	} `json:"author"`
 	Attachments []interface{} `json:"attachments"`
+	GuildID     string        `json:"guild_id"`
 	// } `json:"d"`
 }
 
