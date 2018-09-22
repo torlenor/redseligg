@@ -36,16 +36,14 @@ type Bot struct {
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
-// about received messages from the bot. For DiscordBot these messages
-// can be normal channel messages, whispers
+// about received messages from the bot
 func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
 	b.receivers[plugin] = make(chan events.ReceiveMessage)
 	return b.receivers[plugin]
 }
 
 // GetSendMessageChannel returns the channel which is used to
-// send messages using the bot. For DiscordBot these messages
-// can be normal channel messages, whispers
+// send messages using the bot
 func (b *Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
 }

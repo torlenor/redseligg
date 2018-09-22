@@ -15,10 +15,10 @@ func discordBotCreator(config config.Config) *discord.Bot {
 		discordToken = config.Bots.Discord.Token
 	}
 
-	bot := discord.CreateDiscordBot(discordToken)
-	// if err != nil {
-	// 	log.Println("DiscordBot: ERROR: ", err)
-	// }
+	bot, err := discord.CreateDiscordBot(discordToken)
+	if err != nil {
+		log.Println("DiscordBot: ERROR: ", err)
+	}
 
 	return bot
 }

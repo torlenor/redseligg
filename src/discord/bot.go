@@ -43,17 +43,20 @@ type guild struct {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
-	ws                 *websocket.Conn
-	receiveMessageChan chan events.ReceiveMessage
-	sendMessageChan    chan events.SendMessage
-	commandChan        chan events.Command
-	knownChannels      map[string]channelCreate
-	token              string
-	ownSnowflakeID     string
-	currentSeqNumber   int
-	heartBeatSender    *discordHeartBeatSender
-	heartBeatStopChan  chan struct{}
-	seqNumberChan      chan int
+	ws *websocket.Conn
+
+	sendMessageChan chan events.SendMessage
+	commandChan     chan events.Command
+
+	knownChannels     map[string]channelCreate
+	token             string
+	ownSnowflakeID    string
+	currentSeqNumber  int
+	heartBeatSender   *discordHeartBeatSender
+	heartBeatStopChan chan struct{}
+	seqNumberChan     chan int
+
+	receivers map[plugins.Plugin]chan events.ReceiveMessage
 
 	knownPlugins []plugins.Plugin
 
@@ -62,10 +65,10 @@ type Bot struct {
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
-// about received messages from the bot. For DiscordBot these messages
-// can be normal channel messages, whispers
-func (b Bot) GetReceiveMessageChannel() chan events.ReceiveMessage {
-	return b.receiveMessageChan
+// about received messages from the bot
+func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
+	b.receivers[plugin] = make(chan events.ReceiveMessage)
+	return b.receivers[plugin]
 }
 
 // GetSendMessageChannel returns the channel which is used to
@@ -174,13 +177,12 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(token string) *Bot {
+func CreateDiscordBot(token string) (*Bot, error) {
 	log.Printf("DiscordBot: DiscordBot is CREATING itself using TOKEN = %s", token)
 	b := Bot{token: token}
 	url := b.getGateway()
 	b.ws = dialGateway(url)
 
-	b.receiveMessageChan = make(chan events.ReceiveMessage)
 	b.sendMessageChan = make(chan events.SendMessage)
 	b.commandChan = make(chan events.Command)
 
@@ -192,7 +194,9 @@ func CreateDiscordBot(token string) *Bot {
 	b.guilds = make(map[string]guild)
 	b.guildNameToID = make(map[string]string)
 
-	return &b
+	b.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)
+
+	return &b, nil
 }
 
 func (b *Bot) startSendChannelReceiver() {
@@ -242,7 +246,9 @@ func (b *Bot) Stop() {
 	if err != nil {
 		log.Println("write close:", err)
 	}
-	defer close(b.receiveMessageChan)
+
+	b.disconnectReceivers()
+
 	log.Println("DiscordBot is SHUT DOWN")
 }
 
@@ -259,6 +265,13 @@ func (b *Bot) Status() botinterface.BotStatus {
 // adds it to the DiscordBot by connecting all the required
 // channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel(), b.GetCommandChannel())
+	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel(), b.GetCommandChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
+}
+
+func (b *Bot) disconnectReceivers() {
+	for plugin, pluginChannel := range b.receivers {
+		log.Debugln("Disconnecting Plugin", plugin.GetName())
+		defer close(pluginChannel)
+	}
 }

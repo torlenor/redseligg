@@ -19,9 +19,12 @@ func (b Bot) getMessageType(mc messageCreate) events.MessageType {
 
 func (b Bot) dispatchMessage(newMessageCreate messageCreate) {
 	receiveMessage := events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
-	select {
-	case b.receiveMessageChan <- receiveMessage:
-	default:
+	for plugin, pluginChannel := range b.receivers {
+		log.Debugln("Notifying plugin", plugin.GetName(), "about new message/whisper")
+		select {
+		case pluginChannel <- receiveMessage:
+		default:
+		}
 	}
 }
 
@@ -30,7 +33,7 @@ func (b Bot) handleMessageCreate(data map[string]interface{}) {
 	var newMessageCreate messageCreate
 	err := mapstructure.Decode(data["d"], &newMessageCreate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: MESSAGE_CREATE", err)
+		log.Println("UNHANDELED ERROR: MESSAGE_CREATE", err)
 	}
 	// FIXME: Workaround for ChannelID not decoded correctly
 	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
@@ -39,11 +42,11 @@ func (b Bot) handleMessageCreate(data map[string]interface{}) {
 	if str, ok := data["d"].(map[string]interface{})["timestamp"].(string); ok {
 		t, err := time.Parse(time.RFC3339, str)
 		if err != nil {
-			log.Println("DiscordBot: UNHANDELED ERROR: TYPING_START", err)
+			log.Println("UNHANDELED ERROR: TYPING_START", err)
 		}
 		newMessageCreate.Timestamp = t
 	}
-	log.Printf("DiscordBot: Received: MESSAGE_CREATE from User = %s, Content = %s, Timestamp = %s, ChannelID = %s", newMessageCreate.Author.Username, newMessageCreate.Content, newMessageCreate.Timestamp, newMessageCreate.ChannelID)
+	log.Printf("Received: MESSAGE_CREATE from User = %s, Content = %s, Timestamp = %s, ChannelID = %s", newMessageCreate.Author.Username, newMessageCreate.Content, newMessageCreate.Timestamp, newMessageCreate.ChannelID)
 
 	snowflakeID := newMessageCreate.Author.ID
 
@@ -59,10 +62,10 @@ func (b *Bot) handleReady(data map[string]interface{}) {
 	var newReady ready
 	err := mapstructure.Decode(data["d"], &newReady)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: READY", err)
+		log.Println("UNHANDELED ERROR: READY", err)
 	}
 	// log.Println("READY: ", newReady.toString())
-	log.Printf("DiscordBot: Received: READY for Bot User = %s, UserID = %s, SnowflakeID = %s", newReady.User.Username, newReady.User.ID, b.ownSnowflakeID)
+	log.Printf("Received: READY for Bot User = %s, UserID = %s, SnowflakeID = %s", newReady.User.Username, newReady.User.ID, b.ownSnowflakeID)
 }
 
 func (b *Bot) handleGuildCreate(data map[string]interface{}) {
@@ -70,7 +73,7 @@ func (b *Bot) handleGuildCreate(data map[string]interface{}) {
 	var newGuildCreate guildCreate
 	err := mapstructure.Decode(data["d"], &newGuildCreate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: GUILD_CREATE", err)
+		log.Println("UNHANDELED ERROR: GUILD_CREATE", err)
 		return
 	}
 
@@ -91,16 +94,16 @@ func handlePresenceUpdate(data map[string]interface{}) {
 	var newPresenceUpdate presenceUpdate
 	err := mapstructure.Decode(data["d"], &newPresenceUpdate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: PRESENCE_UPDATE", err)
+		log.Println("UNHANDELED ERROR: PRESENCE_UPDATE", err)
 	}
 	// FIXME: Workaround for GuildID not decoded correctly
 	newPresenceUpdate.GuildID = data["d"].(map[string]interface{})["guild_id"].(string)
 	// log.Println("PRESENCE_UPDATE: ", newPresenceUpdate.toString())
-	log.Printf("DiscordBot: Received: PRESENCE_UPDATE for UserID = %s", newPresenceUpdate.User.ID)
+	log.Printf("Received: PRESENCE_UPDATE for UserID = %s", newPresenceUpdate.User.ID)
 }
 
 func handlePresenceReplace(data map[string]interface{}) {
-	log.Printf("DiscordBot: PRESENCE_REPLACE: data['t']: %s, data['d']: %s", data["t"], data["d"])
+	log.Printf("PRESENCE_REPLACE: data['t']: %s, data['d']: %s", data["t"], data["d"])
 }
 
 func handleTypingStart(data map[string]interface{}) {
@@ -108,7 +111,7 @@ func handleTypingStart(data map[string]interface{}) {
 	var newTypingStart typingStart
 	err := mapstructure.Decode(data["d"], &newTypingStart)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: TYPING_START", err)
+		log.Println("UNHANDELED ERROR: TYPING_START", err)
 	}
 	// FIXME: Workaround for GuildID not decoded correctly
 	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
@@ -127,13 +130,13 @@ func handleTypingStart(data map[string]interface{}) {
 		if str, ok := val.(map[string]interface{})["join_at"].(string); ok {
 			t, err := time.Parse(time.RFC3339, str)
 			if err != nil {
-				log.Println("DiscordBot: UNHANDELED ERROR: TYPING_START", err)
+				log.Println("UNHANDELED ERROR: TYPING_START", err)
 			}
 			newTypingStart.Member.JoinedAt = t
 		}
 	}
 	// log.Println("TYPING_START: ", newTypingStart.toString())
-	log.Println("DiscordBot: Received: TYPING_START User = " + newTypingStart.Member.User.Username)
+	log.Println("Received: TYPING_START User = " + newTypingStart.Member.User.Username)
 }
 
 func (b Bot) handleChannelCreate(data map[string]interface{}) {
@@ -141,10 +144,10 @@ func (b Bot) handleChannelCreate(data map[string]interface{}) {
 	var newChannelCreate channelCreate
 	err := mapstructure.Decode(data["d"], &newChannelCreate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: CHANNEL_CREATE", err)
+		log.Println("UNHANDELED ERROR: CHANNEL_CREATE", err)
 	}
 	// log.Println("CHANNEL_CREATE: ", newChannelCreate.toString())
-	log.Printf("DiscordBot: Received: CHANNEL_CREATE with ID = %s", newChannelCreate.ID)
+	log.Printf("Received: CHANNEL_CREATE with ID = %s", newChannelCreate.ID)
 	b.knownChannels[newChannelCreate.ID] = newChannelCreate
 }
 
@@ -153,9 +156,9 @@ func handleMessageReactionAdd(data map[string]interface{}) {
 	var newMessageReactionAdd messageReactionAdd
 	err := mapstructure.Decode(data["d"], &newMessageReactionAdd)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: MESSAGE_REACTION_ADD", err)
+		log.Println("UNHANDELED ERROR: MESSAGE_REACTION_ADD", err)
 	}
-	log.Print("DiscordBot: Received: MESSAGE_REACTION_ADD")
+	log.Print("Received: MESSAGE_REACTION_ADD")
 }
 
 func handleMessageReactionRemove(data map[string]interface{}) {
@@ -163,9 +166,9 @@ func handleMessageReactionRemove(data map[string]interface{}) {
 	var newMessageReactionRemove messageReactionRemove
 	err := mapstructure.Decode(data["d"], &newMessageReactionRemove)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: MESSAGE_REACTION_REMOVE", err)
+		log.Println("UNHANDELED ERROR: MESSAGE_REACTION_REMOVE", err)
 	}
-	log.Print("DiscordBot: Received: MESSAGE_REACTION_REMOVE")
+	log.Print("Received: MESSAGE_REACTION_REMOVE")
 }
 
 func handleMessageDelete(data map[string]interface{}) {
@@ -173,9 +176,9 @@ func handleMessageDelete(data map[string]interface{}) {
 	var newMessageDelete messageDelete
 	err := mapstructure.Decode(data["d"], &newMessageDelete)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: MESSAGE_DELETE", err)
+		log.Println("UNHANDELED ERROR: MESSAGE_DELETE", err)
 	}
-	log.Print("DiscordBot: Received: MESSAGE_DELETE")
+	log.Print("Received: MESSAGE_DELETE")
 }
 
 func handleMessageUpdate(data map[string]interface{}) {
@@ -183,9 +186,9 @@ func handleMessageUpdate(data map[string]interface{}) {
 	var newMessageUpdate messageUpdate
 	err := mapstructure.Decode(data["d"], &newMessageUpdate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: MESSAGE_UPDATE", err)
+		log.Println("UNHANDELED ERROR: MESSAGE_UPDATE", err)
 	}
-	log.Print("DiscordBot: Received: MESSAGE_UPDATE")
+	log.Print("Received: MESSAGE_UPDATE")
 }
 
 func handleCHannelPinsUpdate(data map[string]interface{}) {
@@ -193,9 +196,9 @@ func handleCHannelPinsUpdate(data map[string]interface{}) {
 	var newChannelPinsUpdate channelPinsUpdate
 	err := mapstructure.Decode(data["d"], &newChannelPinsUpdate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: CHANNEL_PINS_UPDATE", err)
+		log.Println("UNHANDELED ERROR: CHANNEL_PINS_UPDATE", err)
 	}
-	log.Print("DiscordBot: Received: CHANNEL_PINS_UPDATE")
+	log.Print("Received: CHANNEL_PINS_UPDATE")
 }
 
 func handleGuildMemberUpdate(data map[string]interface{}) {
@@ -203,11 +206,11 @@ func handleGuildMemberUpdate(data map[string]interface{}) {
 	var newGuildMemberUpdate guildMemberUpdate
 	err := mapstructure.Decode(data["d"], &newGuildMemberUpdate)
 	if err != nil {
-		log.Println("DiscordBot: UNHANDELED ERROR: GUILD_MEMBER_UPDATE", err)
+		log.Println("UNHANDELED ERROR: GUILD_MEMBER_UPDATE", err)
 	}
-	log.Print("DiscordBot: Received: GUILD_MEMBER_UPDATE")
+	log.Print("Received: GUILD_MEMBER_UPDATE")
 }
 
 func handleUnknown(data map[string]interface{}) {
-	log.Printf("DiscordBot: TODO: %s", data["t"])
+	log.Printf("TODO: %s", data["t"])
 }
