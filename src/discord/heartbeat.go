@@ -16,7 +16,7 @@ type discordHeartBeatSender struct {
 }
 
 func heartBeat(interval int, hbSender heartBeatSender, stop chan struct{}, seqNumber chan int) {
-	log.Debugln("Starting heartbeat with interval: %d ms", interval)
+	log.Debugf("Starting heartbeat with interval: %d ms", interval)
 	ticker := time.NewTicker(time.Duration(interval) * time.Millisecond)
 
 	var currentSeqNumber int
@@ -25,7 +25,7 @@ func heartBeat(interval int, hbSender heartBeatSender, stop chan struct{}, seqNu
 	for {
 		select {
 		case <-ticker.C:
-			log.Debugln("Sending heartbeat (seq number = %d)", currentSeqNumber)
+			log.Debugf("Sending heartbeat (seq number = %d)", currentSeqNumber)
 			err := hbSender.sendHeartBeat(currentSeqNumber)
 			if err != nil {
 				log.Errorln("UNHANDELED ERROR in heartbeat:", err)
