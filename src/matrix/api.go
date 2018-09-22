@@ -9,6 +9,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+var doHTTPRequest = func(request *http.Request) (*http.Response, error) {
+	client := &http.Client{}
+	return client.Do(request)
+}
+
 type api interface {
 	call(path string, method string, body string, auth bool) (r []byte, e error)
 
@@ -24,7 +29,6 @@ type matrixAPI struct {
 }
 
 func (api *matrixAPI) call(path string, method string, body string, auth bool) (r []byte, e error) {
-	client := &http.Client{}
 
 	req, err := http.NewRequest(method, api.server+"/_matrix"+path, strings.NewReader(body))
 	if err != nil {
@@ -36,7 +40,7 @@ func (api *matrixAPI) call(path string, method string, body string, auth bool) (
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	response, err := client.Do(req)
+	response, err := doHTTPRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +74,6 @@ func (api *matrixAPI) login(username string, password string) error {
 	if err != nil {
 		return errors.Wrap(err, "apiCall failed")
 	}
-
-	log.Debugln("login() response:", string(response))
 
 	var channelResponseData loginResponse
 	if err := json.Unmarshal(response, &channelResponseData); err != nil {
