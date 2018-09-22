@@ -169,6 +169,16 @@ func (b *Bot) handleGuildMemberUpdate(data map[string]interface{}) {
 	log.Debugln("Received: GUILD_MEMBER_UPDATE", newGuildMemberUpdate)
 }
 
+func (b *Bot) handlePresencesReplace(data map[string]interface{}) {
+	newPresencesReplace, err := decodePresencesReplace(data)
+	if err != nil {
+		log.Errorln("UNHANDELED ERROR: PRESENCES_REPLACE", err)
+		return
+	}
+
+	log.Debugln("Received: PRESENCES_REPLACE", newPresencesReplace)
+}
+
 func (b *Bot) handleUnknown(data map[string]interface{}) {
 	log.Debugf("TODO HANDLE UNKNOWN EVENT: %s", data["t"])
 }

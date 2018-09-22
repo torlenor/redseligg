@@ -37,7 +37,7 @@ func decodeTypingStart(data map[string]interface{}) (typingStart, error) {
 	var newTypingStart typingStart
 	err := mapstructure.Decode(data["d"], &newTypingStart)
 	if err != nil {
-		return typingStart{}, errors.New("decodeTypingStart: " + err.Error())
+		log.Debugln("Error automatically decoding typingStart, ignoring it")
 	}
 
 	// FIXME: Workaround for GuildID not decoded correctly
@@ -57,7 +57,7 @@ func decodeTypingStart(data map[string]interface{}) (typingStart, error) {
 		if str, ok := val.(map[string]interface{})["join_at"].(string); ok {
 			t, err := time.Parse(time.RFC3339, str)
 			if err != nil {
-				log.Println("UNHANDELED ERROR: TYPING_START", err)
+				log.Errorln("UNHANDELED ERROR: decodeTypingStart:", err)
 			}
 			newTypingStart.Member.JoinedAt = t
 		}
@@ -97,7 +97,7 @@ func decodePresenceUpdate(data map[string]interface{}) (presenceUpdate, error) {
 	var newPresenceUpdate presenceUpdate
 	err := mapstructure.Decode(data["d"], &newPresenceUpdate)
 	if err != nil {
-		return presenceUpdate{}, errors.New("decodePresenceUpdate: " + err.Error())
+		log.Debugln("Error automatically decoding presenceUpdate, ignoring it")
 	}
 
 	// FIXME: Workaround for GuildID not decoded correctly
@@ -147,7 +147,7 @@ func decodeMessageCreate(data map[string]interface{}) (messageCreate, error) {
 	var newMessageCreate messageCreate
 	err := mapstructure.Decode(data["d"], &newMessageCreate)
 	if err != nil {
-		return messageCreate{}, errors.New("decodeMessageCreate:" + err.Error())
+		log.Debugln("Error automatically decoding messageCreate, ignoring it")
 	}
 
 	// FIXME: Workaround for ChannelID not decoded correctly
@@ -302,6 +302,7 @@ func decodeReady(data map[string]interface{}) (ready, error) {
 	if err != nil {
 		return ready{}, errors.New("decodeReady" + err.Error())
 	}
+
 	return newReady, nil
 }
 
@@ -556,5 +557,32 @@ func (gmu guildMemberUpdate) toString() string {
 	if err != nil {
 		log.Errorln("UNHANDELED ERROR:", err)
 	}
+
+	return fmt.Sprintf("%s", data)
+}
+
+type presencesReplace struct {
+	// T  string        `json:"t"`
+	// S  int           `json:"s"`
+	// Op int           `json:"op"`
+	D []interface{} `json:"d"`
+}
+
+func decodePresencesReplace(data map[string]interface{}) (presencesReplace, error) {
+	var newPresencesReplace presencesReplace
+	err := mapstructure.Decode(data["d"], &newPresencesReplace)
+	if err != nil {
+		return presencesReplace{}, errors.New("decodePresencesReplace: " + err.Error())
+	}
+
+	return newPresencesReplace, nil
+}
+
+func (pr presencesReplace) toString() string {
+	data, err := json.Marshal(pr)
+	if err != nil {
+		log.Errorln("UNHANDELED ERROR:", err)
+	}
+
 	return fmt.Sprintf("%s", data)
 }

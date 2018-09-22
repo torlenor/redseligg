@@ -67,6 +67,7 @@ type Bot struct {
 // GetReceiveMessageChannel returns the channel which is used to notify
 // about received messages from the bot
 func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
+	log.Debugln("Creating receiveChannel for Plugin", plugin.GetName())
 	b.receivers[plugin] = make(chan events.ReceiveMessage)
 	return b.receivers[plugin]
 }
@@ -158,6 +159,8 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 				b.handleChannelPinsUpdate(data)
 			case "GUILD_MEMBER_UPDATE":
 				b.handleGuildMemberUpdate(data)
+			case "PRESENCES_REPLACE":
+				b.handlePresencesReplace(data)
 			default:
 				log.Errorln("Unhandeled message:", string(message))
 				b.handleUnknown(data)
