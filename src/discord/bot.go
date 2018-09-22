@@ -109,9 +109,9 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-				log.Println("DiscordBot: Connection closed normally: ", err)
+				log.Println("Connection closed normally: ", err)
 			} else {
-				log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+				log.Println("UNHANDELED ERROR: ", err)
 			}
 			break
 		}
@@ -119,17 +119,17 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 		var data map[string]interface{}
 
 		if err := json.Unmarshal(message, &data); err != nil {
-			log.Println("DiscordBot: UNHANDELED ERROR: ", err)
+			log.Println("UNHANDELED ERROR: ", err)
 			continue
 		}
 
 		if data["op"].(float64) == 10 { // Hello from Discord Gateway
-			log.Println("DiscordBot: Received HELLO from gateway")
+			log.Println("Received HELLO from gateway")
 			sendIdent(b.token, b.ws)
 			heartbeatInterval := int(data["d"].(map[string]interface{})["heartbeat_interval"].(float64))
 			b.heartBeatSender = &discordHeartBeatSender{ws: b.ws}
 			go heartBeat(heartbeatInterval, b.heartBeatSender, b.heartBeatStopChan, b.seqNumberChan)
-			log.Println("DiscordBot: DiscordBot is READY")
+			log.Println("DiscordBot is READY")
 		} else if data["op"].(float64) == 0 { // Dispatch to event handlers
 			switch data["t"] {
 			case "MESSAGE_CREATE":
@@ -166,10 +166,10 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 			b.currentSeqNumber = int(data["s"].(float64))
 			b.seqNumberChan <- b.currentSeqNumber
 		} else if data["op"].(float64) == 9 { // Invalid Session
-			log.Printf("DiscordBot: Invalid Session received. Please try again...")
+			log.Printf("Invalid Session received. Please try again...")
 			return
 		} else if data["op"].(float64) == 11 { // Heartbeat ACK
-			log.Printf("DiscordBot: Heartbeat ACKed from Gateway")
+			log.Printf("Heartbeat ACKed from Gateway")
 		} else { // opcode which is not handled, yet
 			log.Printf("data: %s", data)
 		}
@@ -178,7 +178,7 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 
 // CreateDiscordBot creates a new instance of a DiscordBot
 func CreateDiscordBot(token string) (*Bot, error) {
-	log.Printf("DiscordBot: DiscordBot is CREATING itself using TOKEN = %s", token)
+	log.Printf("DiscordBot is CREATING itself using TOKEN = %s", token)
 	b := Bot{token: token}
 	url := b.getGateway()
 	b.ws = dialGateway(url)
@@ -206,12 +206,12 @@ func (b *Bot) startSendChannelReceiver() {
 		case events.MESSAGE:
 			err := b.sendMessage(sendMsg.Ident, sendMsg.Content)
 			if err != nil {
-				log.Println("DiscordBot: Error sending message:", err)
+				log.Println("Error sending message:", err)
 			}
 		case events.WHISPER:
 			err := b.sendWhisper(sendMsg.Ident, sendMsg.Content)
 			if err != nil {
-				log.Println("DiscordBot: Error sending whisper:", err)
+				log.Println("Error sending whisper:", err)
 			}
 		default:
 		}
