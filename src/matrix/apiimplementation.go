@@ -42,11 +42,10 @@ func (b *Bot) handleLeaveRooms(rooms []room) {
 
 func (b *Bot) handleInviteRooms(rooms []room) {
 	for _, room := range rooms {
-		response, err := b.api.call("/client/r0/rooms/"+room.RoomID+"/join", "POST", `{}`, true)
+		_, err := b.api.call("/client/r0/rooms/"+room.RoomID+"/join", "POST", `{}`, true)
 		if err != nil {
 			log.Errorln("join room failed:", err)
 		}
-		log.Println(string(response))
 	}
 }
 
@@ -56,13 +55,13 @@ func (b *Bot) callSync() error {
 	if len(b.nextBatch) == 0 {
 		response, err = b.api.call("/client/r0/sync?filter={\"room\":{\"timeline\":{\"limit\":1}}}", "GET", `{}`, true)
 		if err != nil {
-			log.Println("UNHANDELED ERROR: ", err)
+			log.Errorln("UNHANDELED ERROR: ", err)
 			return err
 		}
 	} else {
 		response, err = b.api.call("/client/r0/sync?since="+b.nextBatch, "GET", `{}`, true)
 		if err != nil {
-			log.Println("UNHANDELED ERROR: ", err)
+			log.Errorln("UNHANDELED ERROR: ", err)
 			return err
 		}
 	}
@@ -73,13 +72,13 @@ func (b *Bot) callSync() error {
 
 	var data map[string]interface{}
 	if err := json.Unmarshal(response, &data); err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR: ", err)
 		return err
 	}
 
 	sr, err := syncResponseFromMap(data)
 	if err != nil {
-		log.Println("UNHANDELED ERROR: ", err)
+		log.Errorln("UNHANDELED ERROR: ", err)
 		return err
 	}
 
