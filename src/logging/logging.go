@@ -22,6 +22,19 @@ func Get(name string) *logrus.Entry {
 	return logrus.WithField("name", name)
 }
 
+// SetLoggingLevel takes one of the strings
+// panic, fatal, error, warn/warning, info or debug
+// and sets the log level accordingly
+func SetLoggingLevel(loggingLevel string) {
+	level, err := logrus.ParseLevel(loggingLevel)
+	if err == nil {
+		logrus.SetLevel(level)
+		Get("logging").Infoln("Setting log level to ", loggingLevel)
+	} else {
+		Get("logging").Warnln("Error setting log level to ", loggingLevel)
+	}
+}
+
 type MyFormatter struct{}
 
 func (f *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
