@@ -18,6 +18,14 @@ func (b *Bot) handleJoinRooms(rooms []room) {
 				b.addKnownRoom(room.RoomID, event.Content.Name)
 			}
 		}
+
+		for _, event := range room.Timeline.Events {
+			if event.Type == "m.room.message" {
+				log.Debugf("Received room message from User: %s, Content: %s, MsgType: %s", event.Sender,
+					event.Content.Body, event.Content.Msgtype)
+			}
+		}
+
 	}
 }
 
