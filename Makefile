@@ -75,6 +75,8 @@ clean-dist:
 dist:
 	@# For linux 386 when building on linux amd64 you'll need 'libc6-dev-i386' package
 	@echo Building dist
+	# we need this for Windows
+	GOOS=windows GOARCH=386 go get -v github.com/konsorten/go-windows-terminal-sequences
 
 	@#             os    arch  cgo ext
 	@for arch in "linux   386  1      "  "linux   amd64 1      "  \
@@ -87,6 +89,7 @@ dist:
 	  mkdir -p $$distpath ; \
 	  CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 go build -v -o $$distpath/$(NAME)$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go ;\
 	  cp "README.md" "LICENSE" "CHANGELOG.md" "AUTHORS" $$distpath ;\
+	  cp "config/config.toml" $$distpath/config_example.toml ;\
 	  if [ "$$1" = "linux" ]; then \
 		  cd $$distpath && tar -zcvf ../../${NAME}_${VERSION}_$$1_$$2.tar.gz * && cd - ;\
 	  else \
