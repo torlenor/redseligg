@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"logging"
 	"net/http"
-	"os"
 	"plugins"
 	"strings"
 
@@ -18,17 +17,6 @@ import (
 )
 
 var (
-	discordOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/cb",
-		ClientID:     os.Getenv("DISCORD_KEY"),
-		ClientSecret: os.Getenv("DISCORD_SECRET"),
-		Scopes:       []string{"bot"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://discordapp.com/api/oauth2/authorize",
-			TokenURL: "https://discordapp.com/api/oauth2/token",
-		},
-	}
-
 	// Some random string, random for each request
 	oauthStateString = "random"
 
@@ -78,6 +66,10 @@ type Bot struct {
 	guildNameToID map[string]string
 
 	stats stats
+
+	discordOauthConfig *oauth2.Config
+
+	oauth2Handler *oauth2Handler
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -195,7 +187,7 @@ func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(token string) (*Bot, error) {
+func CreateDiscordBot(id string, secret string, token string) (*Bot, error) {
 	log.Printf("DiscordBot is CREATING itself using TOKEN = %s", token)
 	b := Bot{token: token}
 	url := b.getGateway()
@@ -213,6 +205,19 @@ func CreateDiscordBot(token string) (*Bot, error) {
 	b.guildNameToID = make(map[string]string)
 
 	b.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)
+
+	b.discordOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/cb",
+		ClientID:     id,
+		ClientSecret: secret,
+		Scopes:       []string{"bot"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://discordapp.com/api/oauth2/authorize",
+			TokenURL: "https://discordapp.com/api/oauth2/token",
+		},
+	}
+
+	b.oauth2Handler = createOAuth2Handler(*b.discordOauthConfig)
 
 	return &b, nil
 }
@@ -252,6 +257,7 @@ func (b *Bot) Start(doneChannel chan struct{}) {
 	go b.startDiscordBot(doneChannel)
 	go b.startSendChannelReceiver()
 	go b.startCommandChannelReceiver()
+	go b.oauth2Handler.startOAuth2Handler()
 	log.Infoln("DiscordBot is RUNNING")
 }
 

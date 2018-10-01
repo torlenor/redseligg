@@ -35,7 +35,9 @@ type Config struct {
 	Bots    struct {
 		Discord struct {
 			Enabled bool    `toml:"enabled"`
+			ID      string  `toml:"id"`
 			Token   string  `toml:"token"`
+			Secret  string  `toml:"secret"`
 			Plugins Plugins `toml:"plugins"`
 		} `toml:"discord"`
 		Fake struct {
