@@ -8,45 +8,54 @@
 
 ## Description
 
-This is AbyleBotter, an extensible Chat Bot for Discord (and in the future other chat platforms).
+This is AbyleBotter, an extensible Chat Bot for Discord and Matrix (+ in the future other chat platforms).
 
 At the moment the Bot is in a proof of concept/API/interface development phase with very limited functional use.
 
-## How to download/install
+## Releases
 
-Checkout and compile AbyleBotter with
+For releases binaries for Linux, Windows and Mac are provided. Check out the respective section on GitHub.
 
-```
-$ git clone https://github.com/torlenor/AbyleBotter.git
-$ cd AbyleBotter
-$ make deps
-$ make
-```
+## How to build from source
 
-## How to start
-
-Currently it is necessary to have a registered Bot Account which has already joined some servers. Please take a look at https://discordapp.com/developers/docs/intro on how to set this up. In the end you should have a bot token to use with AbyleBotter.
-
-To start AbyleBotter use when using Linux (bash or similar shell)
+Clone the sources from GitHub and compile AbyleBotter with
 
 ```
-$ DISCORD_BOT_TOKEN=token ./bin/AbyleBotter
+make deps
+make
 ```
 
-The Bot should now connect to the Discord Gateway and should be ready to use. 
+and optionally
+
+```
+make test
+```
+
+to run tests.
+
+## How to run it
+
+Independent of the way you obtain it, you have to configure the bot first and it is necessary to have a registered bot account for the service you want to use. 
+
+- Discord: Please take a look at https://discordapp.com/developers/docs/intro on how to set up a bot user and generate the required authentication token.
+- Matrix: For Matrix it is simpler, just create a user for the bot on your preferred Matrix server.
+
+Then please take a look at the provided example configuration in _config/config.toml_ and adapt it to match your settings.
+
+To start AbyleBotter using the self-built or downloaded binary enter
+
+```
+./path/to/abylebotter -c /path/to/config/file.toml
+```
+
+The Bot should now connect automatically to the service and should be ready to use.
 
 ## Using Docker
 
-If you want try out AbyleBotter in a Docker container you can pull the latest version with
+Probably the easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it just type
 
 ```
-$ docker pull hpsch/abylebotter:latest
+docker run --name abylebotter -v /path/to/config/file.toml:/app/config/config.toml:ro hpsch/abylebotter:latest
 ```
 
-After the successful download it can be started with
-
-```
-$ docker run -i -t --name abylebotter --rm -e DISCORD_BOT_TOKEN=token hpsch/abylebotter
-```
-
-where token has to be replaced with your Discord Bot token.
+where _/path/to/config/file.toml_ has to be replaced with the path to your config file.

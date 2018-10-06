@@ -4,7 +4,7 @@
 # Initial concept for Makefile stolen from https://github.com/yyyar/gobetween/tree/master/dist (thanks!)
 #
 
-.PHONY: update clean build build-all run package deploy test authors dist
+.PHONY: update clean build build-all test authors dist
 
 export GOPATH := ${PWD}/vendor:${PWD}
 export GOBIN := ${PWD}/vendor/bin
@@ -34,9 +34,6 @@ build-static:
 	@echo Building...
 	CGO_ENABLED=0 go build -v -o ./bin/$(NAME) -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go
 	@echo Done.
-
-run: build
-	./bin/$(NAME)
 
 test:
 	@go test -covermode=count -coverprofile=coverage.out ./...

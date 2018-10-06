@@ -4,40 +4,37 @@
 
 [general]
 
-    enabled = true
-    ip = "127.0.0.1"
-    port = "8000"
+  [general.api]
+    enabled = true # Set this to true to enable the REST API
+    ip = "127.0.0.1" # IP to listen on for the REST API
+    port = "8000" # Port to listen on for the REST API
 
 [bots]
 
   [bots.discord]
-  enabled = false
-  token = "INSERT_DISCORD_TOKEN_HERE" # can be overwritten via env variable DISCORD_TOKEN
+  enabled = false # Set this to true to enable the Discord bot
+  token = "INSERT_DISCORD_TOKEN_HERE" # Used for signing into Discord as a bot user, see https://discordapp.com/developers/applications/
+  id = "INSERT_DISCORD_CLIENT_ID_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
+  secret = "INSERT_DISCORD_SECRET_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
+  oauth2_callback = "http://localhost:8080" # Used for OAUTH2 and has to match the configured callback, see https://discordapp.com/developers/applications/
 
     [bots.discord.plugins.echo]
-    enabled = false
+    enabled = false # Set to true to enable Echo plugin
+    onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
 
-    [bots.discord.plugins.giveaway]
-    enabled = false
-
-  [bots.fake]
-  enabled = true
-
-    [bots.fake.plugins.echo]
-    enabled = true
-
-    [bots.fake.plugins.giveaway]
-    enabled = false
+    [bots.discord.plugins.sendmessages]
+    enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
 
   [bots.matrix]
-  enabled = false
-  server = "INSERT_MATRIX_SERVER_HERE" # can be overwritten via env variable MATRIX_SERVER
-  username = "INSERT_MATRIX_USER_HERE" # can be overwritten via env variable MATRIX_USERNAME
-  password = "INSERT_MATRIX_PASSWORD_HERE" # can be overwritten via env variable MATRIX_PASSWORD
-  token = "INSERT_MATRIX_TOKEN_HERE" # can be overwritten via env variable MATRIX_TOKEN
+  enabled = false # Set this to true to enable the Matrix bot
+  server = "INSERT_MATRIX_SERVER_HERE" # Matrix server name to use for connection
+  username = "INSERT_MATRIX_USER_HERE" # Matrix user name to use for connection
+  password = "INSERT_MATRIX_PASSWORD_HERE" # Matrix password matching the user to use for connection
+  token = "INSERT_MATRIX_TOKEN_HERE" # Alternatively to user/pass specify a pre-generated auth token here
 
     [bots.matrix.plugins.echo]
-    enabled = false
+    enabled = false # Set to true to enable Echo plugin
+    onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
 
-    [bots.matrix.plugins.giveaway]
-    enabled = false
+    [bots.matrix.plugins.sendmessages]
+    enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)

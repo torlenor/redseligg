@@ -12,7 +12,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY bin/abylebotter /usr/bin/
 
-CMD ["/usr/bin/abylebotter"]
+CMD ["/usr/bin/abylebotter", "-c", "/app/config/config.toml"]
 
 LABEL org.label-schema.vendor="Abyle.org" \
       org.label-schema.url="https://github.com/torlenor/AbyleBotter" \
