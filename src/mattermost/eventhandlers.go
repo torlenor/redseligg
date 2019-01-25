@@ -40,7 +40,22 @@ func (b *Bot) handleEventPosted(data []byte) {
 		return
 	}
 
-	receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, Ident: post.ChannelID, Content: post.Message}
+	b.log.Printf("%s", data)
+
+	var messageType events.MessageType
+	var ident string
+
+	if posted.Data.ChannelType == "D" {
+		messageType = events.WHISPER
+		ident = post.UserID
+	} else {
+		messageType = events.MESSAGE
+		ident = post.ChannelID
+	}
+
+	receiveMessage := events.ReceiveMessage{Type: messageType, Ident: ident, Content: post.Message}
+
+	_, _ = b.getUserByID(post.UserID)
 
 	for plugin, pluginChannel := range b.receivers {
 		b.log.Debugln("Notifying plugin", plugin.GetName(), "about new message/whisper")

@@ -4,13 +4,10 @@ import (
 	"botinterface"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"logging"
-	"net/http"
 	"plugins"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"config"
@@ -53,7 +50,15 @@ type Bot struct {
 
 	lastWsSeqNumber uint32
 
-	User UserObject
+	MeUser UserObject
+
+	KnownUsers     map[string]User   // key is UserID
+	knownUserNames map[string]string // mapping of UserName to UserID
+	knownUserIDs   map[string]string // mapping of UserID to UserName
+
+	KnownChannels     map[string]Channel // key is ChannelID
+	knownChannelNames map[string]string  // mapping of ChannelName to ChannelID
+	knownChannelIDs   map[string]string  // mapping of ChannelID to UserChannelNameName
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -75,38 +80,6 @@ func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 // a plugin
 func (b Bot) GetCommandChannel() chan events.Command {
 	return b.commandChan
-}
-
-type apiResponse struct {
-	header http.Header
-	body   []byte
-}
-
-func (b *Bot) apiCall(path string, method string, body string) (*apiResponse, error) {
-	client := &http.Client{}
-
-	req, err := http.NewRequest(method, b.config.Server+path, strings.NewReader(body))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Authorization", "Bearer "+b.token)
-	req.Header.Add("Content-Type", "application/json")
-
-	response, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	responseBody, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &apiResponse{
-		body:   responseBody,
-		header: response.Header,
-	}, nil
 }
 
 func (b *Bot) startMattermostBot(doneChannel chan struct{}) {
@@ -143,33 +116,6 @@ func (b *Bot) startMattermostBot(doneChannel chan struct{}) {
 	}
 }
 
-type loginResponse struct {
-	AccessToken string `json:"access_token"`
-	HomeServer  string `json:"home_server"`
-	UserID      string `json:"user_id"`
-	DeviceID    string `json:"device_id"`
-}
-
-func (b *Bot) login() error {
-	// get login server
-	response, err := b.apiCall("/api/v4/users/login", "POST", `{"login_id":"`+b.config.Username+`","password":"`+b.config.Password+`"}`)
-	if err != nil {
-		return errors.Wrap(err, "apiCall failed")
-	}
-
-	if val, ok := response.header["Token"]; ok {
-		if len(val) > 0 {
-			b.token = val[0]
-		}
-	} else {
-		return errors.New("could not login: Response: " + string(response.body))
-	}
-
-	user := UserObject{}
-	err = json.Unmarshal(response.body, &user)
-	return err
-}
-
 // CreateMattermostBot creates a new instance of a MattermostBot
 func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 	log := logging.Get("MattermostBot")
@@ -182,6 +128,14 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 		sendMessageChan: make(chan events.SendMessage),
 		commandChan:     make(chan events.Command),
 		lastWsSeqNumber: 0,
+
+		KnownUsers:     make(map[string]User),
+		knownUserNames: make(map[string]string),
+		knownUserIDs:   make(map[string]string),
+
+		KnownChannels:     make(map[string]Channel),
+		knownChannelNames: make(map[string]string),
+		knownChannelIDs:   make(map[string]string),
 	}
 
 	if b.config.UseToken == true {
@@ -279,4 +233,18 @@ func (b *Bot) disconnectReceivers() {
 		b.log.Debugln("Disconnecting Plugin", plugin.GetName())
 		defer close(pluginChannel)
 	}
+}
+
+func (b *Bot) addKnownUser(user User) {
+	b.log.Debugf("Added new known User: %s (%s)", user.Username, user.ID)
+	b.KnownUsers[user.ID] = user
+	b.knownUserNames[user.Username] = user.ID
+	b.knownUserIDs[user.ID] = user.Username
+}
+
+func (b *Bot) addKnownChannel(channel Channel) {
+	b.log.Debugf("Added new known Channel: %s (%s)", channel.ID, channel.Name)
+	b.KnownChannels[channel.ID] = channel
+	b.knownChannelNames[channel.Name] = channel.ID
+	b.knownChannelIDs[channel.ID] = channel.Name
 }
