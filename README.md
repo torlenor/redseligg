@@ -1,6 +1,6 @@
 # AbyleBotter
 
-[![Build Status](https://travis-ci.org/torlenor/AbyleBotter.svg?branch=master)](https://travis-ci.org/torlenor/AbyleBotter)
+[![Build Status](https://travis-ci.org/torlenor/abylebotter.svg?branch=master)](https://travis-ci.org/torlenor/abylebotter)
 [![Coverage Status](https://coveralls.io/repos/github/torlenor/AbyleBotter/badge.svg?branch=master)](https://coveralls.io/github/torlenor/AbyleBotter?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/AbyleBotter)](https://goreportcard.com/report/github.com/torlenor/AbyleBotter)
 [![Docker](https://img.shields.io/docker/pulls/hpsch/abylebotter.svg)](https://hub.docker.com/r/hpsch/abylebotter/)
