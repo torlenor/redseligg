@@ -96,7 +96,13 @@ func createBots(cfg config.Config) error {
 		if bots.m["fake"] == nil {
 			return errors.New("Could not create Fake Bot")
 		}
-		createPlugins(cfg.Bots.Matrix.Plugins, bots.m["fake"])
+		createPlugins(cfg.Bots.Fake.Plugins, bots.m["fake"])
+	} else if cfg.Bots.Mattermost.Enabled {
+		bots.m["mattermost"] = mattermostBotCreator(cfg.Bots.Mattermost)
+		if bots.m["mattermost"] == nil {
+			return errors.New("Could not create Mattermost Bot")
+		}
+		createPlugins(cfg.Bots.Mattermost.Plugins, bots.m["mattermost"])
 	}
 
 	return nil

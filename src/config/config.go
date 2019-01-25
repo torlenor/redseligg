@@ -29,6 +29,17 @@ type Plugins struct {
 	} `toml:"sendmessages"`
 }
 
+// MattermostConfig contains config related to the Mattermost component
+type MattermostConfig struct {
+	Enabled  bool    `toml:"enabled"`
+	Server   string  `toml:"server"`
+	Username string  `toml:"username"`
+	Password string  `toml:"password"`
+	UseToken bool    `toml:"usetoken"`
+	Token    string  `toml:"token"`
+	Plugins  Plugins `toml:"plugins"`
+}
+
 // Config holds the complete AbyleBotter config
 type Config struct {
 	General General `toml:"general"`
@@ -52,5 +63,6 @@ type Config struct {
 			Token    string  `toml:"token"`
 			Plugins  Plugins `toml:"plugins"`
 		} `toml:"matrix"`
+		Mattermost MattermostConfig `toml:"mattermost"`
 	} `toml:"bots"`
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fake"
+	"mattermost"
 	"os"
 
 	"config"
@@ -51,6 +52,15 @@ func matrixBotCreator(config config.Config) *matrix.Bot {
 
 func fakeBotCreator(config config.Config) *fake.Bot {
 	bot, err := fake.CreateFakeBot()
+	if err != nil {
+		log.Println("FakeBot: ERROR: ", err)
+	}
+
+	return bot
+}
+
+func mattermostBotCreator(config config.MattermostConfig) *mattermost.Bot {
+	bot, err := mattermost.CreateMattermostBot(config)
 	if err != nil {
 		log.Println("FakeBot: ERROR: ", err)
 	}
