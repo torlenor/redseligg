@@ -12,11 +12,11 @@
 [bots]
 
   [bots.discord]
-  enabled = false # Set this to true to enable the Discord bot
-  token = "INSERT_DISCORD_TOKEN_HERE" # Used for signing into Discord as a bot user, see https://discordapp.com/developers/applications/
-  id = "INSERT_DISCORD_CLIENT_ID_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
-  secret = "INSERT_DISCORD_SECRET_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
-  oauth2_callback = "http://localhost:8080" # Used for OAUTH2 and has to match the configured callback, see https://discordapp.com/developers/applications/
+    enabled = false # Set this to true to enable the Discord bot
+    token = "INSERT_DISCORD_TOKEN_HERE" # Used for signing into Discord as a bot user, see https://discordapp.com/developers/applications/
+    id = "INSERT_DISCORD_CLIENT_ID_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
+    secret = "INSERT_DISCORD_SECRET_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
+    oauth2_callback = "http://localhost:8080" # Used for OAUTH2 and has to match the configured callback, see https://discordapp.com/developers/applications/
 
     [bots.discord.plugins.echo]
     enabled = false # Set to true to enable Echo plugin
@@ -26,11 +26,11 @@
     enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
 
   [bots.matrix]
-  enabled = false # Set this to true to enable the Matrix bot
-  server = "INSERT_MATRIX_SERVER_HERE" # Matrix server name to use for connection
-  username = "INSERT_MATRIX_USER_HERE" # Matrix user name to use for connection
-  password = "INSERT_MATRIX_PASSWORD_HERE" # Matrix password matching the user to use for connection
-  token = "INSERT_MATRIX_TOKEN_HERE" # Alternatively to user/pass specify a pre-generated auth token here
+    enabled = false # Set this to true to enable the Matrix bot
+    server = "INSERT_MATRIX_SERVER_HERE" # Matrix server name to use for connection
+    username = "INSERT_MATRIX_USER_HERE" # Matrix user name to use for connection
+    password = "INSERT_MATRIX_PASSWORD_HERE" # Matrix password matching the user to use for connection
+    token = "INSERT_MATRIX_TOKEN_HERE" # Alternatively to user/pass specify a pre-generated auth token here
 
     [bots.matrix.plugins.echo]
     enabled = false # Set to true to enable Echo plugin
@@ -38,3 +38,30 @@
 
     [bots.matrix.plugins.sendmessages]
     enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
+
+  [bots.mattermost]
+    enabled = false # Set this to true to enable the Mattermost bot
+    server = "INSERT_MATTERMOST_SERVER_HERE" # Mattermost server name to use for connection
+    username = "INSERT_MATTERMOST_USER_HERE" # Mattermost username to use
+    password = "INSERT_MATTERMOST_PASSWORT_HERE" # Mattermost password to use
+    usetoken = false # Set to true if you want to use a token instead of username/password
+    token = "TOKEN" # Mattermost token to use, if token usage enabled
+
+    [bots.mattermost.plugins.echo]
+      enabled = false # Set to true to enable Echo plugin
+      onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
+
+    [bots.mattermost.plugins.sendmessages]
+      enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
+
+  [bots.slack]
+    enabled = false # Set this to true to enable the Slack Bot
+    workspace = "INSERT_SLACK_WORKSPACE_HERE" # Slack Workspace to use
+	  token = "INSERT_BOT_TOKEN_HERE" # Slack token which allows the bot to connect to the specified Workspace
+
+    [bots.slack.plugins.echo]
+      enabled = false # Set to true to enable Echo plugin
+      onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
+
+    [bots.slack.plugins.sendmessages]
+      enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)

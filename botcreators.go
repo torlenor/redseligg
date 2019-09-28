@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/torlenor/abylebotter/config"
+	"github.com/torlenor/abylebotter/slack"
 
 	"github.com/torlenor/abylebotter/discord"
-	"github.com/torlenor/abylebotter/matrix"
 	"github.com/torlenor/abylebotter/fake"
+	"github.com/torlenor/abylebotter/matrix"
 	"github.com/torlenor/abylebotter/mattermost"
 )
 
@@ -67,4 +69,13 @@ func mattermostBotCreator(config config.MattermostConfig) *mattermost.Bot {
 	}
 
 	return bot
+}
+
+func slackBotCreator(config config.SlackConfig) (*slack.Bot, error) {
+	bot, err := slack.CreateSlackBot(config)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating SlackBot: %s", err)
+	}
+
+	return bot, nil
 }

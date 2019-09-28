@@ -40,6 +40,14 @@ type MattermostConfig struct {
 	Plugins  Plugins `toml:"plugins"`
 }
 
+// SlackConfig contains config related to the Mattermost component
+type SlackConfig struct {
+	Enabled   bool    `toml:"enabled"`
+	Workspace string  `toml:"workspace"`
+	Token     string  `toml:"token"`
+	Plugins   Plugins `toml:"plugins"`
+}
+
 // Config holds the complete AbyleBotter config
 type Config struct {
 	General General `toml:"general"`
@@ -64,5 +72,6 @@ type Config struct {
 			Plugins  Plugins `toml:"plugins"`
 		} `toml:"matrix"`
 		Mattermost MattermostConfig `toml:"mattermost"`
+		Slack      SlackConfig      `toml:"slack"`
 	} `toml:"bots"`
 }

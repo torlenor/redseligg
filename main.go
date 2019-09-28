@@ -103,6 +103,13 @@ func createBots(cfg config.Config) error {
 			return errors.New("Could not create Mattermost Bot")
 		}
 		createPlugins(cfg.Bots.Mattermost.Plugins, bots.m["mattermost"])
+	} else if cfg.Bots.Slack.Enabled {
+		var err error
+		bots.m["slack"], err = slackBotCreator(cfg.Bots.Slack)
+		if err != nil {
+			return fmt.Errorf("Could not create Slack Bot: %s", err)
+		}
+		createPlugins(cfg.Bots.Slack.Plugins, bots.m["slack"])
 	}
 
 	return nil
