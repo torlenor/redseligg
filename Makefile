@@ -4,15 +4,13 @@
 # Initial concept for Makefile stolen from https://github.com/yyyar/gobetween/tree/master/dist (thanks!)
 #
 
-.PHONY: update clean build build-all test authors dist
-
-export GOPATH := ${PWD}/vendor:${PWD}
-export GOBIN := ${PWD}/vendor/bin
+.PHONY: update clean build build-all test authors dist vendor
 
 NAME := abylebotter
 VERSION := $(shell cat VERSION)
-LDFLAGS := -X main.version=${VERSION}
-SRCPATH := src
+COMPTIME := $(shell date -Is)
+LDFLAGS := -X main.version=${VERSION} -X main.compTime=${COMPTIME}
+SRCPATH := .
 DOCKERBASETAG := hpsch/abylebotter
 CURRENTGITCOMMIT := $(shell git log -1 --format=%h)
 CURRENTGITUNTRACKED := $(shell git diff-index --quiet HEAD -- || echo "_untracked")
@@ -27,18 +25,33 @@ clean:
 
 build:
 	@echo Building...
-	go build -v -o ./bin/$(NAME) -ldflags '${LDFLAGS}' ${SRCPATH}/*.go
+	go build -o ./bin/$(NAME) -ldflags '${LDFLAGS}'
+	@echo Done.
+
+race:
+	@echo Building...
+	go build -o ./bin/$(NAME) -ldflags '${LDFLAGS}' -race
 	@echo Done.
 
 build-static:
 	@echo Building...
-	CGO_ENABLED=0 go build -v -o ./bin/$(NAME) -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go
+	CGO_ENABLED=0 go build -o ./bin/$(NAME) -ldflags '-s -w --extldflags "-static" ${LDFLAGS}'
 	@echo Done.
 
 test:
+	@echo "Running unit tests (EXcluding MongoDB dependent tests)"
+	@go test -covermode=count -coverprofile=coverage.out $(shell go list ./... | grep -v mongo)
+
+test-mongo:
+	@echo "Running unit tests (INcluding MongoDB dependent tests)"
 	@go test -covermode=count -coverprofile=coverage.out ./...
 
 test-verbose:
+	@echo "Running unit tests (EXcluding MongoDB dependent tests)"
+	@go test -v -covermode=count -coverprofile=coverage.out $(shell go list ./... | grep -v mongo)
+
+test-mongo-verbose:
+	@echo "Running unit tests (INcluding MongoDB dependent tests)"
 	@go test -v -covermode=count -coverprofile=coverage.out ./...
 
 install: build
@@ -52,19 +65,8 @@ authors:
 	@git log --format='%aN <%aE>' | LC_ALL=C.UTF-8 sort | uniq -c -i | sort -nr | sed "s/^ *[0-9]* //g" > AUTHORS
 	@cat AUTHORS
 
-clean-deps:
-	rm -rf ./vendor/src
-	rm -rf ./vendor/pkg
-	rm -rf ./vendor/bin
-
-deps: clean-deps
-	go get -v github.com/gorilla/websocket
-	go get -v github.com/mitchellh/mapstructure
-	go get -v github.com/pkg/errors
-	go get -v golang.org/x/oauth2
-	go get -v github.com/BurntSushi/toml
-	go get -v github.com/sirupsen/logrus
-	go get -v github.com/gorilla/mux
+deps:
+	go get -v ./...
 
 clean-dist:
 	rm -rf ./dist/${VERSION}
@@ -86,7 +88,7 @@ dist:
 	  mkdir -p $$distpath ; \
 	  CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 go build -v -o $$distpath/$(NAME)$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go ;\
 	  cp "README.md" "LICENSE" "CHANGELOG.md" "AUTHORS" $$distpath ;\
-	  cp "config/config.toml" $$distpath/config_example.toml ;\
+	  cp "cfg/config.toml" $$distpath/config_example.toml ;\
 	  if [ "$$1" = "linux" ]; then \
 		  cd $$distpath && tar -zcvf ../../${NAME}_${VERSION}_$$1_$$2.tar.gz * && cd - ;\
 	  else \
@@ -95,13 +97,18 @@ dist:
 	done
 
 build-container-latest: build-static
-	@echo Building docker container ${DOCKERBASETAG}:latest
+	@echo Building docker image ${DOCKERBASETAG}:latest
 	docker build -t ${DOCKERBASETAG}:latest .
 
 build-container-tagged: build-static
-	@echo Building docker container ${DOCKERBASETAG}:${VERSION}
+	@echo Building docker image ${DOCKERBASETAG}:${VERSION}
 	docker build -t ${DOCKERBASETAG}:${VERSION} .
 
 build-container-gitcommit: build-static
-	@echo Building docker container ${DOCKERBASETAG}:${VERSION}
+	@echo Building docker image ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
 	docker build -t ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} .
+
+release-container: build-container-tagged
+	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}
+	docker push ${DOCKERBASETAG}:${VERSION}
+
