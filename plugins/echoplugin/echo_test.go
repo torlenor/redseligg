@@ -1,11 +1,11 @@
 package echoplugin
 
 import (
-	"events"
 	"testing"
 	"time"
 
 	"github.com/torlenor/abylebotter/botinterface"
+	"github.com/torlenor/abylebotter/events"
 )
 
 func TestEcho(t *testing.T) {
