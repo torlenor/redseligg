@@ -8,15 +8,33 @@
 
 ## Description
 
-This is AbyleBotter, an extensible Chat Bot for Discord and Matrix (+ in the future other chat platforms).
+This is AbyleBotter, an extensible Chat Bot for various platforms.
 
 At the moment the Bot is in a proof of concept/API/interface development phase with very limited functional use.
+
+## Supported plattforms
+
+These plattforms are current supported (at least with the functionality to send and receive messages):
+
+### Discord
+
+### Matrix
+
+### Mattermost
+
+### Slack
 
 ## Releases
 
 For releases binaries for Linux, Windows and Mac are provided. Check out the respective section on GitHub.
 
 ## How to build from source
+
+### Requirements
+
+- Go >= 1.12
+
+### Building
 
 Clone the sources from GitHub and compile AbyleBotter with
 
@@ -39,6 +57,8 @@ Independent of the way you obtain it, you have to configure the bot first and it
 
 - Discord: Please take a look at https://discordapp.com/developers/docs/intro on how to set up a bot user and generate the required authentication token.
 - Matrix: For Matrix it is simpler, just create a user for the bot on your preferred Matrix server.
+- Mattermost: For Mattermost a username and password with the necessary rights on the specified server is enough.
+- Slack: The bot as to be added to the workspace and a token has to be generated.
 
 Then please take a look at the provided example configuration in _config/config.toml_ and adapt it to match your settings.
 
@@ -49,13 +69,3 @@ To start AbyleBotter using the self-built or downloaded binary enter
 ```
 
 The Bot should now connect automatically to the service and should be ready to use.
-
-## Using Docker
-
-Probably the easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it just type
-
-```
-docker run --name abylebotter -v /path/to/config/file.toml:/app/config/config.toml:ro hpsch/abylebotter:latest
-```
-
-where _/path/to/config/file.toml_ has to be replaced with the path to your config file.
