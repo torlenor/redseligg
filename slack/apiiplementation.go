@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -43,22 +44,55 @@ type Channel struct {
 	NumMembers    int           `json:"num_members"`
 }
 
+type Channels []Channel
+
 type ConversationsListResponse struct {
-	Ok               bool      `json:"ok"`
-	Channels         []Channel `json:"channels"`
+	Ok               bool     `json:"ok"`
+	Channels         Channels `json:"channels"`
 	ResponseMetadata struct {
 		NextCursor string `json:"next_cursor"`
 	} `json:"response_metadata"`
 }
 
-func (b *Bot) getConversationsList() (ConversationsListResponse, error) {
-	rawResponse, err := b.apiCall("/api/conversations.list", "GET", "")
+func (b *Bot) getConversationsList(cursor string) (ConversationsListResponse, error) {
+	args := ""
+	if len(cursor) > 0 {
+		args = "cursor=" + cursor
+	}
+	rawResponse, err := b.apiCall("/api/conversations.list", "GET", args, "")
 	if err != nil {
 		return ConversationsListResponse{}, errors.Wrap(err, "apiCall failed")
 	}
 
 	response := ConversationsListResponse{}
-
 	err = json.Unmarshal(rawResponse.body, &response)
-	return response, err
+
+	if err == nil && !response.Ok {
+		return ConversationsListResponse{}, fmt.Errorf("Error getting conversations.list: Received not OK")
+	} else if err != nil {
+		return ConversationsListResponse{}, err
+	}
+
+	return response, nil
+}
+
+func (b *Bot) getConversations() (Channels, error) {
+	conversationsList, err := b.getConversationsList("")
+	if err != nil {
+		return Channels{}, fmt.Errorf("Error getting conversations.list: %s", err)
+	}
+
+	channels := conversationsList.Channels
+
+	nextCursor := conversationsList.ResponseMetadata.NextCursor
+	for len(nextCursor) != 0 {
+		conversationsList, err := b.getConversationsList(nextCursor)
+		if err != nil {
+			return Channels{}, fmt.Errorf("Error getting conversations.list: %s", err)
+		}
+		channels = append(channels, conversationsList.Channels...)
+		nextCursor = conversationsList.ResponseMetadata.NextCursor
+	}
+
+	return channels, nil
 }

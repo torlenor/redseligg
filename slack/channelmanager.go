@@ -59,3 +59,7 @@ func (cm channelManager) isChannelNameKnown(name string) bool {
 	_, ok := cm.knownChannelNames[name]
 	return ok
 }
+
+func (cm channelManager) Len() int {
+	return len(cm.knownChannels)
+}

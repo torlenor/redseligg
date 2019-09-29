@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (b *Bot) apiRunner(path string, method string, body string) (*apiResponse, error) {
+func (b *Bot) apiRunner(path string, method string, args string, body string) (*apiResponse, error) {
 	finished := false
 	tries := 0
 	for !finished {
@@ -18,7 +18,7 @@ func (b *Bot) apiRunner(path string, method string, body string) (*apiResponse, 
 			return nil, errors.New("API call still failing after 3 tries, giving up")
 		}
 
-		response, err := b.apiCall(path, method, body)
+		response, err := b.apiCall(path, method, args, body)
 		if err != nil {
 			return response, errors.Wrap(err, "apiCall failed")
 		}
@@ -48,7 +48,7 @@ type RtmConnectResponse struct {
 // RtmConnect returns a WebSocket Message Server URL and limited information about the team
 func (b *Bot) RtmConnect() (RtmConnectResponse, error) {
 	// get login server
-	response, err := b.apiCall("/api/rtm.connect", "GET", "")
+	response, err := b.apiCall("/api/rtm.connect", "GET", "", "")
 	if err != nil {
 		return RtmConnectResponse{}, errors.Wrap(err, "apiCall failed")
 	}
@@ -65,10 +65,10 @@ type apiResponse struct {
 	statusCode int
 }
 
-func (b *Bot) apiCall(path string, method string, body string) (*apiResponse, error) {
+func (b *Bot) apiCall(path string, method string, args string, body string) (*apiResponse, error) {
 	client := &http.Client{}
 
-	req, err := http.NewRequest(method, "https://slack.com"+path+"?token="+b.config.Token, strings.NewReader(body))
+	req, err := http.NewRequest(method, "https://slack.com"+path+"?token="+b.config.Token+args, strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

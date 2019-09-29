@@ -92,10 +92,24 @@ func (b *Bot) startSlackBot(doneChannel chan struct{}) {
 
 		if event, ok := data["type"]; ok { // Dispatch to event handlers
 			switch event {
-			case "message":
-				b.handleEventMessage(message)
 			case "hello":
 				// nothing to do here, just a greeting from the server
+			case "message":
+				b.handleEventMessage(message)
+			case "desktop_notification":
+				b.handleEventDesktopNotification(message)
+			case "user_typing":
+				b.handleEventUserTyping(message)
+			case "channel_created":
+				b.handleEventChannelCreated(message)
+			case "channel_deleted":
+				b.handleEventChannelDeleted(message)
+			case "channel_joined":
+				b.handleEventChannelJoined(message)
+			case "channel_left":
+				b.handleEventChannelLeft(message)
+			case "member_joined_channel":
+				b.handleEventMemberJoinedChannel(message)
 			default:
 				b.log.Warnf("Received unhandled event %s: %s", event, message)
 			}
@@ -145,17 +159,16 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 }
 
 func (b *Bot) populateChannelList() error {
-	conversations, err := b.getConversationsList()
+	conversations, err := b.getConversations()
 	if err != nil {
 		return err
 	}
-	if !conversations.Ok {
-		return fmt.Errorf("We received a NOT OK when we tried to get the Conversations List")
-	}
 
-	for _, channel := range conversations.Channels {
+	for _, channel := range conversations {
 		b.channels.addKnownChannel(channel)
 	}
+
+	b.log.Infof("Added %d known channels", b.channels.Len())
 	return nil
 }
 
@@ -173,6 +186,7 @@ func (b *Bot) startSendChannelReceiver() {
 				b.log.Errorln("Error sending whisper:", err)
 			}
 		default:
+			b.log.Warnf("Bot does not support Send Event %s", sendMsg.Type)
 		}
 	}
 }
