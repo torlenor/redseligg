@@ -45,9 +45,7 @@ type Bot struct {
 
 	knownPlugins []plugins.Plugin
 
-	KnownChannels     map[string]Channel // key is ChannelID
-	knownChannelNames map[string]string  // mapping of ChannelName to ChannelID
-	knownChannelIDs   map[string]string  // mapping of ChannelID to UserChannelNameName
+	channels channelManager
 }
 
 // GetReceiveMessageChannel returns the channel which is used to notify
@@ -117,9 +115,7 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 		sendMessageChan: make(chan events.SendMessage),
 		commandChan:     make(chan events.Command),
 
-		KnownChannels:     make(map[string]Channel),
-		knownChannelNames: make(map[string]string),
-		knownChannelIDs:   make(map[string]string),
+		channels: newChannelManager(),
 	}
 
 	if len(b.config.Token) == 0 {
@@ -156,7 +152,7 @@ func (b *Bot) populateChannelList() error {
 	}
 
 	for _, channel := range conversations.Channels {
-		b.addKnownChannel(channel)
+		b.channels.addKnownChannel(channel)
 	}
 	return nil
 }
@@ -235,11 +231,4 @@ func (b *Bot) disconnectReceivers() {
 		b.log.Debugln("Disconnecting Plugin", plugin.GetName())
 		defer close(pluginChannel)
 	}
-}
-
-func (b *Bot) addKnownChannel(channel Channel) {
-	b.log.Debugf("Added new known Channel: %s (%s)", channel.ID, channel.Name)
-	b.KnownChannels[channel.ID] = channel
-	b.knownChannelNames[channel.Name] = channel.ID
-	b.knownChannelIDs[channel.ID] = channel.Name
 }
