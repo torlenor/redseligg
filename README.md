@@ -69,3 +69,13 @@ To start AbyleBotter using the self-built or downloaded binary enter
 ```
 
 The Bot should now connect automatically to the service and should be ready to use.
+
+## Using Docker
+
+Probably the easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it just type
+
+```
+docker run --name abylebotter -v /path/to/config/file.toml:/app/config/config.toml:ro hpsch/abylebotter:latest
+```
+
+where _/path/to/config/file.toml_ has to be replaced with the path to your config file (see above for remarks about bot accounts for the various services).
