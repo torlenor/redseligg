@@ -110,6 +110,8 @@ func (b *Bot) startSlackBot(doneChannel chan struct{}) {
 				b.handleEventChannelLeft(message)
 			case "member_joined_channel":
 				b.handleEventMemberJoinedChannel(message)
+			case "group_joined":
+				b.handleEventGroupJoined(message)
 			default:
 				b.log.Warnf("Received unhandled event %s: %s", event, message)
 			}

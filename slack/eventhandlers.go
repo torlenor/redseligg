@@ -102,3 +102,14 @@ func (b *Bot) handleEventMemberJoinedChannel(data []byte) {
 
 	b.log.Debugf("Received MemberJoinedChannel event, user ID %s -> Channel ID %s", memberJoinedChannel.User, memberJoinedChannel.Channel)
 }
+
+func (b *Bot) handleEventGroupJoined(data []byte) {
+	var groupJoined EventGroupJoined
+
+	if err := json.Unmarshal([]byte(data), &groupJoined); err != nil {
+		b.log.Errorln("UNHANDLED ERROR: ", err)
+		return
+	}
+
+	b.log.Debugf("Received GroupJoined event from Channel Name %s", groupJoined.Channel.Name)
+}
