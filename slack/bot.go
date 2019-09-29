@@ -94,6 +94,8 @@ func (b *Bot) startSlackBot(doneChannel chan struct{}) {
 			switch event {
 			case "message":
 				b.handleEventMessage(message)
+			case "hello":
+				// nothing to do here, just a greeting from the server
 			default:
 				b.log.Warnf("Received unhandled event %s: %s", event, message)
 			}
@@ -188,7 +190,7 @@ func (b *Bot) startCommandChannelReceiver() {
 
 // Start the Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
-	b.log.Infoln("SlackBot is STARTING")
+	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", len(b.knownPlugins))
 	go b.startSlackBot(doneChannel)
 	go b.startSendChannelReceiver()
 	go b.startCommandChannelReceiver()
@@ -214,7 +216,8 @@ func (b *Bot) Status() botinterface.BotStatus {
 	status := botinterface.BotStatus{
 		Running: true,
 		Fail:    false,
-		Fatal:   false}
+		Fatal:   false,
+	}
 	return status
 }
 
