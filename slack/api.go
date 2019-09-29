@@ -68,7 +68,7 @@ type apiResponse struct {
 func (b *Bot) apiCall(path string, method string, body string) (*apiResponse, error) {
 	client := &http.Client{}
 
-	req, err := http.NewRequest(method, "https://slack.com"+path+"?token="+b.token, strings.NewReader(body))
+	req, err := http.NewRequest(method, "https://slack.com"+path+"?token="+b.config.Token, strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

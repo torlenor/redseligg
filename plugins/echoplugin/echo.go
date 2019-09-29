@@ -9,7 +9,7 @@ import (
 
 // EchoPlugin struct holds the private variables for a EchoPlugin
 type EchoPlugin struct {
-	botReceiveChannel chan events.ReceiveMessage
+	botReceiveChannel <-chan events.ReceiveMessage
 	botSendChannel    chan events.SendMessage
 	botCommandChannel chan events.Command
 
@@ -76,7 +76,7 @@ func (p *EchoPlugin) IsStarted() bool {
 }
 
 // ConnectChannels connects the given receive, send and command channels to the plugin
-func (p *EchoPlugin) ConnectChannels(receiveChannel chan events.ReceiveMessage,
+func (p *EchoPlugin) ConnectChannels(receiveChannel <-chan events.ReceiveMessage,
 	sendChannel chan events.SendMessage,
 	commandCHannel chan events.Command) error {
 	p.botReceiveChannel = receiveChannel

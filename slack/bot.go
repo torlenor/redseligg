@@ -30,29 +30,20 @@ func (s stats) toString() string {
 // The Bot struct holds parameters related to the bot
 type Bot struct {
 	config config.SlackConfig
+	log    *logrus.Entry
+
+	stats stats
 
 	ws *websocket.Conn
 
 	sendMessageChan chan events.SendMessage
 	commandChan     chan events.Command
 
-	token string
-
 	rtmConnectResponse RtmConnectResponse
 
 	receivers map[plugins.Plugin]chan events.ReceiveMessage
 
 	knownPlugins []plugins.Plugin
-
-	stats stats
-
-	log *logrus.Entry
-
-	lastWsSeqNumber uint32
-
-	KnownUsers     map[string]User   // key is UserID
-	knownUserNames map[string]string // mapping of UserName to UserID
-	knownUserIDs   map[string]string // mapping of UserID to UserName
 
 	KnownChannels     map[string]Channel // key is ChannelID
 	knownChannelNames map[string]string  // mapping of ChannelName to ChannelID
@@ -61,7 +52,7 @@ type Bot struct {
 
 // GetReceiveMessageChannel returns the channel which is used to notify
 // about received messages from the bot
-func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
+func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) <-chan events.ReceiveMessage {
 	b.log.Debugln("Creating receiveChannel for Plugin", plugin.GetName())
 	b.receivers[plugin] = make(chan events.ReceiveMessage)
 	return b.receivers[plugin]
@@ -125,11 +116,6 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 		receivers:       make(map[plugins.Plugin]chan events.ReceiveMessage),
 		sendMessageChan: make(chan events.SendMessage),
 		commandChan:     make(chan events.Command),
-		lastWsSeqNumber: 0,
-
-		KnownUsers:     make(map[string]User),
-		knownUserNames: make(map[string]string),
-		knownUserIDs:   make(map[string]string),
 
 		KnownChannels:     make(map[string]Channel),
 		knownChannelNames: make(map[string]string),
@@ -139,7 +125,6 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 	if len(b.config.Token) == 0 {
 		return nil, fmt.Errorf("No Slack token defined in config file")
 	}
-	b.token = b.config.Token
 
 	rtmConnectResponse, err := b.RtmConnect()
 	if err != nil {
@@ -153,9 +138,27 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 	}
 	b.ws = ws
 
-	// b.authWs()
+	err = b.populateChannelList()
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
+	}
 
 	return &b, nil
+}
+
+func (b *Bot) populateChannelList() error {
+	conversations, err := b.getConversationsList()
+	if err != nil {
+		return err
+	}
+	if !conversations.Ok {
+		return fmt.Errorf("We received a NOT OK when we tried to get the Conversations List")
+	}
+
+	for _, channel := range conversations.Channels {
+		b.addKnownChannel(channel)
+	}
+	return nil
 }
 
 func (b *Bot) startSendChannelReceiver() {
@@ -182,7 +185,7 @@ func (b *Bot) startCommandChannelReceiver() {
 		case string("DemoCommand"):
 			b.log.Infoln("Received DemoCommand with server name" + cmd.Payload)
 		default:
-			b.log.Errorln("Received unhandeled command" + cmd.Command)
+			b.log.Errorln("Received unhandled command" + cmd.Command)
 		}
 	}
 }
@@ -232,13 +235,6 @@ func (b *Bot) disconnectReceivers() {
 		b.log.Debugln("Disconnecting Plugin", plugin.GetName())
 		defer close(pluginChannel)
 	}
-}
-
-func (b *Bot) addKnownUser(user User) {
-	b.log.Debugf("Added new known User: %s (%s)", user.Username, user.ID)
-	b.KnownUsers[user.ID] = user
-	b.knownUserNames[user.Username] = user.ID
-	b.knownUserIDs[user.ID] = user.Username
 }
 
 func (b *Bot) addKnownChannel(channel Channel) {

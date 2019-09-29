@@ -6,98 +6,59 @@ import (
 	"github.com/pkg/errors"
 )
 
-type User struct {
-	ID            string `json:"id"`
-	CreateAt      int    `json:"create_at"`
-	UpdateAt      int    `json:"update_at"`
-	DeleteAt      int    `json:"delete_at"`
-	Username      string `json:"username"`
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	Nickname      string `json:"nickname"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	AuthService   string `json:"auth_service"`
-	Roles         string `json:"roles"`
-	Locale        string `json:"locale"`
-	NotifyProps   struct {
-		Email        string `json:"email"`
-		Push         string `json:"push"`
-		Desktop      string `json:"desktop"`
-		DesktopSound string `json:"desktop_sound"`
-		MentionKeys  string `json:"mention_keys"`
-		Channel      string `json:"channel"`
-		FirstName    string `json:"first_name"`
-	} `json:"notify_props"`
-	Props struct {
-	} `json:"props"`
-	LastPasswordUpdate int  `json:"last_password_update"`
-	LastPictureUpdate  int  `json:"last_picture_update"`
-	FailedAttempts     int  `json:"failed_attempts"`
-	MfaActive          bool `json:"mfa_active"`
-}
-
-type Users []User
-
-func (b *Bot) getUserByID(userID string) (*User, error) {
-	if val, ok := b.KnownUsers[userID]; ok {
-		return &val, nil
-	}
-
-	response, err := b.apiRunner("/api/v4/users/ids", "POST", `[
-		"`+userID+`"
-		]`)
-	if err != nil && response.statusCode > 200 {
-		return nil, err
-	}
-	var users Users
-	err = json.Unmarshal(response.body, &users)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(users) == 0 {
-		return nil, errors.New("Could not find user with UserID: " + userID)
-	}
-
-	b.addKnownUser(users[0])
-
-	return &users[0], nil
-}
-
 type Channel struct {
-	ID            string `json:"id"`
-	CreateAt      int    `json:"create_at"`
-	UpdateAt      int    `json:"update_at"`
-	DeleteAt      int    `json:"delete_at"`
-	TeamID        string `json:"team_id"`
-	Type          string `json:"type"`
-	DisplayName   string `json:"display_name"`
-	Name          string `json:"name"`
-	Header        string `json:"header"`
-	Purpose       string `json:"purpose"`
-	LastPostAt    int    `json:"last_post_at"`
-	TotalMsgCount int    `json:"total_msg_count"`
-	ExtraUpdateAt int    `json:"extra_update_at"`
-	CreatorID     string `json:"creator_id"`
+	ID                      string        `json:"id"`
+	Name                    string        `json:"name"`
+	IsChannel               bool          `json:"is_channel"`
+	IsGroup                 bool          `json:"is_group"`
+	IsIm                    bool          `json:"is_im"`
+	Created                 int           `json:"created"`
+	IsArchived              bool          `json:"is_archived"`
+	IsGeneral               bool          `json:"is_general"`
+	Unlinked                int           `json:"unlinked"`
+	NameNormalized          string        `json:"name_normalized"`
+	IsShared                bool          `json:"is_shared"`
+	ParentConversation      interface{}   `json:"parent_conversation"`
+	Creator                 string        `json:"creator"`
+	IsExtShared             bool          `json:"is_ext_shared"`
+	IsOrgShared             bool          `json:"is_org_shared"`
+	SharedTeamIds           []string      `json:"shared_team_ids"`
+	PendingShared           []interface{} `json:"pending_shared"`
+	PendingConnectedTeamIds []interface{} `json:"pending_connected_team_ids"`
+	IsPendingExtShared      bool          `json:"is_pending_ext_shared"`
+	IsMember                bool          `json:"is_member"`
+	IsPrivate               bool          `json:"is_private"`
+	IsMpim                  bool          `json:"is_mpim"`
+	Topic                   struct {
+		Value   string `json:"value"`
+		Creator string `json:"creator"`
+		LastSet int    `json:"last_set"`
+	} `json:"topic"`
+	Purpose struct {
+		Value   string `json:"value"`
+		Creator string `json:"creator"`
+		LastSet int    `json:"last_set"`
+	} `json:"purpose"`
+	PreviousNames []interface{} `json:"previous_names"`
+	NumMembers    int           `json:"num_members"`
 }
 
-func (b *Bot) getChannelByID(channelID string) (*Channel, error) {
-	if val, ok := b.KnownChannels[channelID]; ok {
-		return &val, nil
-	}
+type ConversationsListResponse struct {
+	Ok               bool      `json:"ok"`
+	Channels         []Channel `json:"channels"`
+	ResponseMetadata struct {
+		NextCursor string `json:"next_cursor"`
+	} `json:"response_metadata"`
+}
 
-	response, err := b.apiRunner("/api/v4/channels/"+channelID, "GET", "")
-	if err != nil && response.statusCode > 200 {
-		return nil, err
-	}
-	var channel Channel
-	err = json.Unmarshal(response.body, &channel)
+func (b *Bot) getConversationsList() (ConversationsListResponse, error) {
+	rawResponse, err := b.apiCall("/api/conversations.list", "GET", "")
 	if err != nil {
-		return nil, err
+		return ConversationsListResponse{}, errors.Wrap(err, "apiCall failed")
 	}
 
-	b.addKnownChannel(channel)
+	response := ConversationsListResponse{}
 
-	return &channel, nil
+	err = json.Unmarshal(rawResponse.body, &response)
+	return response, err
 }

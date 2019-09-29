@@ -4,7 +4,7 @@ import "github.com/torlenor/abylebotter/events"
 
 // Plugin type interface
 type Plugin interface {
-	ConnectChannels(receiveChannel chan events.ReceiveMessage,
+	ConnectChannels(receiveChannel <-chan events.ReceiveMessage,
 		sendChannel chan events.SendMessage,
 		commandCHannel chan events.Command) error
 

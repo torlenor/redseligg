@@ -94,7 +94,7 @@ func (p *SendMessagesPlugin) IsStarted() bool {
 }
 
 // ConnectChannels connects the given receive, send and command channels to the plugin
-func (p *SendMessagesPlugin) ConnectChannels(receiveChannel chan events.ReceiveMessage,
+func (p *SendMessagesPlugin) ConnectChannels(receiveChannel <-chan events.ReceiveMessage,
 	sendChannel chan events.SendMessage,
 	commandCHannel chan events.Command) error {
 	p.botSendChannel = sendChannel
