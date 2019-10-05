@@ -9,19 +9,23 @@ import (
 func (b *Bot) handleEventMessage(data []byte) {
 	var message EventMessage
 
-	if err := json.Unmarshal([]byte(data), &message); err != nil {
+	if err := json.Unmarshal(data, &message); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
 
-	receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, Ident: message.Channel, Content: message.Text}
-	b.plugins.Send(receiveMessage)
+	if message.Subtype != "message_deleted" {
+		receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, Ident: message.Channel, Content: message.Text}
+		b.plugins.Send(receiveMessage)
+	} else {
+		b.log.Debugf("Received message::message_deleted event on Channel ID %s", message.Channel)
+	}
 }
 
 func (b *Bot) handleEventUserTyping(data []byte) {
 	var userTyping EventUserTyping
 
-	if err := json.Unmarshal([]byte(data), &userTyping); err != nil {
+	if err := json.Unmarshal(data, &userTyping); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -32,7 +36,7 @@ func (b *Bot) handleEventUserTyping(data []byte) {
 func (b *Bot) handleEventDesktopNotification(data []byte) {
 	var desktopNotification EventDesktopNotification
 
-	if err := json.Unmarshal([]byte(data), &desktopNotification); err != nil {
+	if err := json.Unmarshal(data, &desktopNotification); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -43,7 +47,7 @@ func (b *Bot) handleEventDesktopNotification(data []byte) {
 func (b *Bot) handleEventChannelCreated(data []byte) {
 	var channelCreated EventChannelCreated
 
-	if err := json.Unmarshal([]byte(data), &channelCreated); err != nil {
+	if err := json.Unmarshal(data, &channelCreated); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -54,7 +58,7 @@ func (b *Bot) handleEventChannelCreated(data []byte) {
 func (b *Bot) handleEventChannelJoined(data []byte) {
 	var channelJoined EventChannelJoined
 
-	if err := json.Unmarshal([]byte(data), &channelJoined); err != nil {
+	if err := json.Unmarshal(data, &channelJoined); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -65,7 +69,7 @@ func (b *Bot) handleEventChannelJoined(data []byte) {
 func (b *Bot) handleEventChannelLeft(data []byte) {
 	var channelLeft EventChannelLeft
 
-	if err := json.Unmarshal([]byte(data), &channelLeft); err != nil {
+	if err := json.Unmarshal(data, &channelLeft); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -76,7 +80,7 @@ func (b *Bot) handleEventChannelLeft(data []byte) {
 func (b *Bot) handleEventChannelDeleted(data []byte) {
 	var channelDeleted EventChannelDeleted
 
-	if err := json.Unmarshal([]byte(data), &channelDeleted); err != nil {
+	if err := json.Unmarshal(data, &channelDeleted); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -87,7 +91,7 @@ func (b *Bot) handleEventChannelDeleted(data []byte) {
 func (b *Bot) handleEventMemberJoinedChannel(data []byte) {
 	var memberJoinedChannel EventMemberJoinedChannel
 
-	if err := json.Unmarshal([]byte(data), &memberJoinedChannel); err != nil {
+	if err := json.Unmarshal(data, &memberJoinedChannel); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
@@ -98,7 +102,7 @@ func (b *Bot) handleEventMemberJoinedChannel(data []byte) {
 func (b *Bot) handleEventGroupJoined(data []byte) {
 	var groupJoined EventGroupJoined
 
-	if err := json.Unmarshal([]byte(data), &groupJoined); err != nil {
+	if err := json.Unmarshal(data, &groupJoined); err != nil {
 		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}

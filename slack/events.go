@@ -4,6 +4,7 @@ type EventMessage struct {
 	ClientMsgID          string `json:"client_msg_id"`
 	SuppressNotification bool   `json:"suppress_notification"`
 	Type                 string `json:"type"`
+	Subtype              string `json:"subtype"`
 	Text                 string `json:"text"`
 	User                 string `json:"user"`
 	Team                 string `json:"team"`
