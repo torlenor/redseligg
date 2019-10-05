@@ -28,6 +28,9 @@
     [bots.discord.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
 
+    [bots.discord.plugins.random]
+      enabled = false # Set to true to enable Random plugin
+
   [bots.matrix]
     enabled = false # Set this to true to enable the Matrix bot
     server = "INSERT_MATRIX_SERVER_HERE" # Matrix server name to use for connection
@@ -44,6 +47,9 @@
 
     [bots.matrix.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
+
+    [bots.matrix.plugins.random]
+      enabled = false # Set to true to enable Random plugin
 
   [bots.mattermost]
     enabled = false # Set this to true to enable the Mattermost bot
@@ -63,6 +69,9 @@
     [bots.mattermost.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
 
+    [bots.mattermost.plugins.random]
+      enabled = false # Set to true to enable Random plugin
+
   [bots.slack]
     enabled = false # Set this to true to enable the Slack Bot
     workspace = "INSERT_SLACK_WORKSPACE_HERE" # Slack Workspace to use
@@ -77,3 +86,6 @@
     
     [bots.slack.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
+
+    [bots.slack.plugins.random]
+      enabled = false # Set to true to enable Random plugin

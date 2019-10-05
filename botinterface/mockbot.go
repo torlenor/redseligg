@@ -14,7 +14,7 @@ func (b *MockBot) StartSendChannelReceiver() {
 }
 
 func (b *MockBot) Reset() {
-	b.LastSendMessage = events.SendMessage{Type: events.UNKNOWN, Ident: "", Content: ""}
+	b.LastSendMessage = events.SendMessage{Type: events.UNKNOWN, ChannelID: "", Content: ""}
 }
 
 func (b *MockBot) SendMessage(msg events.ReceiveMessage) {

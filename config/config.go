@@ -30,6 +30,9 @@ type Plugins struct {
 	HTTPPing struct {
 		Enabled bool `toml:"enabled"`
 	} `toml:"httpping"`
+	Random struct {
+		Enabled bool `toml:"enabled"`
+	} `toml:"random"`
 }
 
 // MattermostConfig contains config related to the Mattermost component

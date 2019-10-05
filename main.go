@@ -18,6 +18,7 @@ import (
 
 	"github.com/torlenor/abylebotter/plugins/echoplugin"
 	"github.com/torlenor/abylebotter/plugins/httppingplugin"
+	"github.com/torlenor/abylebotter/plugins/randomplugin"
 	"github.com/torlenor/abylebotter/plugins/sendmessagesplugin"
 )
 
@@ -79,6 +80,15 @@ func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
 		plugin, err := httppingplugin.CreateHTTPPingPlugin()
 		if err != nil {
 			log.Errorln("Could not create HTTPPingPlugin: ", err)
+			return err
+		}
+		bot.AddPlugin(&plugin)
+		plugin.Start()
+	}
+	if cfg.Random.Enabled {
+		plugin, err := randomplugin.CreateRandomPlugin()
+		if err != nil {
+			log.Errorln("Could not create RandomPlugin: ", err)
 			return err
 		}
 		bot.AddPlugin(&plugin)
