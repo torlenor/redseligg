@@ -25,6 +25,9 @@
     [bots.discord.plugins.sendmessages]
     enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
 
+    [bots.discord.plugins.httpping]
+      enabled = false # Set to true to enable HTTPPing plugin
+
   [bots.matrix]
     enabled = false # Set this to true to enable the Matrix bot
     server = "INSERT_MATRIX_SERVER_HERE" # Matrix server name to use for connection
@@ -38,6 +41,9 @@
 
     [bots.matrix.plugins.sendmessages]
     enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
+
+    [bots.matrix.plugins.httpping]
+      enabled = false # Set to true to enable HTTPPing plugin
 
   [bots.mattermost]
     enabled = false # Set this to true to enable the Mattermost bot
@@ -54,6 +60,9 @@
     [bots.mattermost.plugins.sendmessages]
       enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
 
+    [bots.mattermost.plugins.httpping]
+      enabled = false # Set to true to enable HTTPPing plugin
+
   [bots.slack]
     enabled = false # Set this to true to enable the Slack Bot
     workspace = "INSERT_SLACK_WORKSPACE_HERE" # Slack Workspace to use
@@ -65,3 +74,6 @@
 
     [bots.slack.plugins.sendmessages]
       enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
+    
+    [bots.slack.plugins.httpping]
+      enabled = false # Set to true to enable HTTPPing plugin

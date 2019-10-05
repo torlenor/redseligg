@@ -27,6 +27,9 @@ type Plugins struct {
 	SendMessage struct {
 		Enabled bool `toml:"enabled"`
 	} `toml:"sendmessages"`
+	HTTPPing struct {
+		Enabled bool `toml:"enabled"`
+	} `toml:"httpping"`
 }
 
 // MattermostConfig contains config related to the Mattermost component

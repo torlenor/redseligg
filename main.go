@@ -17,6 +17,7 @@ import (
 	"github.com/torlenor/abylebotter/logging"
 
 	"github.com/torlenor/abylebotter/plugins/echoplugin"
+	"github.com/torlenor/abylebotter/plugins/httppingplugin"
 	"github.com/torlenor/abylebotter/plugins/sendmessagesplugin"
 )
 
@@ -73,6 +74,15 @@ func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
 		}
 		bot.AddPlugin(&sendMessagesPlugin)
 		sendMessagesPlugin.Start()
+	}
+	if cfg.HTTPPing.Enabled {
+		plugin, err := httppingplugin.CreateHTTPPingPlugin()
+		if err != nil {
+			log.Errorln("Could not create HTTPPingPlugin: ", err)
+			return err
+		}
+		bot.AddPlugin(&plugin)
+		plugin.Start()
 	}
 
 	return nil
