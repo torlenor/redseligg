@@ -9,6 +9,7 @@ import (
 
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/utils"
 )
 
 // HTTPPingPlugin struct holds the private variables for a HTTPPingPlugin
@@ -55,7 +56,7 @@ func (p *HTTPPingPlugin) handleReceivedMessage(receivedMessage events.ReceiveMes
 	log.Printf("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.ChannelID, receivedMessage.Content)
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && strings.HasPrefix(msg, "!httpping") {
-		u := stripCmd(msg, "httpping")
+		u := utils.StripCmd(msg, "httpping")
 		timeMs, err := httpPing(u)
 		var response string
 		if err != nil {

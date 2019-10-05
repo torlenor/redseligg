@@ -7,12 +7,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/utils"
 )
 
 // RandomPlugin struct holds the private variables for a RandomPlugin
 type RandomPlugin struct {
+	log *logrus.Entry
+
 	botReceiveChannel <-chan events.ReceiveMessage
 	botSendChannel    chan events.SendMessage
 
@@ -28,8 +32,10 @@ func (p *RandomPlugin) GetName() string {
 func CreateRandomPlugin() (RandomPlugin, error) {
 	log := logging.Get("RandomPlugin")
 
-	log.Printf("RandomPlugin is CREATING itself")
-	ep := RandomPlugin{}
+	log.Info("RandomPlugin is CREATING itself")
+	ep := RandomPlugin{
+		log: log,
+	}
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -41,12 +47,10 @@ func random(max int) int {
 }
 
 func (p *RandomPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
-	log := logging.Get("RandomPlugin")
-
-	log.Printf("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.ChannelID, receivedMessage.Content)
+	p.log.Tracef("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.ChannelID, receivedMessage.Content)
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && strings.HasPrefix(msg, "!roll") {
-		u := stripCmd(msg, "roll")
+		u := utils.StripCmd(msg, "roll")
 		if len(msg) == len("!roll") && u == "!roll" {
 			u = "100"
 		}
@@ -64,12 +68,10 @@ func (p *RandomPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessa
 }
 
 func (p *RandomPlugin) receiveMessageRunner() {
-	log := logging.Get("RandomPlugin")
-
 	for receivedMessage := range p.botReceiveChannel {
 		p.handleReceivedMessage(receivedMessage)
 	}
-	log.Printf("Automatically SHUTTING DOWN because bot closed the receive channel")
+	p.log.Info("Automatically SHUTTING DOWN because bot closed the receive channel")
 	p.isStarted = false
 }
 

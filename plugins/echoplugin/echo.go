@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/utils"
 )
 
 // EchoPlugin struct holds the private variables for a EchoPlugin
@@ -47,8 +48,8 @@ func (p *EchoPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage
 	p.log.Tracef("Received Message with Type = %s, UserID = %s, content = %s", receivedMessage.Type.String(), receivedMessage.UserID, receivedMessage.Content)
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && (!p.onlyOnWhisper || receivedMessage.Type == events.WHISPER) && strings.HasPrefix(msg, "!echo") {
-		p.log.Tracef("Echoing message back to user = %s, content = %s", receivedMessage.User, stripCmd(msg, "echo"))
-		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, ChannelID: receivedMessage.ChannelID, Content: stripCmd(msg, "echo")}
+		p.log.Tracef("Echoing message back to user = %s, content = %s", receivedMessage.User, utils.StripCmd(msg, "echo"))
+		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, ChannelID: receivedMessage.ChannelID, Content: utils.StripCmd(msg, "echo")}
 	}
 }
 
