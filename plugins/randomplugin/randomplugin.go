@@ -37,7 +37,7 @@ func CreateRandomPlugin() (RandomPlugin, error) {
 }
 
 func random(max int) int {
-	return rand.Intn(max)
+	return rand.Intn(max + 1)
 }
 
 func (p *RandomPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
