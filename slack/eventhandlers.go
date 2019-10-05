@@ -21,7 +21,7 @@ func (b *Bot) handleEventMessage(data []byte) {
 	}
 
 	if message.Subtype != "message_deleted" {
-		receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, ChannelID: message.Channel, Content: cleanupMessage(message.Text)}
+		receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, UserID: message.User, ChannelID: message.Channel, Content: cleanupMessage(message.Text)}
 		b.plugins.Send(receiveMessage)
 	} else {
 		b.log.Debugf("Received message::message_deleted event on Channel ID %s", message.Channel)
