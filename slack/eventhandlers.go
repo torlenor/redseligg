@@ -15,15 +15,7 @@ func (b *Bot) handleEventMessage(data []byte) {
 	}
 
 	receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, Ident: message.Channel, Content: message.Text}
-
-	for plugin, pluginChannel := range b.receivers {
-		b.log.Debugln("Notifying plugin", plugin.GetName(), "about new message/whisper")
-		select {
-		case pluginChannel <- receiveMessage:
-		default:
-		}
-	}
-
+	b.plugins.Send(receiveMessage)
 }
 
 func (b *Bot) handleEventUserTyping(data []byte) {

@@ -11,6 +11,7 @@ import (
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/plugincontainer"
 	"github.com/torlenor/abylebotter/plugins"
 )
 
@@ -46,30 +47,8 @@ type Bot struct {
 
 	ws webSocketClient
 
-	sendMessageChan chan events.SendMessage
-
-	rtmConnectResponse RtmConnectResponse
-
-	receivers map[plugins.Plugin]chan events.ReceiveMessage
-
-	knownPlugins []plugins.Plugin
-
 	channels channelManager
-}
-
-// GetReceiveMessageChannel returns the channel which is used to notify
-// about received messages from the bot
-func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) <-chan events.ReceiveMessage {
-	b.log.Debugln("Creating receiveChannel for Plugin", plugin.GetName())
-	b.receivers[plugin] = make(chan events.ReceiveMessage)
-	return b.receivers[plugin]
-}
-
-// GetSendMessageChannel returns the channel which is used to
-// send messages using the bot. For SlackBot these messages
-// can be normal channel messages, whispers
-func (b Bot) GetSendMessageChannel() chan events.SendMessage {
-	return b.sendMessageChan
+	plugins  plugincontainer.PluginContainer
 }
 
 func (b *Bot) startSlackBot(doneChannel chan struct{}) {
@@ -130,13 +109,12 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 	log.Printf("SlackBot is CREATING itself")
 
 	b := Bot{
-		config:          cfg,
-		log:             log,
-		receivers:       make(map[plugins.Plugin]chan events.ReceiveMessage),
-		sendMessageChan: make(chan events.SendMessage),
-		ws:              ws,
+		config: cfg,
+		log:    log,
+		ws:     ws,
 
 		channels: newChannelManager(),
+		plugins:  plugincontainer.New(),
 	}
 
 	if len(b.config.Token) == 0 {
@@ -147,7 +125,6 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error connecting to Slack servers: %s", err)
 	}
-	b.rtmConnectResponse = rtmConnectResponse
 
 	err = b.ws.Dial(rtmConnectResponse.URL)
 	if err != nil {
@@ -177,7 +154,7 @@ func (b *Bot) populateChannelList() error {
 }
 
 func (b *Bot) startSendChannelReceiver() {
-	for sendMsg := range b.sendMessageChan {
+	for sendMsg := range b.plugins.SendChannel() {
 		switch sendMsg.Type {
 		case events.MESSAGE:
 			err := b.sendMessage(sendMsg.Ident, sendMsg.Content)
@@ -197,7 +174,7 @@ func (b *Bot) startSendChannelReceiver() {
 
 // Start the Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
-	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", len(b.knownPlugins))
+	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", b.plugins.Size())
 	go b.startSlackBot(doneChannel)
 	go b.startSendChannelReceiver()
 	b.log.Infoln("SlackBot is RUNNING")
@@ -213,9 +190,9 @@ func (b *Bot) Stop() {
 		b.log.Warnln("Error when writing close message to ws:", err)
 	}
 
-	b.disconnectReceivers()
 	b.ws.Stop()
 
+	b.plugins.RemoveAll()
 	b.log.Infoln("SlackBot is SHUT DOWN")
 }
 
@@ -233,13 +210,5 @@ func (b *Bot) Status() botinterface.BotStatus {
 // adds it to the SlackBot by connecting all the required
 // channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
-	b.knownPlugins = append(b.knownPlugins, plugin)
-}
-
-func (b *Bot) disconnectReceivers() {
-	for plugin, pluginChannel := range b.receivers {
-		b.log.Debugln("Disconnecting Plugin", plugin.GetName())
-		defer close(pluginChannel)
-	}
+	b.plugins.Add(plugin)
 }

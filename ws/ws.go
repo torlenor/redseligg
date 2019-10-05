@@ -42,7 +42,7 @@ type Client struct {
 // NewClient prepares a new ws Client
 func NewClient() *Client {
 	log := logging.Get("WSClient")
-	log.Printf("WS Client is CREATING itself")
+	log.Debug("WS Client is CREATING itself")
 
 	c := Client{
 		log: log,
@@ -86,9 +86,6 @@ func (c *Client) Stop() {
 // ReadMessage can be used to read the next message from WebSocket.
 // it blocks until somehing is received or the ws is closed.
 func (c *Client) ReadMessage() (int, []byte, error) {
-	// c.startStopMutex.Lock()
-	// defer c.startStopMutex.Unlock()
-
 	return c.ws.ReadMessage()
 }
 
