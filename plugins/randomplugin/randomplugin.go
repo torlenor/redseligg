@@ -47,6 +47,9 @@ func (p *RandomPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessa
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && strings.HasPrefix(msg, "!roll") {
 		u := stripCmd(msg, "roll")
+		if len(msg) == len("!roll") && u == "!roll" {
+			u = "100"
+		}
 		var response string
 		num, err := strconv.Atoi(u)
 		if err != nil {
