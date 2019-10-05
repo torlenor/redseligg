@@ -2,9 +2,15 @@ package slack
 
 import (
 	"encoding/json"
+	"regexp"
 
 	"github.com/torlenor/abylebotter/events"
 )
+
+func cleanupMessage(msg string) string {
+	var re = regexp.MustCompile(`(?m)<(https?://(\w|\.)*)(>|.*>)`)
+	return re.ReplaceAllString(msg, "$1")
+}
 
 func (b *Bot) handleEventMessage(data []byte) {
 	var message EventMessage
@@ -15,7 +21,7 @@ func (b *Bot) handleEventMessage(data []byte) {
 	}
 
 	if message.Subtype != "message_deleted" {
-		receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, Ident: message.Channel, Content: message.Text}
+		receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, Ident: message.Channel, Content: cleanupMessage(message.Text)}
 		b.plugins.Send(receiveMessage)
 	} else {
 		b.log.Debugf("Received message::message_deleted event on Channel ID %s", message.Channel)
