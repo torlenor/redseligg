@@ -57,7 +57,7 @@ func (p *RandomPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessa
 		} else if num <= 0 {
 			response = fmt.Sprintf("Number must be > 0")
 		} else {
-			response = strconv.Itoa(random(num))
+			response = "<@" + receivedMessage.UserID + "> rolled *" + strconv.Itoa(random(num)) + "* in [0," + strconv.Itoa(num) + "]"
 		}
 		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, ChannelID: receivedMessage.ChannelID, Content: response}
 	}
