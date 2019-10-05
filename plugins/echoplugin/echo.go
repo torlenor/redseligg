@@ -11,7 +11,6 @@ import (
 type EchoPlugin struct {
 	botReceiveChannel <-chan events.ReceiveMessage
 	botSendChannel    chan events.SendMessage
-	botCommandChannel chan events.Command
 
 	onlyOnWhisper bool
 
@@ -75,13 +74,11 @@ func (p *EchoPlugin) IsStarted() bool {
 	return p.isStarted
 }
 
-// ConnectChannels connects the given receive, send and command channels to the plugin
+// ConnectChannels connects the given receive and send channels to the plugin
 func (p *EchoPlugin) ConnectChannels(receiveChannel <-chan events.ReceiveMessage,
-	sendChannel chan events.SendMessage,
-	commandCHannel chan events.Command) error {
+	sendChannel chan events.SendMessage) error {
 	p.botReceiveChannel = receiveChannel
 	p.botSendChannel = sendChannel
-	p.botCommandChannel = commandCHannel
 
 	return nil
 }

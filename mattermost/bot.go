@@ -35,7 +35,6 @@ type Bot struct {
 	ws *websocket.Conn
 
 	sendMessageChan chan events.SendMessage
-	commandChan     chan events.Command
 
 	token string
 
@@ -73,12 +72,6 @@ func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.Receiv
 // can be normal channel messages, whispers
 func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
-}
-
-// GetCommandChannel gives a channel to control the bot from
-// a plugin
-func (b Bot) GetCommandChannel() chan events.Command {
-	return b.commandChan
 }
 
 func (b *Bot) startMattermostBot(doneChannel chan struct{}) {
@@ -125,7 +118,7 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 		log:             log,
 		receivers:       make(map[plugins.Plugin]chan events.ReceiveMessage),
 		sendMessageChan: make(chan events.SendMessage),
-		commandChan:     make(chan events.Command),
+
 		lastWsSeqNumber: 0,
 
 		KnownUsers:     make(map[string]User),
@@ -176,23 +169,11 @@ func (b *Bot) startSendChannelReceiver() {
 	}
 }
 
-func (b *Bot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		switch cmd.Command {
-		case string("DemoCommand"):
-			b.log.Infoln("Received DemoCommand with server name" + cmd.Payload)
-		default:
-			b.log.Errorln("Received unhandeled command" + cmd.Command)
-		}
-	}
-}
-
 // Start the Discord Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
 	b.log.Infoln("MattermostBot is STARTING")
 	go b.startMattermostBot(doneChannel)
 	go b.startSendChannelReceiver()
-	go b.startCommandChannelReceiver()
 	b.log.Infoln("MattermostBot is RUNNING")
 }
 
@@ -223,7 +204,7 @@ func (b *Bot) Status() botinterface.BotStatus {
 // adds it to the MattermostBot by connecting all the required
 // channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel(), b.GetCommandChannel())
+	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
 }
 

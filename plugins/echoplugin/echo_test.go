@@ -18,13 +18,12 @@ func TestEcho(t *testing.T) {
 	var bot botinterface.MockBot
 	bot.ReceiveMessageChan = make(chan events.ReceiveMessage)
 	bot.SendMessageChan = make(chan events.SendMessage)
-	bot.CommandChan = make(chan events.Command)
 
 	bot.Reset()
 
 	go bot.StartSendChannelReceiver()
 
-	err = echoPlugin.ConnectChannels(bot.ReceiveMessageChan, bot.SendMessageChan, bot.CommandChan)
+	err = echoPlugin.ConnectChannels(bot.ReceiveMessageChan, bot.SendMessageChan)
 	if err != nil {
 		t.Fatalf("Error connecting channels")
 	}

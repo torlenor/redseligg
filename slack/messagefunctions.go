@@ -1,8 +1,6 @@
 package slack
 
-import (
-	"github.com/pkg/errors"
-)
+import "github.com/pkg/errors"
 
 type SendMessage struct {
 	ID      int    `json:"id"`
@@ -20,7 +18,7 @@ func (b *Bot) sendMessage(channelID string, content string) error {
 		Text:    content,
 	}
 
-	err := b.ws.WriteJSON(msg)
+	err := b.ws.SendJSONMessage(msg)
 	if err != nil {
 		return errors.New("Sending Message failed: " + err.Error())
 	}

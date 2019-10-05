@@ -6,6 +6,7 @@ import (
 
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/slack"
+	"github.com/torlenor/abylebotter/ws"
 
 	"github.com/torlenor/abylebotter/discord"
 	"github.com/torlenor/abylebotter/fake"
@@ -72,7 +73,7 @@ func mattermostBotCreator(config config.MattermostConfig) *mattermost.Bot {
 }
 
 func slackBotCreator(config config.SlackConfig) (*slack.Bot, error) {
-	bot, err := slack.CreateSlackBot(config)
+	bot, err := slack.CreateSlackBot(config, ws.NewClient())
 	if err != nil {
 		return nil, fmt.Errorf("Error creating SlackBot: %s", err)
 	}

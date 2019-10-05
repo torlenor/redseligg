@@ -15,7 +15,6 @@ var (
 type Bot struct {
 	receiveMessageChan chan events.ReceiveMessage
 	sendMessageChan    chan events.SendMessage
-	commandChan        chan events.Command
 
 	pollingDone chan bool
 
@@ -34,12 +33,6 @@ func (b Bot) GetReceiveMessageChannel() chan events.ReceiveMessage {
 // can be normal channel messages, whispers
 func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
-}
-
-// GetCommandChannel gives a channel to control the bot from
-// a plugin
-func (b Bot) GetCommandChannel() chan events.Command {
-	return b.commandChan
 }
 
 func (b *Bot) startBot(doneChannel chan struct{}) {
@@ -64,7 +57,6 @@ func CreateFakeBot() (*Bot, error) {
 
 	b.receiveMessageChan = make(chan events.ReceiveMessage)
 	b.sendMessageChan = make(chan events.SendMessage)
-	b.commandChan = make(chan events.Command)
 
 	return &b, nil
 }
@@ -81,23 +73,11 @@ func (b *Bot) startSendChannelReceiver() {
 	}
 }
 
-func (b *Bot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		switch cmd.Command {
-		case string("DemoCommand"):
-			log.Println("Received DemoCommand with server name" + cmd.Payload)
-		default:
-			log.Println("Received unhandeled command" + cmd.Command)
-		}
-	}
-}
-
 // Start the Fake Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
 	log.Println("FakeBot is STARTING")
 	go b.startBot(doneChannel)
 	go b.startSendChannelReceiver()
-	go b.startCommandChannelReceiver()
 }
 
 // Stop the Fake Bot
@@ -116,6 +96,6 @@ func (b *Bot) Status() botinterface.BotStatus {
 
 // AddPlugin adds the give plugin to the current bot
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel(), b.GetCommandChannel())
+	plugin.ConnectChannels(b.GetReceiveMessageChannel(), b.GetSendMessageChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
 }

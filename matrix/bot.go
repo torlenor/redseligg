@@ -18,7 +18,6 @@ type Bot struct {
 	api api
 
 	sendMessageChan chan events.SendMessage
-	commandChan     chan events.Command
 
 	pollingDone chan bool
 
@@ -48,12 +47,6 @@ func (b *Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
 }
 
-// GetCommandChannel gives a channel to control the bot from
-// a plugin
-func (b *Bot) GetCommandChannel() chan events.Command {
-	return b.commandChan
-}
-
 // The createMatrixBotWithAPI creates a new instance of a DiscordBot using the api interface api
 func createMatrixBotWithAPI(api api, username string, password string, token string) (*Bot, error) {
 	log.Printf("MatrixBot is CREATING itself")
@@ -75,7 +68,6 @@ func createMatrixBotWithAPI(api api, username string, password string, token str
 	b.pollingInterval = 1000 * time.Millisecond
 
 	b.sendMessageChan = make(chan events.SendMessage)
-	b.commandChan = make(chan events.Command)
 
 	b.knownRooms = make(map[string]string)
 	b.knownRoomIDs = make(map[string]string)
@@ -98,7 +90,7 @@ func (b *Bot) Status() botinterface.BotStatus {
 
 // AddPlugin adds the given plugin to the current bot
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel(), b.GetCommandChannel())
+	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
 	log.Debugln("Connected plugin", plugin.GetName())
 }

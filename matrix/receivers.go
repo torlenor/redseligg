@@ -19,14 +19,3 @@ func (b *Bot) startSendChannelReceiver() {
 		}
 	}
 }
-
-func (b *Bot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		switch cmd.Command {
-		case string("DemoCommand"):
-			log.Println("Received DemoCommand with server name" + cmd.Payload)
-		default:
-			log.Println("Received unhandeled command" + cmd.Command)
-		}
-	}
-}

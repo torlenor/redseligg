@@ -21,8 +21,7 @@ var registerToAPI = func(path string, f func(http.ResponseWriter, *http.Request)
 type SendMessagesPlugin struct {
 	log *logrus.Entry
 
-	botSendChannel    chan events.SendMessage
-	botCommandChannel chan events.Command
+	botSendChannel chan events.SendMessage
 
 	isStarted bool
 }
@@ -93,12 +92,10 @@ func (p *SendMessagesPlugin) IsStarted() bool {
 	return p.isStarted
 }
 
-// ConnectChannels connects the given receive, send and command channels to the plugin
+// ConnectChannels connects the given receive and send channels to the plugin
 func (p *SendMessagesPlugin) ConnectChannels(receiveChannel <-chan events.ReceiveMessage,
-	sendChannel chan events.SendMessage,
-	commandCHannel chan events.Command) error {
+	sendChannel chan events.SendMessage) error {
 	p.botSendChannel = sendChannel
-	p.botCommandChannel = commandCHannel
 
 	return nil
 }

@@ -27,6 +27,16 @@ func (s stats) toString() string {
 		s.messagesSent, s.messagesReceived, s.whispersSent, s.whispersReceived)
 }
 
+type webSocketClient interface {
+	Dial(wsURL string) error
+	Stop()
+
+	ReadMessage() (int, []byte, error)
+
+	SendMessage(messageType int, data []byte) error
+	SendJSONMessage(v interface{}) error
+}
+
 // The Bot struct holds parameters related to the bot
 type Bot struct {
 	config config.SlackConfig
@@ -34,10 +44,9 @@ type Bot struct {
 
 	stats stats
 
-	ws *websocket.Conn
+	ws webSocketClient
 
 	sendMessageChan chan events.SendMessage
-	commandChan     chan events.Command
 
 	rtmConnectResponse RtmConnectResponse
 
@@ -61,12 +70,6 @@ func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) <-chan events.Rece
 // can be normal channel messages, whispers
 func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
-}
-
-// GetCommandChannel gives a channel to control the bot from
-// a plugin
-func (b Bot) GetCommandChannel() chan events.Command {
-	return b.commandChan
 }
 
 func (b *Bot) startSlackBot(doneChannel chan struct{}) {
@@ -122,7 +125,7 @@ func (b *Bot) startSlackBot(doneChannel chan struct{}) {
 }
 
 // CreateSlackBot creates a new instance of a SlackBot
-func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
+func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 	log := logging.Get("SlackBot")
 	log.Printf("SlackBot is CREATING itself")
 
@@ -131,7 +134,7 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 		log:             log,
 		receivers:       make(map[plugins.Plugin]chan events.ReceiveMessage),
 		sendMessageChan: make(chan events.SendMessage),
-		commandChan:     make(chan events.Command),
+		ws:              ws,
 
 		channels: newChannelManager(),
 	}
@@ -146,11 +149,10 @@ func CreateSlackBot(cfg config.SlackConfig) (*Bot, error) {
 	}
 	b.rtmConnectResponse = rtmConnectResponse
 
-	ws, err := b.dialGateway(rtmConnectResponse.URL)
+	err = b.ws.Dial(rtmConnectResponse.URL)
 	if err != nil {
-		return nil, fmt.Errorf(err.Error())
+		return nil, err
 	}
-	b.ws = ws
 
 	err = b.populateChannelList()
 	if err != nil {
@@ -193,23 +195,11 @@ func (b *Bot) startSendChannelReceiver() {
 	}
 }
 
-func (b *Bot) startCommandChannelReceiver() {
-	for cmd := range b.commandChan {
-		switch cmd.Command {
-		case string("DemoCommand"):
-			b.log.Infoln("Received DemoCommand with server name" + cmd.Payload)
-		default:
-			b.log.Errorln("Received unhandled command" + cmd.Command)
-		}
-	}
-}
-
 // Start the Bot
 func (b *Bot) Start(doneChannel chan struct{}) {
 	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", len(b.knownPlugins))
 	go b.startSlackBot(doneChannel)
 	go b.startSendChannelReceiver()
-	go b.startCommandChannelReceiver()
 	b.log.Infoln("SlackBot is RUNNING")
 }
 
@@ -217,12 +207,14 @@ func (b *Bot) Start(doneChannel chan struct{}) {
 func (b *Bot) Stop() {
 	b.log.Infoln("SlackBot is SHUTING DOWN")
 	b.log.Infof("SlackBot Stats:\n%s", b.stats.toString())
-	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+
+	err := b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
-		b.log.Errorln("write close:", err)
+		b.log.Warnln("Error when writing close message to ws:", err)
 	}
 
 	b.disconnectReceivers()
+	b.ws.Stop()
 
 	b.log.Infoln("SlackBot is SHUT DOWN")
 }
@@ -241,7 +233,7 @@ func (b *Bot) Status() botinterface.BotStatus {
 // adds it to the SlackBot by connecting all the required
 // channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel(), b.GetCommandChannel())
+	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
 	b.knownPlugins = append(b.knownPlugins, plugin)
 }
 

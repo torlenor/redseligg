@@ -28,7 +28,6 @@ func (b *Bot) Start(doneChannel chan struct{}) {
 	log.Println("MatrixBot is STARTING")
 	go b.startBot(doneChannel)
 	go b.startSendChannelReceiver()
-	go b.startCommandChannelReceiver()
 	log.Println("MatrixBot is RUNNING")
 }
 
