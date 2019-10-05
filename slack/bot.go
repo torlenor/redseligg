@@ -48,7 +48,9 @@ type Bot struct {
 	ws webSocketClient
 
 	channels channelManager
-	plugins  plugincontainer.PluginContainer
+	users    userManager
+
+	plugins plugincontainer.PluginContainer
 }
 
 func (b *Bot) startSlackBot(doneChannel chan struct{}) {
@@ -114,7 +116,9 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 		ws:     ws,
 
 		channels: newChannelManager(),
-		plugins:  plugincontainer.New(),
+		users:    newUserManager(),
+
+		plugins: plugincontainer.New(),
 	}
 
 	if len(b.config.Token) == 0 {
@@ -136,6 +140,11 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 		return nil, fmt.Errorf(err.Error())
 	}
 
+	err = b.populateUserList()
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
+	}
+
 	return &b, nil
 }
 
@@ -150,6 +159,20 @@ func (b *Bot) populateChannelList() error {
 	}
 
 	b.log.Infof("Added %d known channels", b.channels.Len())
+	return nil
+}
+
+func (b *Bot) populateUserList() error {
+	users, err := b.getUsers()
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		b.users.addKnownUser(user)
+	}
+
+	b.log.Infof("Added %d known users", b.users.Len())
 	return nil
 }
 

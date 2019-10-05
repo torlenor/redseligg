@@ -96,3 +96,100 @@ func (b *Bot) getConversations() (Channels, error) {
 
 	return channels, nil
 }
+
+type User struct {
+	ID       string `json:"id"`
+	TeamID   string `json:"team_id"`
+	Name     string `json:"name"`
+	Deleted  bool   `json:"deleted"`
+	Color    string `json:"color"`
+	RealName string `json:"real_name"`
+	Tz       string `json:"tz"`
+	TzLabel  string `json:"tz_label"`
+	TzOffset int    `json:"tz_offset"`
+	Profile  struct {
+		AvatarHash            string `json:"avatar_hash"`
+		StatusText            string `json:"status_text"`
+		StatusEmoji           string `json:"status_emoji"`
+		RealName              string `json:"real_name"`
+		DisplayName           string `json:"display_name"`
+		RealNameNormalized    string `json:"real_name_normalized"`
+		DisplayNameNormalized string `json:"display_name_normalized"`
+		Email                 string `json:"email"`
+		Image24               string `json:"image_24"`
+		Image32               string `json:"image_32"`
+		Image48               string `json:"image_48"`
+		Image72               string `json:"image_72"`
+		Image192              string `json:"image_192"`
+		Image512              string `json:"image_512"`
+		Team                  string `json:"team"`
+		FirstName             string `json:"first_name"`
+		LastName              string `json:"last_name"`
+		Title                 string `json:"title"`
+		Phone                 string `json:"phone"`
+		Skype                 string `json:"skype"`
+	} `json:"profile"`
+	IsAdmin           bool `json:"is_admin"`
+	IsOwner           bool `json:"is_owner"`
+	IsPrimaryOwner    bool `json:"is_primary_owner"`
+	IsRestricted      bool `json:"is_restricted"`
+	IsUltraRestricted bool `json:"is_ultra_restricted"`
+	IsBot             bool `json:"is_bot"`
+	Updated           int  `json:"updated"`
+	IsAppUser         bool `json:"is_app_user"`
+	Has2Fa            bool `json:"has_2fa"`
+}
+
+type Users []User
+
+type UserListResponse struct {
+	Ok               bool  `json:"ok"`
+	Members          Users `json:"members"`
+	CacheTs          int   `json:"cache_ts"`
+	ResponseMetadata struct {
+		NextCursor string `json:"next_cursor"`
+	} `json:"response_metadata"`
+}
+
+func (b *Bot) getUserList(cursor string) (UserListResponse, error) {
+	args := ""
+	if len(cursor) > 0 {
+		args = "cursor=" + cursor
+	}
+	rawResponse, err := b.apiCall("/api/users.list", "GET", args, "")
+	if err != nil {
+		return UserListResponse{}, errors.Wrap(err, "apiCall failed")
+	}
+
+	response := UserListResponse{}
+	err = json.Unmarshal(rawResponse.body, &response)
+
+	if err == nil && !response.Ok {
+		return UserListResponse{}, fmt.Errorf("Error getting users.list: Received not OK")
+	} else if err != nil {
+		return UserListResponse{}, err
+	}
+
+	return response, nil
+}
+
+func (b *Bot) getUsers() (Users, error) {
+	usersList, err := b.getUserList("")
+	if err != nil {
+		return Users{}, fmt.Errorf("Error getting users.list: %s", err)
+	}
+
+	users := usersList.Members
+
+	nextCursor := usersList.ResponseMetadata.NextCursor
+	for len(nextCursor) != 0 {
+		conversationsList, err := b.getConversationsList(nextCursor)
+		if err != nil {
+			return Users{}, fmt.Errorf("Error getting users.list: %s", err)
+		}
+		users = append(users, usersList.Members...)
+		nextCursor = conversationsList.ResponseMetadata.NextCursor
+	}
+
+	return users, nil
+}
