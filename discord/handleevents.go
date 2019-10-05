@@ -17,10 +17,10 @@ func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
 	var receiveMessage events.ReceiveMessage
 	if b.getMessageType(newMessageCreate) == events.MESSAGE {
 		b.stats.messagesReceived++
-		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
+		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	} else {
 		b.stats.whispersReceived++
-		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), Ident: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
+		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), UserID: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
 	}
 
 	for plugin, pluginChannel := range b.receivers {

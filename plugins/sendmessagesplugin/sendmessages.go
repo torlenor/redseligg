@@ -40,7 +40,7 @@ func CreateSendMessagesPlugin() (SendMessagesPlugin, error) {
 }
 
 func (p *SendMessagesPlugin) handleSendMessage(ident string, content string) {
-	p.botSendChannel <- events.SendMessage{Type: events.MESSAGE, Ident: ident, Content: content}
+	p.botSendChannel <- events.SendMessage{Type: events.MESSAGE, ChannelID: ident, Content: content}
 }
 
 // Message is a simple struct holding Ident and Content for a message to send

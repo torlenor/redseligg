@@ -155,12 +155,12 @@ func (b *Bot) startSendChannelReceiver() {
 	for sendMsg := range b.sendMessageChan {
 		switch sendMsg.Type {
 		case events.MESSAGE:
-			err := b.sendMessage(sendMsg.Ident, sendMsg.Content)
+			err := b.sendMessage(sendMsg.ChannelID, sendMsg.Content)
 			if err != nil {
 				b.log.Errorln("Error sending message:", err)
 			}
 		case events.WHISPER:
-			err := b.sendWhisper(sendMsg.Ident, sendMsg.Content)
+			err := b.sendWhisper(sendMsg.ChannelID, sendMsg.Content)
 			if err != nil {
 				b.log.Errorln("Error sending whisper:", err)
 			}

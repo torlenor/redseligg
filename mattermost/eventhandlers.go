@@ -54,7 +54,7 @@ func (b *Bot) handleEventPosted(data []byte) {
 		ident = post.ChannelID
 	}
 
-	receiveMessage := events.ReceiveMessage{Type: messageType, Ident: ident, Content: post.Message}
+	receiveMessage := events.ReceiveMessage{Type: messageType, ChannelID: ident, Content: post.Message}
 
 	_, _ = b.getUserByID(post.UserID)
 

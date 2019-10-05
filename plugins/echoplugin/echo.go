@@ -3,12 +3,15 @@ package echoplugin
 import (
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
 )
 
 // EchoPlugin struct holds the private variables for a EchoPlugin
 type EchoPlugin struct {
+	log *logrus.Entry
+
 	botReceiveChannel <-chan events.ReceiveMessage
 	botSendChannel    chan events.SendMessage
 
@@ -27,7 +30,10 @@ func CreateEchoPlugin() (EchoPlugin, error) {
 	log := logging.Get("EchoPlugin")
 
 	log.Printf("EchoPlugin is CREATING itself")
-	ep := EchoPlugin{}
+	ep := EchoPlugin{
+		log: log,
+	}
+
 	return ep, nil
 }
 
@@ -38,13 +44,11 @@ func (p *EchoPlugin) SetOnlyOnWhisper(onlyOnWhisper bool) {
 }
 
 func (p *EchoPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
-	log := logging.Get("EchoPlugin")
-
-	log.Printf("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.Ident, receivedMessage.Content)
+	p.log.Tracef("Received Message with Type = %s, UserID = %s, content = %s", receivedMessage.Type.String(), receivedMessage.UserID, receivedMessage.Content)
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && (!p.onlyOnWhisper || receivedMessage.Type == events.WHISPER) && strings.HasPrefix(msg, "!echo") {
-		log.Printf("Echoing message back to user = %s, content = %s", receivedMessage.Ident, stripCmd(msg, "echo"))
-		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, Ident: receivedMessage.Ident, Content: stripCmd(msg, "echo")}
+		p.log.Tracef("Echoing message back to user = %s, content = %s", receivedMessage.User, stripCmd(msg, "echo"))
+		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, ChannelID: receivedMessage.ChannelID, Content: stripCmd(msg, "echo")}
 	}
 }
 

@@ -157,12 +157,12 @@ func (b *Bot) startSendChannelReceiver() {
 	for sendMsg := range b.plugins.SendChannel() {
 		switch sendMsg.Type {
 		case events.MESSAGE:
-			err := b.sendMessage(sendMsg.Ident, sendMsg.Content)
+			err := b.sendMessage(sendMsg.ChannelID, sendMsg.Content)
 			if err != nil {
 				b.log.Errorln("Error sending message:", err)
 			}
 		case events.WHISPER:
-			err := b.sendWhisper(sendMsg.Ident, sendMsg.Content)
+			err := b.sendWhisper(sendMsg.ChannelID, sendMsg.Content)
 			if err != nil {
 				b.log.Errorln("Error sending whisper:", err)
 			}
@@ -211,4 +211,18 @@ func (b *Bot) Status() botinterface.BotStatus {
 // channels and starting it
 func (b *Bot) AddPlugin(plugin plugins.Plugin) {
 	b.plugins.Add(plugin)
+}
+
+func (b *Bot) checkRequirements(rq plugins.RequirementsProvider) error {
+	features := map[string]bool{
+		"SOMEFEATURE":  true,
+		"OTHERFEATURE": true,
+	}
+	for req, needed := range rq.GetRequirements() {
+		if ok, _ := features[req]; !ok && needed {
+			return fmt.Errorf("Plugin requires %s which SlackBot does not support", req)
+		}
+	}
+
+	return nil
 }

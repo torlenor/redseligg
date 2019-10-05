@@ -52,7 +52,7 @@ func httpPing(u string) (int, error) {
 func (p *HTTPPingPlugin) handleReceivedMessage(receivedMessage events.ReceiveMessage) {
 	log := logging.Get("HTTPPingPlugin")
 
-	log.Printf("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.Ident, receivedMessage.Content)
+	log.Printf("Received Message with Type = %s, Ident = %s, content = %s", receivedMessage.Type.String(), receivedMessage.ChannelID, receivedMessage.Content)
 	msg := strings.Trim(receivedMessage.Content, " ")
 	if p.isStarted && strings.HasPrefix(msg, "!httpping") {
 		u := stripCmd(msg, "httpping")
@@ -63,7 +63,7 @@ func (p *HTTPPingPlugin) handleReceivedMessage(receivedMessage events.ReceiveMes
 		} else {
 			response = fmt.Sprintf("SUCCESS. Request took %d ms", timeMs)
 		}
-		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, Ident: receivedMessage.Ident, Content: response}
+		p.botSendChannel <- events.SendMessage{Type: receivedMessage.Type, ChannelID: receivedMessage.ChannelID, Content: response}
 	}
 }
 

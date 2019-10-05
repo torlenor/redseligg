@@ -12,3 +12,7 @@ type Plugin interface {
 	Start()
 	Stop()
 }
+
+type RequirementsProvider interface {
+	GetRequirements() map[string]bool
+}
