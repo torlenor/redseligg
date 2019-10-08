@@ -74,9 +74,7 @@ func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
 }
 
-func (b *Bot) startMattermostBot(doneChannel chan struct{}) {
-	defer close(doneChannel)
-
+func (b *Bot) startMattermostBot() {
 	for {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
@@ -170,9 +168,9 @@ func (b *Bot) startSendChannelReceiver() {
 }
 
 // Start the Discord Bot
-func (b *Bot) Start(doneChannel chan struct{}) {
+func (b *Bot) Start() {
 	b.log.Infoln("MattermostBot is STARTING")
-	go b.startMattermostBot(doneChannel)
+	go b.startMattermostBot()
 	go b.startSendChannelReceiver()
 	b.log.Infoln("MattermostBot is RUNNING")
 }

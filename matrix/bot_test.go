@@ -181,16 +181,10 @@ func TestMatrixBotStartingAndStopping(t *testing.T) {
 		t.Fatalf("Could not create Matrix Bot")
 	}
 
-	var done = make(chan struct{})
-	go bot.Start(done)
+	go bot.Start()
 	time.Sleep(time.Millisecond * 100)
 	go bot.Stop()
 	time.Sleep(time.Millisecond * 100)
-
-	_, opened := <-done
-	if opened != false {
-		t.Fatalf("done channel was not closed by MatrixBot on quit")
-	}
 }
 
 func TestMatrixBotAddRemoveRoom(t *testing.T) {

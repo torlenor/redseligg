@@ -105,8 +105,7 @@ func (b Bot) apiCall(path string, method string, body string) (r []byte, e error
 	return ioutil.ReadAll(response.Body)
 }
 
-func (b *Bot) startDiscordBot(doneChannel chan struct{}) {
-	defer close(doneChannel)
+func (b *Bot) startDiscordBot() {
 	for {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
@@ -233,9 +232,9 @@ func (b *Bot) startSendChannelReceiver() {
 }
 
 // Start the Discord Bot
-func (b *Bot) Start(doneChannel chan struct{}) {
+func (b *Bot) Start() {
 	log.Infoln("DiscordBot is STARTING")
-	go b.startDiscordBot(doneChannel)
+	go b.startDiscordBot()
 	go b.startSendChannelReceiver()
 	go b.oauth2Handler.startOAuth2Handler()
 	log.Infoln("DiscordBot is RUNNING")

@@ -35,8 +35,7 @@ func (b Bot) GetSendMessageChannel() chan events.SendMessage {
 	return b.sendMessageChan
 }
 
-func (b *Bot) startBot(doneChannel chan struct{}) {
-	defer close(doneChannel)
+func (b *Bot) startBot() {
 	// do some message polling or whatever until stopped
 
 	for {
@@ -74,9 +73,9 @@ func (b *Bot) startSendChannelReceiver() {
 }
 
 // Start the Fake Bot
-func (b *Bot) Start(doneChannel chan struct{}) {
+func (b *Bot) Start() {
 	log.Println("FakeBot is STARTING")
-	go b.startBot(doneChannel)
+	go b.startBot()
 	go b.startSendChannelReceiver()
 }
 

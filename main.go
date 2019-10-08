@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
@@ -15,6 +14,7 @@ import (
 	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/pool"
 
 	"github.com/torlenor/abylebotter/plugins/echoplugin"
 	"github.com/torlenor/abylebotter/plugins/httppingplugin"
@@ -35,24 +35,16 @@ var version string
 var configPath string
 var loggingLevel string
 
-var bots = struct {
-	m map[string]botinterface.Bot
-}{m: make(map[string]botinterface.Bot)}
-
 var interrupt chan os.Signal
 
 var log *logrus.Entry
+
+var botPool pool.Pool
 
 func init() {
 	flag.StringVar(&configPath, "c", defaultConfigPath, "Path to toml config file")
 	flag.StringVar(&loggingLevel, "l", defaultLoggingLevel, "Logging level (panic, fatal, error, warn/warning, info or debug)")
 	flag.Parse()
-}
-
-func start(done chan struct{}) {
-	for _, bot := range bots.m {
-		bot.Start(done)
-	}
 }
 
 func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
@@ -100,36 +92,40 @@ func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
 
 func createBots(cfg config.Config) error {
 	if cfg.Bots.Discord.Enabled {
-		bots.m["discord"] = discordBotCreator(cfg)
-		if bots.m["discord"] == nil {
+		bot := discordBotCreator(cfg)
+		if bot == nil {
 			return errors.New("Could not create Discord Bot")
 		}
-		createPlugins(cfg.Bots.Discord.Plugins, bots.m["discord"])
+		createPlugins(cfg.Bots.Discord.Plugins, bot)
+		botPool.Add(bot)
 	} else if cfg.Bots.Matrix.Enabled {
-		bots.m["matrix"] = matrixBotCreator(cfg)
-		if bots.m["matrix"] == nil {
+		bot := matrixBotCreator(cfg)
+		if bot == nil {
 			return errors.New("Could not create Matrix Bot")
 		}
-		createPlugins(cfg.Bots.Matrix.Plugins, bots.m["matrix"])
+		createPlugins(cfg.Bots.Matrix.Plugins, bot)
+		botPool.Add(bot)
 	} else if cfg.Bots.Fake.Enabled {
-		bots.m["fake"] = fakeBotCreator(cfg)
-		if bots.m["fake"] == nil {
+		bot := fakeBotCreator(cfg)
+		if bot == nil {
 			return errors.New("Could not create Fake Bot")
 		}
-		createPlugins(cfg.Bots.Fake.Plugins, bots.m["fake"])
+		createPlugins(cfg.Bots.Fake.Plugins, bot)
+		botPool.Add(bot)
 	} else if cfg.Bots.Mattermost.Enabled {
-		bots.m["mattermost"] = mattermostBotCreator(cfg.Bots.Mattermost)
-		if bots.m["mattermost"] == nil {
+		bot := mattermostBotCreator(cfg.Bots.Mattermost)
+		if bot == nil {
 			return errors.New("Could not create Mattermost Bot")
 		}
-		createPlugins(cfg.Bots.Mattermost.Plugins, bots.m["mattermost"])
+		createPlugins(cfg.Bots.Mattermost.Plugins, bot)
+		botPool.Add(bot)
 	} else if cfg.Bots.Slack.Enabled {
-		var err error
-		bots.m["slack"], err = slackBotCreator(cfg.Bots.Slack)
+		bot, err := slackBotCreator(cfg.Bots.Slack)
 		if err != nil {
 			return fmt.Errorf("Could not create Slack Bot: %s", err)
 		}
-		createPlugins(cfg.Bots.Slack.Plugins, bots.m["slack"])
+		createPlugins(cfg.Bots.Slack.Plugins, bot)
+		botPool.Add(bot)
 	}
 
 	return nil
@@ -138,45 +134,27 @@ func createBots(cfg config.Config) error {
 func startAbyleBotter() {
 	log.Println("Starting the bots")
 
-	done := make(chan struct{})
-	start(done)
-
-	ticker := time.NewTicker(500 * time.Millisecond)
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				for botname, bot := range bots.m {
-					if bot.Status().Fatal {
-						log.Println("Status of bot", botname, " it FATAL, trying to recover...")
-						bot.Stop()
-						bot.Start(done)
-					}
-				}
-			}
-		}
-	}()
+	botPool.StartAll()
 
 	for {
 		select {
-		case <-done:
-			return
 		case <-interrupt:
-			for _, bot := range bots.m {
-				bot.Stop()
-			}
-			ticker.Stop()
+			botPool.StopAll()
 			log.Println("AbyleBotter gracefully shut down")
-			break
+			return
 		}
 	}
 }
 
-func main() {
+func setupLogging() {
 	logging.Init()
 	logging.SetLoggingLevel(loggingLevel)
 
 	log = logging.Get("main")
+}
+
+func main() {
+	setupLogging()
 
 	log.Println("AbyleBotter (" + version + ") is STARTING")
 
@@ -194,15 +172,14 @@ func main() {
 		log.Fatalln("Error initializing the bots and plugins:" + err.Error() + "Quitting...")
 	}
 
-	if len(bots.m) == 0 {
+	if botPool.Len() == 0 {
 		log.Fatal("No Bot enabled. Check config file: ", configPath)
 	}
 
-	log.Println("AbyleBotter: Number of configured bots:", len(bots.m))
+	log.Println("AbyleBotter: Number of configured bots:", botPool.Len())
 
 	// Start API
 	go api.Start(cfg.General.API)
 
 	startAbyleBotter()
-
 }

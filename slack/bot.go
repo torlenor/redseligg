@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
@@ -51,10 +52,12 @@ type Bot struct {
 	users    userManager
 
 	plugins plugincontainer.PluginContainer
+
+	wg sync.WaitGroup
 }
 
-func (b *Bot) startSlackBot(doneChannel chan struct{}) {
-	defer close(doneChannel)
+func (b *Bot) startSlackBot() {
+	defer b.wg.Done()
 
 	for {
 		_, message, err := b.ws.ReadMessage()
@@ -196,9 +199,10 @@ func (b *Bot) startSendChannelReceiver() {
 }
 
 // Start the Bot
-func (b *Bot) Start(doneChannel chan struct{}) {
+func (b *Bot) Start() {
 	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", b.plugins.Size())
-	go b.startSlackBot(doneChannel)
+	b.wg.Add(1)
+	go b.startSlackBot()
 	go b.startSendChannelReceiver()
 	b.log.Infoln("SlackBot is RUNNING")
 }
@@ -213,6 +217,7 @@ func (b *Bot) Stop() {
 		b.log.Warnln("Error when writing close message to ws:", err)
 	}
 
+	b.wg.Wait()
 	b.ws.Stop()
 
 	b.plugins.RemoveAll()

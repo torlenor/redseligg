@@ -6,7 +6,7 @@ import (
 
 // Bot type interface
 type Bot interface {
-	Start(doneChannel chan struct{})
+	Start()
 	Stop()
 	Status() BotStatus
 

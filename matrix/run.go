@@ -8,8 +8,7 @@ func (b *Bot) handlePolling() error {
 	return b.callSync()
 }
 
-func (b *Bot) startBot(doneChannel chan struct{}) {
-	defer close(doneChannel)
+func (b *Bot) startBot() {
 	// do some message polling or whatever until stopped
 	tickChan := time.Tick(b.pollingInterval)
 
@@ -24,9 +23,9 @@ func (b *Bot) startBot(doneChannel chan struct{}) {
 }
 
 // Start the Matrix Bot
-func (b *Bot) Start(doneChannel chan struct{}) {
+func (b *Bot) Start() {
 	log.Println("MatrixBot is STARTING")
-	go b.startBot(doneChannel)
+	go b.startBot()
 	go b.startSendChannelReceiver()
 	log.Println("MatrixBot is RUNNING")
 }
