@@ -9,19 +9,11 @@ import (
 	"github.com/torlenor/abylebotter/logging"
 )
 
-// message is used to send a []byte message of messageType over the WebSocket
-type message struct {
-	messageType int
-	data        []byte
+type wsClient interface {
+	ReadMessage() (messageType int, p []byte, err error)
 
-	errChannel chan error
-}
-
-// jSONMessage is used to send an arbitrary struct V via JSON message over the WebSocket
-type jSONMessage struct {
-	v interface{}
-
-	errChannel chan error
+	WriteMessage(messageType int, data []byte) error
+	WriteJSON(v interface{}) error
 }
 
 // Client is an abstraction of a WebSocket client
@@ -31,12 +23,16 @@ type Client struct {
 	messageChan     chan message
 	jSONMessageChan chan jSONMessage
 
-	ws *websocket.Conn
-
+	ws             wsClient
 	startStopMutex sync.Mutex
 
 	workersWG   sync.WaitGroup
 	stopWorkers chan struct{}
+}
+
+var dialer = func(wsURL string) (wsClient, error) {
+	ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	return ws, err
 }
 
 // NewClient prepares a new ws Client
@@ -49,8 +45,6 @@ func NewClient() *Client {
 
 		messageChan:     make(chan message),
 		jSONMessageChan: make(chan jSONMessage),
-
-		stopWorkers: make(chan struct{}),
 	}
 	return &c
 }
@@ -61,10 +55,12 @@ func (c *Client) Dial(wsURL string) error {
 	defer c.startStopMutex.Unlock()
 
 	var err error
-	c.ws, _, err = websocket.DefaultDialer.Dial(wsURL, nil)
+	c.ws, err = dialer(wsURL)
 	if err != nil {
 		return err
 	}
+
+	c.stopWorkers = make(chan struct{})
 
 	c.workersWG.Add(1)
 	go c.wsWriter()
@@ -76,9 +72,13 @@ func (c *Client) Dial(wsURL string) error {
 func (c *Client) Stop() {
 	c.startStopMutex.Lock()
 
-	close(c.stopWorkers)
-	c.workersWG.Wait()
+	if c.stopWorkers != nil {
+		close(c.stopWorkers)
+		c.workersWG.Wait()
+	}
+
 	c.ws = nil
+	c.stopWorkers = nil
 
 	c.startStopMutex.Unlock()
 }
