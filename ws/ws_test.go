@@ -152,7 +152,7 @@ func TestClient_ReadMessage(t *testing.T) {
 	assert.Equal(mockWsClient.retMessage, actualMessage)
 
 	mockWsClient.retError = fmt.Errorf("SOME ERROR")
-	actualMessageType, actualMessage, err = client.ReadMessage()
+	_, _, err = client.ReadMessage()
 	assert.Error(err)
 
 	assert.NotPanics(func() { client.Stop() })

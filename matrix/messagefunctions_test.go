@@ -11,7 +11,7 @@ func TestSendRoomMessage(t *testing.T) {
 		t.Fatalf("Could not create Matrix Bot")
 	}
 
-	// succesfully sending message with assumption of roomID
+	// successfully sending message with assumption of roomID
 	err = bot.sendRoomMessage("_ROOMID_", "_MSGCONTENT_")
 	if api.lastAPICallPath != `/client/r0/rooms/_ROOMID_/send/m.room.message` {
 		t.Fatalf("handlePolling api call path wrong: %s", api.lastAPICallPath)
@@ -29,7 +29,7 @@ func TestSendRoomMessage(t *testing.T) {
 		t.Fatalf("sending message failed even though it shouldn't")
 	}
 
-	// succesfully sending message where room is mapped via NAME
+	// successfully sending message where room is mapped via NAME
 	bot.addKnownRoom("_REALROOMID_", "_REALROOMNAME_")
 	err = bot.sendRoomMessage("_REALROOMNAME_", "_MSGCONTENT_")
 	if api.lastAPICallPath != `/client/r0/rooms/_REALROOMID_/send/m.room.message` {
@@ -48,7 +48,7 @@ func TestSendRoomMessage(t *testing.T) {
 		t.Fatalf("sending message failed even though it shouldn't")
 	}
 
-	// succesfully sending message where room is mapped via ID
+	// successfully sending message where room is mapped via ID
 	bot.addKnownRoom("_REALROOMID_", "_REALROOMNAME_")
 	err = bot.sendRoomMessage("_REALROOMID_", "_MSGCONTENT_")
 	if api.lastAPICallPath != `/client/r0/rooms/_REALROOMID_/send/m.room.message` {
@@ -100,7 +100,7 @@ func TestSendWhisper(t *testing.T) {
 		t.Fatalf("Could not create Matrix Bot")
 	}
 
-	// succesfully sending message with assumption of roomID
+	// successfully sending message with assumption of roomID
 	err = bot.sendWhisper("_ROOMID_", "_MSGCONTENT_")
 	if api.lastAPICallPath != `/client/r0/rooms/_ROOMID_/send/m.room.message` {
 		t.Fatalf("handlePolling api call path wrong: %s", api.lastAPICallPath)
@@ -118,7 +118,7 @@ func TestSendWhisper(t *testing.T) {
 		t.Fatalf("sending message failed even though it shouldn't")
 	}
 
-	// succesfully sending message where room is mapped via NAME
+	// successfully sending message where room is mapped via NAME
 	bot.addKnownRoom("_REALROOMID_", "_REALROOMNAME_")
 	err = bot.sendWhisper("_REALROOMNAME_", "_MSGCONTENT_")
 	if api.lastAPICallPath != `/client/r0/rooms/_REALROOMID_/send/m.room.message` {
@@ -137,7 +137,7 @@ func TestSendWhisper(t *testing.T) {
 		t.Fatalf("sending message failed even though it shouldn't")
 	}
 
-	// succesfully sending message where room is mapped via ID
+	// successfully sending message where room is mapped via ID
 	bot.addKnownRoom("_REALROOMID_", "_REALROOMNAME_")
 	err = bot.sendWhisper("_REALROOMID_", "_MSGCONTENT_")
 	if api.lastAPICallPath != `/client/r0/rooms/_REALROOMID_/send/m.room.message` {

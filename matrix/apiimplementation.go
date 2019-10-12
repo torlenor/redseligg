@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func checkEventsOK(repsonse []byte) bool {
+func checkEventsOK(response []byte) bool {
 	// TODO check if response is containing any errors
 	return true
 }

@@ -12,7 +12,7 @@ import (
 // Init the logging framework
 // has to be called only once
 func Init() {
-	logrus.SetFormatter(new(MyFormatter))
+	logrus.SetFormatter(new(myFormatter))
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(os.Stdout)
 }
@@ -35,9 +35,9 @@ func SetLoggingLevel(loggingLevel string) {
 	}
 }
 
-type MyFormatter struct{}
+type myFormatter struct{}
 
-func (f *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (f *myFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	b := &bytes.Buffer{}
 	name, ok := entry.Data["name"]
 	if !ok {
