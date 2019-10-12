@@ -12,9 +12,9 @@ This is AbyleBotter, an extensible Chat Bot for various platforms.
 
 At the moment the Bot is in a proof of concept/API/interface development phase with very limited functional use.
 
-## Supported plattforms
+## Supported platforms
 
-These plattforms are current supported (at least with the functionality to send and receive messages):
+These platforms are current supported (at least with the functionality to send and receive messages):
 
 ### Discord
 
@@ -23,6 +23,33 @@ These plattforms are current supported (at least with the functionality to send 
 ### Mattermost
 
 ### Slack
+
+## Plugins
+
+Plugins are used to implement actual functionality of AbyleBotter. They serve as handlers of received messages and can send messages over the Bot to the platform.
+In the future it is planed to support external Plugins via gRPC.
+
+Currently these Plugins are part of AbyleBotter:
+
+### EchoPlugin
+
+The EchoPlugin echos back all messages it received to the sender of the message. It listens to messages which start with `!echo ` followed by text.
+
+#### Configuration Options
+
+- **onlywhispers**: When set to true the EchoPlugin only echos in whispers (when supported by the used Bot)
+
+### HTTPPingPlugin
+
+The HTTPPingPlugin listens to messages starting with `!httpping ` followed by an URL. If the URL is valid it will try to contact the server and reports back the request duration or an error if the URL was not reachable.
+
+### RandomPlugin
+
+This is a classic "Roll/Random" plugin which sends back a random number in the range [0,100] when it receives the `!roll` command. When it receives `!roll {PositiveNumber}` instead, it returns a random number in the range [0, {PositiveNumber}].
+
+### SendMessagePlugin
+
+A small example which shows how one could implement a JSON interface to allow sending messages via an HTTP interface to AbyleBotter.
 
 ## Releases
 
