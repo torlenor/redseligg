@@ -46,7 +46,7 @@ func matrixBotCreator(config config.Config) *matrix.Bot {
 		matrixToken = config.Bots.Matrix.Token
 	}
 
-	bot, err := matrix.CreateMatrixBot("https://matrix.abyle.org", matrixUsername, matrixPassword, matrixToken)
+	bot, err := matrix.CreateMatrixBot(matrixServer, matrixUsername, matrixPassword, matrixToken)
 	if err != nil {
 		log.Println("MatrixBot: ERROR: ", err)
 	}
