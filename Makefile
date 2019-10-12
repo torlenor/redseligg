@@ -39,19 +39,11 @@ build-static:
 	@echo Done.
 
 test:
-	@echo "Running unit tests (EXcluding MongoDB dependent tests)"
-	@go test -covermode=count -coverprofile=coverage.out $(shell go list ./... | grep -v mongo)
-
-test-mongo:
-	@echo "Running unit tests (INcluding MongoDB dependent tests)"
+	@echo "Running unit tests"
 	@go test -covermode=count -coverprofile=coverage.out ./...
 
 test-verbose:
-	@echo "Running unit tests (EXcluding MongoDB dependent tests)"
-	@go test -v -covermode=count -coverprofile=coverage.out $(shell go list ./... | grep -v mongo)
-
-test-mongo-verbose:
-	@echo "Running unit tests (INcluding MongoDB dependent tests)"
+	@echo "Running unit tests"
 	@go test -v -covermode=count -coverprofile=coverage.out ./...
 
 install: build
