@@ -62,8 +62,6 @@ func createMatrixBotWithAPI(api api, username string, password string, token str
 		b.api.updateAuthToken(token)
 	}
 
-	b.api.connectToMatrixServer()
-
 	b.pollingDone = make(chan bool)
 	b.pollingInterval = 1000 * time.Millisecond
 

@@ -15,8 +15,7 @@ type mockAPI struct {
 	server    string
 	authToken string
 
-	loginCalled                 bool
-	connectToMatrixServerCalled bool
+	loginCalled bool
 
 	lastAPICallPath   string
 	lastAPICallMethod string
@@ -39,11 +38,6 @@ func (api *mockAPI) updateAuthToken(token string) {
 	api.authToken = token
 }
 
-func (api *mockAPI) connectToMatrixServer() error {
-	api.connectToMatrixServerCalled = true
-	return nil
-}
-
 func (api *mockAPI) login(username string, password string) error {
 	api.loginCalled = true
 	if api.letLoginFail == true {
@@ -56,7 +50,6 @@ func (api *mockAPI) reset() {
 	api.letLoginFail = false
 	api.letAPICallFail = false
 	api.loginCalled = false
-	api.connectToMatrixServerCalled = false
 	api.authToken = ""
 	api.lastAPICallPath = ""
 	api.lastAPICallMethod = ""
@@ -79,10 +72,6 @@ func TestCreateMatrixBot(t *testing.T) {
 		t.Fatalf("Login not called even though user and password were provided")
 	}
 
-	if api.connectToMatrixServerCalled != true {
-		t.Fatalf("Not connected to Matrix Server")
-	}
-
 	// Fail login
 	api.reset()
 	api.letLoginFail = true
@@ -97,10 +86,6 @@ func TestCreateMatrixBot(t *testing.T) {
 		t.Fatalf("Login not called even though user and password were provided")
 	}
 
-	if api.connectToMatrixServerCalled != false {
-		t.Fatalf("Tried to connect to Matrix server even though login failed")
-	}
-
 	// No login, but token provided
 	api.reset()
 
@@ -112,10 +97,6 @@ func TestCreateMatrixBot(t *testing.T) {
 
 	if api.loginCalled != false {
 		t.Fatalf("Login called even though token was provided")
-	}
-
-	if api.connectToMatrixServerCalled != true {
-		t.Fatalf("Not connected to Matrix Server")
 	}
 
 	if api.authToken != "TEST_TOKEN" {

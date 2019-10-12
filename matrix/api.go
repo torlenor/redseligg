@@ -19,7 +19,6 @@ type api interface {
 
 	updateAuthToken(token string)
 
-	connectToMatrixServer() error
 	login(username string, password string) error
 }
 
@@ -46,15 +45,6 @@ func (api *matrixAPI) call(path string, method string, body string, auth bool) (
 	}
 
 	return ioutil.ReadAll(response.Body)
-}
-
-func (api *matrixAPI) connectToMatrixServer() error {
-	response, err := api.call("/client/r0/join/!cJQhJDXTxLzZeuoHzw:matrix.abyle.org?access_token="+api.authToken, "POST", `{}`, false)
-	if err != nil {
-		return errors.Wrap(err, "apiCall failed")
-	}
-	log.Debugln("connectToMatrixServer() response:", string(response))
-	return nil
 }
 
 func (api *matrixAPI) updateAuthToken(token string) {
