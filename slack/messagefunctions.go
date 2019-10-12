@@ -2,7 +2,7 @@ package slack
 
 import "github.com/pkg/errors"
 
-type SendMessage struct {
+type sendMessage struct {
 	ID      int    `json:"id"`
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
@@ -11,8 +11,8 @@ type SendMessage struct {
 
 func (b *Bot) sendMessage(channelID string, content string) error {
 
-	msg := SendMessage{
-		ID:      1, // TODO needs to increase
+	msg := sendMessage{
+		ID:      b.idProvider.Get(),
 		Type:    "message",
 		Channel: channelID,
 		Text:    content,
@@ -27,23 +27,5 @@ func (b *Bot) sendMessage(channelID string, content string) error {
 }
 
 func (b *Bot) sendWhisper(userID string, content string) error {
-	// // It is a known channel
-	// if _, ok := b.knownChannelIDs[userID]; ok {
 	return b.sendMessage(userID, content)
-	// } else {
-	// 	// It is not a known Channel so maybe it is a userID
-	// 	response, err := b.apiRunner("/api/v4/channels/direct", "POST", `[
-	// 		"`+userID+`"
-	// 		]`)
-	// 	if err != nil && response.statusCode > 200 {
-	// 		return err
-	// 	}
-	// 	var channel Channel
-	// 	err = json.Unmarshal(response.body, &channel)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	b.addKnownChannel(channel)
-	// 	return b.sendMessage(channel.ID, content)
-	// }
 }

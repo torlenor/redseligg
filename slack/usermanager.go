@@ -3,37 +3,37 @@ package slack
 import "fmt"
 
 type userManager struct {
-	knownUsers     map[string]User   // key is UserID
+	knownUsers     map[string]user   // key is UserID
 	knownUserNames map[string]string // mapping of UserName to UserID
 	knownUserIDs   map[string]string // mapping of UserID to UserUserNameName
 }
 
 func newUserManager() userManager {
 	return userManager{
-		knownUsers:     make(map[string]User),
+		knownUsers:     make(map[string]user),
 		knownUserNames: make(map[string]string),
 		knownUserIDs:   make(map[string]string),
 	}
 }
 
-func (um *userManager) addKnownUser(channel User) {
-	um.knownUsers[channel.ID] = channel
-	um.knownUserNames[channel.Name] = channel.ID
-	um.knownUserIDs[channel.ID] = channel.Name
+func (um *userManager) addKnownUser(u user) {
+	um.knownUsers[u.ID] = u
+	um.knownUserNames[u.Name] = u.ID
+	um.knownUserIDs[u.ID] = u.Name
 }
 
-func (um userManager) getUserByID(id string) (User, error) {
-	if channel, ok := um.knownUsers[id]; ok {
-		return channel, nil
+func (um userManager) getUserByID(id string) (user, error) {
+	if u, ok := um.knownUsers[id]; ok {
+		return u, nil
 	}
-	return User{}, fmt.Errorf("User with ID %s not known", id)
+	return user{}, fmt.Errorf("User with ID %s not known", id)
 }
 
-func (um userManager) getUserByName(name string) (channel User, err error) {
+func (um userManager) getUserByName(name string) (user, error) {
 	if id, ok := um.knownUserNames[name]; ok {
 		return um.knownUsers[id], nil
 	}
-	return User{}, fmt.Errorf("User with Name %s not known", name)
+	return user{}, fmt.Errorf("User with Name %s not known", name)
 }
 
 func (um userManager) getUserNameByID(id string) (string, error) {

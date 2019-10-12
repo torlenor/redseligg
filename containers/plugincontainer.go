@@ -1,4 +1,4 @@
-package plugincontainer
+package containers
 
 import (
 	"sync"
@@ -18,13 +18,6 @@ type PluginContainer struct {
 	sendMessageChan chan events.SendMessage
 }
 
-// New returns a fresh PluginContainer
-func New() PluginContainer {
-	return PluginContainer{
-		receivers: make(map[plugins.Plugin]chan events.ReceiveMessage),
-	}
-}
-
 // Add a new plugin to the container
 func (p *PluginContainer) Add(plugin plugins.Plugin) {
 	plugin.ConnectChannels(p.receiveChannel(plugin), p.SendChannel())
@@ -38,7 +31,7 @@ func (p *PluginContainer) RemoveAll() {
 	for _, pluginChannel := range p.receivers {
 		close(pluginChannel)
 	}
-	p.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)
+	p.receivers = nil
 	p.knownPlugins = nil
 	p.mutex.Unlock()
 }
@@ -80,6 +73,10 @@ func (p *PluginContainer) Send(receiveMessage events.ReceiveMessage) {
 func (p *PluginContainer) receiveChannel(plugin plugins.Plugin) <-chan events.ReceiveMessage {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+
+	if p.receivers == nil {
+		p.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)
+	}
 
 	p.receivers[plugin] = make(chan events.ReceiveMessage)
 	return p.receivers[plugin]

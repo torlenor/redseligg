@@ -4,30 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 
 	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/events"
+	"github.com/torlenor/abylebotter/containers"
 	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/plugincontainer"
 	"github.com/torlenor/abylebotter/plugins"
+	"github.com/torlenor/abylebotter/utils"
 )
-
-type stats struct {
-	messagesSent int64
-	whispersSent int64
-
-	messagesReceived int64
-	whispersReceived int64
-}
-
-func (s stats) toString() string {
-	return fmt.Sprintf("Messages Sent: %d\nMessages Received: %d\nWhispers Sent: %d\nWhispers Received: %d",
-		s.messagesSent, s.messagesReceived, s.whispersSent, s.whispersReceived)
-}
 
 type webSocketClient interface {
 	Dial(wsURL string) error
@@ -44,68 +32,21 @@ type Bot struct {
 	config config.SlackConfig
 	log    *logrus.Entry
 
-	stats stats
-
-	ws webSocketClient
+	rtmURL string
+	ws     webSocketClient
 
 	channels channelManager
 	users    userManager
 
-	plugins plugincontainer.PluginContainer
+	plugins containers.PluginContainer
 
 	wg sync.WaitGroup
-}
 
-func (b *Bot) startSlackBot() {
-	defer b.wg.Done()
+	pingSenderStop chan bool
 
-	for {
-		_, message, err := b.ws.ReadMessage()
-		if err != nil {
-			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-				b.log.Debugln("Connection closed normally: ", err)
-			} else {
-				b.log.Errorln("UNHANDLED ERROR: ", err)
-			}
-			break
-		}
+	watchdog *watchdog
 
-		var data map[string]interface{}
-
-		if err := json.Unmarshal(message, &data); err != nil {
-			b.log.Errorln("UNHANDLED ERROR: ", err)
-			continue
-		}
-
-		if event, ok := data["type"]; ok { // Dispatch to event handlers
-			switch event {
-			case "hello":
-				// nothing to do here, just a greeting from the server
-			case "message":
-				b.handleEventMessage(message)
-			case "desktop_notification":
-				b.handleEventDesktopNotification(message)
-			case "user_typing":
-				b.handleEventUserTyping(message)
-			case "channel_created":
-				b.handleEventChannelCreated(message)
-			case "channel_deleted":
-				b.handleEventChannelDeleted(message)
-			case "channel_joined":
-				b.handleEventChannelJoined(message)
-			case "channel_left":
-				b.handleEventChannelLeft(message)
-			case "member_joined_channel":
-				b.handleEventMemberJoinedChannel(message)
-			case "group_joined":
-				b.handleEventGroupJoined(message)
-			default:
-				b.log.Warnf("Received unhandled event %s: %s", event, message)
-			}
-		} else {
-			b.log.Warnf("Received unhandled message: %s", message)
-		}
-	}
+	idProvider utils.IDProvider
 }
 
 // CreateSlackBot creates a new instance of a SlackBot
@@ -116,12 +57,13 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 	b := Bot{
 		config: cfg,
 		log:    log,
-		ws:     ws,
+
+		ws: ws,
 
 		channels: newChannelManager(),
 		users:    newUserManager(),
 
-		plugins: plugincontainer.New(),
+		watchdog: &watchdog{},
 	}
 
 	if len(b.config.Token) == 0 {
@@ -133,84 +75,56 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 		return nil, fmt.Errorf("Error connecting to Slack servers: %s", err)
 	}
 
-	err = b.ws.Dial(rtmConnectResponse.URL)
-	if err != nil {
-		return nil, err
-	}
-
-	err = b.populateChannelList()
-	if err != nil {
-		return nil, fmt.Errorf(err.Error())
-	}
-
-	err = b.populateUserList()
-	if err != nil {
-		return nil, fmt.Errorf(err.Error())
-	}
+	b.rtmURL = rtmConnectResponse.URL
 
 	return &b, nil
-}
-
-func (b *Bot) populateChannelList() error {
-	conversations, err := b.getConversations()
-	if err != nil {
-		return err
-	}
-
-	for _, channel := range conversations {
-		b.channels.addKnownChannel(channel)
-	}
-
-	b.log.Infof("Added %d known channels", b.channels.Len())
-	return nil
-}
-
-func (b *Bot) populateUserList() error {
-	users, err := b.getUsers()
-	if err != nil {
-		return err
-	}
-
-	for _, user := range users {
-		b.users.addKnownUser(user)
-	}
-
-	b.log.Infof("Added %d known users", b.users.Len())
-	return nil
-}
-
-func (b *Bot) startSendChannelReceiver() {
-	for sendMsg := range b.plugins.SendChannel() {
-		switch sendMsg.Type {
-		case events.MESSAGE:
-			err := b.sendMessage(sendMsg.ChannelID, sendMsg.Content)
-			if err != nil {
-				b.log.Errorln("Error sending message:", err)
-			}
-		case events.WHISPER:
-			err := b.sendWhisper(sendMsg.ChannelID, sendMsg.Content)
-			if err != nil {
-				b.log.Errorln("Error sending whisper:", err)
-			}
-		default:
-			b.log.Warnf("Bot does not support Send Event %s", sendMsg.Type)
-		}
-	}
 }
 
 // Start the Bot
 func (b *Bot) Start() {
 	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", b.plugins.Size())
-	b.wg.Add(1)
-	go b.startSlackBot()
-	go b.startSendChannelReceiver()
+
+	err := b.ws.Dial(b.rtmURL)
+	if err != nil {
+		b.log.Errorln("Could not dial Slack RTM WebSocket, Slack Bot not operational:", err)
+		return
+	}
+
+	err = b.populateChannelList()
+	if err != nil {
+		b.log.Warnln("Populating Channel List failed, no Channel information will be available:", err)
+	}
+
+	err = b.populateUserList()
+	if err != nil {
+		b.log.Warnln("Populating User List failed, no User information will be available:", err)
+	}
+
+	b.pingSenderStop = make(chan bool)
+	go func() {
+		b.wg.Add(1)
+		pingSender(5*time.Second, b.sendPing, b.pingSenderStop)
+		defer b.wg.Done()
+	}()
+
+	b.watchdog.SetFailCallback(b.onFail).Start(10 * time.Second)
+
+	go func() {
+		b.wg.Add(1)
+		b.run()
+		defer b.wg.Done()
+	}()
+
+	go b.pluginMessageReceiver()
 	b.log.Infoln("SlackBot is RUNNING")
 }
 
 // Stop the Bot
 func (b *Bot) Stop() {
 	b.log.Infoln("SlackBot is SHUTING DOWN")
-	b.log.Infof("SlackBot Stats:\n%s", b.stats.toString())
+
+	b.watchdog.Stop()
+	b.pingSenderStop <- true
 
 	err := b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
@@ -222,6 +136,10 @@ func (b *Bot) Stop() {
 
 	b.plugins.RemoveAll()
 	b.log.Infoln("SlackBot is SHUT DOWN")
+}
+
+func (b *Bot) onFail() {
+	b.log.Debugf("TODO: Implement recover onFail")
 }
 
 // Status returns the current status of the SlackBot
@@ -241,16 +159,49 @@ func (b *Bot) AddPlugin(plugin plugins.Plugin) {
 	b.plugins.Add(plugin)
 }
 
-func (b *Bot) checkRequirements(rq plugins.RequirementsProvider) error {
-	features := map[string]bool{
-		"SOMEFEATURE":  true,
-		"OTHERFEATURE": true,
-	}
-	for req, needed := range rq.GetRequirements() {
-		if ok, _ := features[req]; !ok && needed {
-			return fmt.Errorf("Plugin requires %s which SlackBot does not support", req)
+func pingSender(interval time.Duration, f func() error, stop chan bool) {
+	ticker := time.NewTicker(interval)
+	for {
+		select {
+		case <-stop:
+			ticker.Stop()
+			return
+		case <-ticker.C:
+			f()
 		}
 	}
+}
 
-	return nil
+func (b *Bot) run() {
+	for {
+		_, message, err := b.ws.ReadMessage()
+		if err != nil {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+				b.log.Debugln("Connection closed normally: ", err)
+			} else {
+				b.log.Errorln("UNHANDLED ERROR: ", err)
+			}
+			break
+		}
+
+		var data map[string]interface{}
+
+		if err := json.Unmarshal(message, &data); err != nil {
+			b.log.Errorln("UNHANDLED ERROR: ", err)
+			continue
+		}
+
+		if event, ok := data["type"]; ok { // Dispatch to event handlers
+			b.eventDispatcher(event, message)
+		} else if _, ok := data["ok"]; ok {
+			ackMessage := EventAck{}
+			if err := json.Unmarshal(message, &ackMessage); err != nil {
+				b.log.Errorln("UNHANDLED ERROR: ", err)
+			} else {
+				b.log.Debugf("Received an ACK to a message we sent, not used yet: %s", message)
+			}
+		} else {
+			b.log.Warnf("Received unhandled message: %s", message)
+		}
+	}
 }

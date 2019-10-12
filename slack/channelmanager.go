@@ -3,37 +3,37 @@ package slack
 import "fmt"
 
 type channelManager struct {
-	knownChannels     map[string]Channel // key is ChannelID
+	knownChannels     map[string]channel // key is ChannelID
 	knownChannelNames map[string]string  // mapping of ChannelName to ChannelID
 	knownChannelIDs   map[string]string  // mapping of ChannelID to UserChannelNameName
 }
 
 func newChannelManager() channelManager {
 	return channelManager{
-		knownChannels:     make(map[string]Channel),
+		knownChannels:     make(map[string]channel),
 		knownChannelNames: make(map[string]string),
 		knownChannelIDs:   make(map[string]string),
 	}
 }
 
-func (cm *channelManager) addKnownChannel(channel Channel) {
+func (cm *channelManager) addKnownChannel(channel channel) {
 	cm.knownChannels[channel.ID] = channel
 	cm.knownChannelNames[channel.Name] = channel.ID
 	cm.knownChannelIDs[channel.ID] = channel.Name
 }
 
-func (cm channelManager) getChannelByID(id string) (Channel, error) {
+func (cm channelManager) getChannelByID(id string) (channel, error) {
 	if channel, ok := cm.knownChannels[id]; ok {
 		return channel, nil
 	}
-	return Channel{}, fmt.Errorf("Channel with ID %s not known", id)
+	return channel{}, fmt.Errorf("Channel with ID %s not known", id)
 }
 
-func (cm channelManager) getChannelByName(name string) (channel Channel, err error) {
+func (cm channelManager) getChannelByName(name string) (channel, error) {
 	if id, ok := cm.knownChannelNames[name]; ok {
 		return cm.knownChannels[id], nil
 	}
-	return Channel{}, fmt.Errorf("Channel with Name %s not known", name)
+	return channel{}, fmt.Errorf("Channel with Name %s not known", name)
 }
 
 func (cm channelManager) getChannelNameByID(id string) (string, error) {

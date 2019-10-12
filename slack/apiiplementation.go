@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Channel struct {
+type channel struct {
 	ID                      string        `json:"id"`
 	Name                    string        `json:"name"`
 	IsChannel               bool          `json:"is_channel"`
@@ -44,60 +44,60 @@ type Channel struct {
 	NumMembers    int           `json:"num_members"`
 }
 
-type Channels []Channel
+type channels []channel
 
-type ConversationsListResponse struct {
+type conversationsListResponse struct {
 	Ok               bool     `json:"ok"`
-	Channels         Channels `json:"channels"`
+	Channels         channels `json:"channels"`
 	ResponseMetadata struct {
 		NextCursor string `json:"next_cursor"`
 	} `json:"response_metadata"`
 }
 
-func (b *Bot) getConversationsList(cursor string) (ConversationsListResponse, error) {
+func (b *Bot) getConversationsList(cursor string) (conversationsListResponse, error) {
 	args := ""
 	if len(cursor) > 0 {
 		args = "cursor=" + cursor
 	}
 	rawResponse, err := b.apiCall("/api/conversations.list", "GET", args, "")
 	if err != nil {
-		return ConversationsListResponse{}, errors.Wrap(err, "apiCall failed")
+		return conversationsListResponse{}, errors.Wrap(err, "apiCall failed")
 	}
 
-	response := ConversationsListResponse{}
+	response := conversationsListResponse{}
 	err = json.Unmarshal(rawResponse.body, &response)
 
 	if err == nil && !response.Ok {
-		return ConversationsListResponse{}, fmt.Errorf("Error getting conversations.list: Received not OK")
+		return conversationsListResponse{}, fmt.Errorf("Error getting conversations.list: Received not OK")
 	} else if err != nil {
-		return ConversationsListResponse{}, err
+		return conversationsListResponse{}, err
 	}
 
 	return response, nil
 }
 
-func (b *Bot) getConversations() (Channels, error) {
+func (b *Bot) getConversations() (channels, error) {
 	conversationsList, err := b.getConversationsList("")
 	if err != nil {
-		return Channels{}, fmt.Errorf("Error getting conversations.list: %s", err)
+		return channels{}, fmt.Errorf("Error getting conversations.list: %s", err)
 	}
 
-	channels := conversationsList.Channels
+	c := conversationsList.Channels
 
 	nextCursor := conversationsList.ResponseMetadata.NextCursor
 	for len(nextCursor) != 0 {
 		conversationsList, err := b.getConversationsList(nextCursor)
 		if err != nil {
-			return Channels{}, fmt.Errorf("Error getting conversations.list: %s", err)
+			return channels{}, fmt.Errorf("Error getting conversations.list: %s", err)
 		}
-		channels = append(channels, conversationsList.Channels...)
+		c = append(c, conversationsList.Channels...)
 		nextCursor = conversationsList.ResponseMetadata.NextCursor
 	}
 
-	return channels, nil
+	return c, nil
 }
 
-type User struct {
+type user struct {
 	ID       string `json:"id"`
 	TeamID   string `json:"team_id"`
 	Name     string `json:"name"`
@@ -140,56 +140,56 @@ type User struct {
 	Has2Fa            bool `json:"has_2fa"`
 }
 
-type Users []User
+type users []user
 
-type UserListResponse struct {
+type userListResponse struct {
 	Ok               bool  `json:"ok"`
-	Members          Users `json:"members"`
+	Members          users `json:"members"`
 	CacheTs          int   `json:"cache_ts"`
 	ResponseMetadata struct {
 		NextCursor string `json:"next_cursor"`
 	} `json:"response_metadata"`
 }
 
-func (b *Bot) getUserList(cursor string) (UserListResponse, error) {
+func (b *Bot) getUserList(cursor string) (userListResponse, error) {
 	args := ""
 	if len(cursor) > 0 {
 		args = "cursor=" + cursor
 	}
 	rawResponse, err := b.apiCall("/api/users.list", "GET", args, "")
 	if err != nil {
-		return UserListResponse{}, errors.Wrap(err, "apiCall failed")
+		return userListResponse{}, errors.Wrap(err, "apiCall failed")
 	}
 
-	response := UserListResponse{}
+	response := userListResponse{}
 	err = json.Unmarshal(rawResponse.body, &response)
 
 	if err == nil && !response.Ok {
-		return UserListResponse{}, fmt.Errorf("Error getting users.list: Received not OK")
+		return userListResponse{}, fmt.Errorf("Error getting users.list: Received not OK")
 	} else if err != nil {
-		return UserListResponse{}, err
+		return userListResponse{}, err
 	}
 
 	return response, nil
 }
 
-func (b *Bot) getUsers() (Users, error) {
+func (b *Bot) getUsers() (users, error) {
 	usersList, err := b.getUserList("")
 	if err != nil {
-		return Users{}, fmt.Errorf("Error getting users.list: %s", err)
+		return users{}, fmt.Errorf("Error getting users.list: %s", err)
 	}
 
-	users := usersList.Members
+	us := usersList.Members
 
 	nextCursor := usersList.ResponseMetadata.NextCursor
 	for len(nextCursor) != 0 {
 		conversationsList, err := b.getConversationsList(nextCursor)
 		if err != nil {
-			return Users{}, fmt.Errorf("Error getting users.list: %s", err)
+			return users{}, fmt.Errorf("Error getting users.list: %s", err)
 		}
-		users = append(users, usersList.Members...)
+		us = append(us, usersList.Members...)
 		nextCursor = conversationsList.ResponseMetadata.NextCursor
 	}
 
-	return users, nil
+	return us, nil
 }

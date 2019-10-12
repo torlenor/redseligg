@@ -12,6 +12,34 @@ func cleanupMessage(msg string) string {
 	return re.ReplaceAllString(msg, "$1")
 }
 
+func (b *Bot) eventDispatcher(event interface{}, message []byte) {
+	switch event {
+	case "hello":
+	case "message":
+		b.handleEventMessage(message)
+	case "desktop_notification":
+		b.handleEventDesktopNotification(message)
+	case "user_typing":
+		b.handleEventUserTyping(message)
+	case "channel_created":
+		b.handleEventChannelCreated(message)
+	case "channel_deleted":
+		b.handleEventChannelDeleted(message)
+	case "channel_joined":
+		b.handleEventChannelJoined(message)
+	case "channel_left":
+		b.handleEventChannelLeft(message)
+	case "member_joined_channel":
+		b.handleEventMemberJoinedChannel(message)
+	case "group_joined":
+		b.handleEventGroupJoined(message)
+	case "pong":
+		b.handleEventPong(message)
+	default:
+		b.log.Warnf("Received unhandled event %s: %s", event, message)
+	}
+}
+
 func (b *Bot) handleEventMessage(data []byte) {
 	var message EventMessage
 
@@ -114,4 +142,8 @@ func (b *Bot) handleEventGroupJoined(data []byte) {
 	}
 
 	b.log.Debugf("Received GroupJoined event from Channel Name %s", groupJoined.Channel.Name)
+}
+
+func (b *Bot) handleEventPong(data []byte) {
+	b.receivePong(data)
 }

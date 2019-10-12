@@ -138,3 +138,10 @@ type EventGroupJoined struct {
 	Type    string       `json:"type"`
 	Channel EventChannel `json:"channel"`
 }
+
+type EventAck struct {
+	Ok      bool   `json:"ok"`
+	ReplyTo int    `json:"reply_to"`
+	Ts      string `json:"ts"`
+	Text    string `json:"text"`
+}

@@ -1,30 +1,26 @@
 package utils
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestCreateMatrixBot(t *testing.T) {
+	assert := assert.New(t)
+
 	result := StripCmd("!CMD test", "CMD")
-	if result != "test" {
-		t.Fatalf("Stripping resulted in wrong string: %s", result)
-	}
+	assert.Equal("test", result)
 
 	result = StripCmd("test !CMD", "CMD")
-	if result != "test !CMD" {
-		t.Fatalf("Stripping resulted in wrong string: %s", result)
-	}
+	assert.Equal("test !CMD", result)
 
 	result = StripCmd("!CMDtest", "CMD")
-	if result != "!CMDtest" {
-		t.Fatalf("Stripping resulted in wrong string: %s", result)
-	}
+	assert.Equal("!CMDtest", result)
 
 	result = StripCmd("!TEST test", "CMD")
-	if result != "!TEST test" {
-		t.Fatalf("Stripping resulted in wrong string: %s", result)
-	}
+	assert.Equal("!TEST test", result)
 
 	result = StripCmd("!CMD2 test", "CMD")
-	if result != "!CMD2 test" {
-		t.Fatalf("Stripping resulted in wrong string: %s", result)
-	}
+	assert.Equal("!CMD2 test", result)
 }
