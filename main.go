@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -91,23 +90,23 @@ func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
 
 func createBots(cfg config.Config) error {
 	if cfg.Bots.Discord.Enabled {
-		bot := discordBotCreator(cfg)
-		if bot == nil {
-			return errors.New("Could not create Discord Bot")
+		bot, err := discordBotCreator(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not create Discord Bot: %s", err)
 		}
 		createPlugins(cfg.Bots.Discord.Plugins, bot)
 		botPool.Add(bot)
 	} else if cfg.Bots.Matrix.Enabled {
-		bot := matrixBotCreator(cfg)
-		if bot == nil {
-			return errors.New("Could not create Matrix Bot")
+		bot, err := matrixBotCreator(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not create Matrix Bot: %s", err)
 		}
 		createPlugins(cfg.Bots.Matrix.Plugins, bot)
 		botPool.Add(bot)
 	} else if cfg.Bots.Mattermost.Enabled {
-		bot := mattermostBotCreator(cfg.Bots.Mattermost)
-		if bot == nil {
-			return errors.New("Could not create Mattermost Bot")
+		bot, err := mattermostBotCreator(cfg.Bots.Mattermost)
+		if err != nil {
+			return fmt.Errorf("Could not create Mattermost Bot: %s", err)
 		}
 		createPlugins(cfg.Bots.Mattermost.Plugins, bot)
 		botPool.Add(bot)

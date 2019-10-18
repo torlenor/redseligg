@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/torlenor/abylebotter/botinterface"
+	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/plugins"
@@ -179,9 +180,10 @@ func (b *Bot) startDiscordBot() {
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(id string, secret string, token string) (*Bot, error) {
-	log.Printf("DiscordBot is CREATING itself using TOKEN = %s", token)
-	b := Bot{token: token}
+func CreateDiscordBot(cfg config.DiscordConfig) (*Bot, error) {
+	log.Info("DiscordBot is CREATING itself")
+
+	b := Bot{token: cfg.Token}
 	url := b.getGateway()
 	b.ws = dialGateway(url)
 
@@ -199,8 +201,8 @@ func CreateDiscordBot(id string, secret string, token string) (*Bot, error) {
 
 	b.discordOauthConfig = &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/cb",
-		ClientID:     id,
-		ClientSecret: secret,
+		ClientID:     cfg.ID,
+		ClientSecret: cfg.Secret,
 		Scopes:       []string{"bot"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discordapp.com/api/oauth2/authorize",

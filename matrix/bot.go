@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/torlenor/abylebotter/botinterface"
+	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/plugins"
@@ -76,9 +77,9 @@ func createMatrixBotWithAPI(api api, username string, password string, token str
 }
 
 // CreateMatrixBot creates a new instance of a DiscordBot
-func CreateMatrixBot(server string, username string, password string, token string) (*Bot, error) {
-	api := &matrixAPI{server: server, authToken: token}
-	return createMatrixBotWithAPI(api, username, password, token)
+func CreateMatrixBot(cfg config.MatrixConfig) (*Bot, error) {
+	api := &matrixAPI{server: cfg.Server, authToken: cfg.Token}
+	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password, cfg.Token)
 }
 
 // Status returns the current status of MatrixBot
