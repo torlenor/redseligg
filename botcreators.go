@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/slack"
-	"github.com/torlenor/abylebotter/ws"
 
 	"github.com/torlenor/abylebotter/discord"
-	"github.com/torlenor/abylebotter/fake"
 	"github.com/torlenor/abylebotter/matrix"
 	"github.com/torlenor/abylebotter/mattermost"
+	"github.com/torlenor/abylebotter/slack"
+
+	"github.com/torlenor/abylebotter/ws"
 )
 
 func discordBotCreator(config config.Config) *discord.Bot {
@@ -49,15 +49,6 @@ func matrixBotCreator(config config.Config) *matrix.Bot {
 	bot, err := matrix.CreateMatrixBot(matrixServer, matrixUsername, matrixPassword, matrixToken)
 	if err != nil {
 		log.Println("MatrixBot: ERROR: ", err)
-	}
-
-	return bot
-}
-
-func fakeBotCreator(config config.Config) *fake.Bot {
-	bot, err := fake.CreateFakeBot()
-	if err != nil {
-		log.Println("FakeBot: ERROR: ", err)
 	}
 
 	return bot

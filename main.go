@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
 
 	"github.com/torlenor/abylebotter/api"
@@ -105,13 +104,6 @@ func createBots(cfg config.Config) error {
 		}
 		createPlugins(cfg.Bots.Matrix.Plugins, bot)
 		botPool.Add(bot)
-	} else if cfg.Bots.Fake.Enabled {
-		bot := fakeBotCreator(cfg)
-		if bot == nil {
-			return errors.New("Could not create Fake Bot")
-		}
-		createPlugins(cfg.Bots.Fake.Plugins, bot)
-		botPool.Add(bot)
 	} else if cfg.Bots.Mattermost.Enabled {
 		bot := mattermostBotCreator(cfg.Bots.Mattermost)
 		if bot == nil {
@@ -161,13 +153,12 @@ func main() {
 	interrupt = make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	var cfg config.Config
-	if _, err := toml.DecodeFile(configPath, &cfg); err != nil {
-		fmt.Println(err)
-		return
+	cfg, err := config.ParseFromFile(configPath)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	err := createBots(cfg)
+	err = createBots(cfg)
 	if err != nil {
 		log.Fatalln("Error initializing the bots and plugins:" + err.Error() + "Quitting...")
 	}
@@ -176,7 +167,7 @@ func main() {
 		log.Fatal("No Bot enabled. Check config file: ", configPath)
 	}
 
-	log.Println("AbyleBotter: Number of configured bots:", botPool.Len())
+	log.Infoln("AbyleBotter: Number of configured bots:", botPool.Len())
 
 	// Start API
 	go api.Start(cfg.General.API)

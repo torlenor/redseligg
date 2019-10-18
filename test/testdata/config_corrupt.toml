@@ -1,0 +1,10 @@
+#
+# AbyleBotter example configuration
+#
+
+[general]]]]
+
+  [dfsfdsf.api]
+    enabled = true # Set this to true to enable the REST API
+    ip = "127.0.0.1" # IP to listen on for the REST API
+    port = "8000" # Port to listen on for the REST API
