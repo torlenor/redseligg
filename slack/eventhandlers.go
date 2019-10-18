@@ -33,6 +33,14 @@ func (b *Bot) eventDispatcher(event interface{}, message []byte) {
 		b.handleEventMemberJoinedChannel(message)
 	case "group_joined":
 		b.handleEventGroupJoined(message)
+	case "user_changed":
+		b.handleEventUserChanged(message)
+	case "team_join":
+		b.handleEventTeamJoin(message)
+	case "dnd_updated_user":
+		b.handleEventDnDUpdatedUser(message)
+	case "im_created":
+		b.handleEventIMCreated(message)
 	case "pong":
 		b.handleEventPong(message)
 	default:
@@ -146,4 +154,48 @@ func (b *Bot) handleEventGroupJoined(data []byte) {
 
 func (b *Bot) handleEventPong(data []byte) {
 	b.receivePong(data)
+}
+
+func (b *Bot) handleEventUserChanged(data []byte) {
+	var userChanged eventUser
+
+	if err := json.Unmarshal(data, &userChanged); err != nil {
+		b.log.Errorln("UNHANDLED ERROR: ", err)
+		return
+	}
+
+	b.log.Debugf("Received UserChanged event for User %s", userChanged.User.Name)
+}
+
+func (b *Bot) handleEventTeamJoin(data []byte) {
+	var teamJoin eventUser
+
+	if err := json.Unmarshal(data, &teamJoin); err != nil {
+		b.log.Errorln("UNHANDLED ERROR: ", err)
+		return
+	}
+
+	b.log.Debugf("Received TeamJoin event for User %s", teamJoin.User.Name)
+}
+
+func (b *Bot) handleEventDnDUpdatedUser(data []byte) {
+	var dndUpdatedUser eventDnDUpdatedUser
+
+	if err := json.Unmarshal(data, &dndUpdatedUser); err != nil {
+		b.log.Errorln("UNHANDLED ERROR: ", err)
+		return
+	}
+
+	b.log.Debugf("Received DnDUpdatedUser event for User ID %s", dndUpdatedUser.User)
+}
+
+func (b *Bot) handleEventIMCreated(data []byte) {
+	var imCreated eventIMCreated
+
+	if err := json.Unmarshal(data, &imCreated); err != nil {
+		b.log.Errorln("UNHANDLED ERROR: ", err)
+		return
+	}
+
+	b.log.Debugf("Received IMCreated event for User ID %s", imCreated.User)
 }

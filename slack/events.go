@@ -145,3 +145,41 @@ type EventAck struct {
 	Ts      string `json:"ts"`
 	Text    string `json:"text"`
 }
+
+type eventUser struct {
+	Type    string `json:"type"`
+	User    user   `json:"user"`
+	CacheTs int    `json:"cache_ts"`
+	EventTs string `json:"event_ts"`
+}
+
+type eventDnDUpdatedUser struct {
+	Type      string `json:"type"`
+	User      string `json:"user"`
+	DndStatus struct {
+		DndEnabled     bool `json:"dnd_enabled"`
+		NextDndStartTs int  `json:"next_dnd_start_ts"`
+		NextDndEndTs   int  `json:"next_dnd_end_ts"`
+	} `json:"dnd_status"`
+	EventTs string `json:"event_ts"`
+}
+
+type eventIMCreated struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel struct {
+		ID                 string      `json:"id"`
+		Created            int         `json:"created"`
+		IsFrozen           bool        `json:"is_frozen"`
+		IsArchived         bool        `json:"is_archived"`
+		IsIm               bool        `json:"is_im"`
+		IsOrgShared        bool        `json:"is_org_shared"`
+		User               string      `json:"user"`
+		LastRead           string      `json:"last_read"`
+		Latest             interface{} `json:"latest"`
+		UnreadCount        int         `json:"unread_count"`
+		UnreadCountDisplay int         `json:"unread_count_display"`
+		IsOpen             bool        `json:"is_open"`
+	} `json:"channel"`
+	EventTs string `json:"event_ts"`
+}
