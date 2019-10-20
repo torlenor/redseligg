@@ -4,7 +4,8 @@
 # Initial concept for Makefile stolen from https://github.com/yyyar/gobetween/tree/master/dist (thanks!)
 #
 
-.PHONY: update clean build build-all test authors dist vendor
+.PHONY: update clean build build-all test authors dist vendor build-container-latest \
+build-container-tagged build-container-gitcommit release-container release-container-gitcommit
 
 NAME := abylebotter
 VERSION := $(shell cat VERSION)
@@ -98,9 +99,12 @@ build-container-tagged: build-static
 
 build-container-gitcommit: build-static
 	@echo Building docker image ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
-	docker build -t ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} .
+	docker build -t ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} .
 
 release-container: build-container-tagged
 	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}
 	docker push ${DOCKERBASETAG}:${VERSION}
 
+release-container-gitcommit: build-container-tagged
+	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}
+	docker push ${DOCKERBASETAG}:${VERSION}
