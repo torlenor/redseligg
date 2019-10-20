@@ -13,10 +13,11 @@ func (b *Bot) run() {
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				b.log.Debugln("Connection closed normally: ", err)
+				break
 			} else {
 				b.log.Errorln("UNHANDLED ERROR: ", err)
+				continue
 			}
-			break
 		}
 
 		var data map[string]interface{}
@@ -55,5 +56,33 @@ func pingSender(interval time.Duration, f func() error, stop chan bool) {
 }
 
 func (b *Bot) onFail() {
-	b.log.Debugf("TODO: Implement recover onFail")
+	b.log.Warnf("Encountered an error, trying to restart the bot...")
+	b.stopPingWatchdog()
+	err := b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		b.log.Warnln("Error when writing close message to ws:", err)
+	}
+	b.wg.Wait()
+	b.ws.Stop()
+
+	rtmConnectResponse, err := b.RtmConnect()
+	if err != nil {
+		b.log.Errorf("Error connecting to Slack servers: %s", err)
+		return
+	}
+	b.rtmURL = rtmConnectResponse.URL
+	err = b.ws.Dial(b.rtmURL)
+	if err != nil {
+		b.log.Errorln("Could not dial Slack RTM WebSocket, Slack Bot not operational:", err)
+		return
+	}
+
+	b.startPingWatchdog()
+	go func() {
+		b.wg.Add(1)
+		b.run()
+		defer b.wg.Done()
+	}()
+
+	b.log.Info("Recovery attempt finished")
 }

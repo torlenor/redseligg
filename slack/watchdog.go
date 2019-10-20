@@ -27,7 +27,8 @@ func (w *watchdog) SetFailCallback(c failCallback) *watchdog {
 	return w
 }
 
-// Start the watchdog
+// Start the watchdog; in case it is not fed, it will keep
+// notifying until it is stopped.
 func (w *watchdog) Start(interval time.Duration) {
 	w.startStopMutex.Lock()
 	defer w.startStopMutex.Unlock()
@@ -51,16 +52,11 @@ func (w *watchdog) Start(interval time.Duration) {
 				}
 				w.timer.Reset(interval)
 			case <-w.timer.C:
-				w.startStopMutex.Lock()
-				w.isRunning = false
-				w.startStopMutex.Unlock()
-
 				if w.failCallback != nil {
-					w.failCallback()
+					go w.failCallback()
 				} else {
 					logging.Get("Watchdog").Infof("Watchdog not fed in time. No callback set")
 				}
-				return
 			}
 		}
 	}(interval)

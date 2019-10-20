@@ -79,6 +79,20 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 	return &b, nil
 }
 
+func (b *Bot) startPluginMessageReceiver() {
+	go b.pluginMessageReceiver()
+}
+
+func (b *Bot) startPingWatchdog() {
+	b.pingSenderStop = make(chan bool)
+	go func() {
+		b.wg.Add(1)
+		pingSender(5*time.Second, b.sendPing, b.pingSenderStop)
+		defer b.wg.Done()
+	}()
+	b.watchdog.SetFailCallback(b.onFail).Start(10 * time.Second)
+}
+
 // Start the Bot
 func (b *Bot) Start() {
 	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", b.plugins.Size())
@@ -99,14 +113,9 @@ func (b *Bot) Start() {
 		b.log.Warnln("Populating User List failed, no User information will be available:", err)
 	}
 
-	b.pingSenderStop = make(chan bool)
-	go func() {
-		b.wg.Add(1)
-		pingSender(5*time.Second, b.sendPing, b.pingSenderStop)
-		defer b.wg.Done()
-	}()
+	b.startPluginMessageReceiver()
 
-	b.watchdog.SetFailCallback(b.onFail).Start(10 * time.Second)
+	b.startPingWatchdog()
 
 	go func() {
 		b.wg.Add(1)
@@ -114,16 +123,19 @@ func (b *Bot) Start() {
 		defer b.wg.Done()
 	}()
 
-	go b.pluginMessageReceiver()
 	b.log.Infoln("SlackBot is RUNNING")
+}
+
+func (b *Bot) stopPingWatchdog() {
+	b.watchdog.Stop()
+	b.pingSenderStop <- true
 }
 
 // Stop the Bot
 func (b *Bot) Stop() {
 	b.log.Infoln("SlackBot is SHUTING DOWN")
 
-	b.watchdog.Stop()
-	b.pingSenderStop <- true
+	b.stopPingWatchdog()
 
 	err := b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
