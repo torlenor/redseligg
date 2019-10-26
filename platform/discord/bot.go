@@ -12,9 +12,9 @@ import (
 
 	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/plugins"
+	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/abylebotter/plugin"
 )
 
 var (
@@ -48,8 +48,6 @@ func (s stats) toString() string {
 type Bot struct {
 	ws *websocket.Conn
 
-	sendMessageChan chan events.SendMessage
-
 	knownChannels     map[string]channelCreate
 	token             string
 	ownSnowflakeID    string
@@ -58,9 +56,7 @@ type Bot struct {
 	heartBeatStopChan chan struct{}
 	seqNumberChan     chan int
 
-	receivers map[plugins.Plugin]chan events.ReceiveMessage
-
-	knownPlugins []plugins.Plugin
+	plugins []plugin.Hooks
 
 	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
@@ -70,21 +66,6 @@ type Bot struct {
 	discordOauthConfig *oauth2.Config
 
 	oauth2Handler *oauth2Handler
-}
-
-// GetReceiveMessageChannel returns the channel which is used to notify
-// about received messages from the bot
-func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
-	log.Debugln("Creating receiveChannel for Plugin", plugin.GetName())
-	b.receivers[plugin] = make(chan events.ReceiveMessage)
-	return b.receivers[plugin]
-}
-
-// GetSendMessageChannel returns the channel which is used to
-// send messages using the bot. For DiscordBot these messages
-// can be normal channel messages, whispers
-func (b Bot) GetSendMessageChannel() chan events.SendMessage {
-	return b.sendMessageChan
 }
 
 func (b Bot) apiCall(path string, method string, body string) (r []byte, e error) {
@@ -187,8 +168,6 @@ func CreateDiscordBot(cfg config.DiscordConfig) (*Bot, error) {
 	url := b.getGateway()
 	b.ws = dialGateway(url)
 
-	b.sendMessageChan = make(chan events.SendMessage)
-
 	b.knownChannels = make(map[string]channelCreate)
 
 	b.heartBeatStopChan = make(chan struct{})
@@ -196,8 +175,6 @@ func CreateDiscordBot(cfg config.DiscordConfig) (*Bot, error) {
 
 	b.guilds = make(map[string]guildCreate)
 	b.guildNameToID = make(map[string]string)
-
-	b.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)
 
 	b.discordOauthConfig = &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/cb",
@@ -215,29 +192,10 @@ func CreateDiscordBot(cfg config.DiscordConfig) (*Bot, error) {
 	return &b, nil
 }
 
-func (b *Bot) startSendChannelReceiver() {
-	for sendMsg := range b.sendMessageChan {
-		switch sendMsg.Type {
-		case events.MESSAGE:
-			err := b.sendMessage(sendMsg.ChannelID, sendMsg.Content)
-			if err != nil {
-				log.Errorln("Error sending message:", err)
-			}
-		case events.WHISPER:
-			err := b.sendWhisper(sendMsg.ChannelID, sendMsg.Content)
-			if err != nil {
-				log.Errorln("Error sending whisper:", err)
-			}
-		default:
-		}
-	}
-}
-
 // Start the Discord Bot
 func (b *Bot) Start() {
 	log.Infoln("DiscordBot is STARTING")
 	go b.startDiscordBot()
-	go b.startSendChannelReceiver()
 	go b.oauth2Handler.startOAuth2Handler()
 	log.Infoln("DiscordBot is RUNNING")
 }
@@ -252,8 +210,6 @@ func (b *Bot) Stop() {
 		log.Errorln("write close:", err)
 	}
 
-	b.disconnectReceivers()
-
 	log.Infoln("DiscordBot is SHUT DOWN")
 }
 
@@ -266,17 +222,9 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return status
 }
 
-// AddPlugin takes as argument a plugin interface and
-// adds it to the DiscordBot by connecting all the required
-// channels and starting it
-func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
-	b.knownPlugins = append(b.knownPlugins, plugin)
-}
-
-func (b *Bot) disconnectReceivers() {
-	for plugin, pluginChannel := range b.receivers {
-		log.Debugln("Disconnecting Plugin", plugin.GetName())
-		defer close(pluginChannel)
-	}
+// AddPlugin takes as argument a plugin and
+// adds it to the bot providing it with the API
+func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
+	plugin.SetAPI(b)
+	b.plugins = append(b.plugins, plugin)
 }

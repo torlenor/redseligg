@@ -2,6 +2,7 @@ package discord
 
 import (
 	"github.com/torlenor/abylebotter/events"
+	"github.com/torlenor/abylebotter/model"
 )
 
 func (b Bot) getMessageType(mc messageCreate) events.MessageType {
@@ -14,21 +15,17 @@ func (b Bot) getMessageType(mc messageCreate) events.MessageType {
 }
 
 func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
-	var receiveMessage events.ReceiveMessage
+	var receiveMessage model.Post
 	if b.getMessageType(newMessageCreate) == events.MESSAGE {
 		b.stats.messagesReceived++
-		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
+		receiveMessage = model.Post{UserID: newMessageCreate.Author.ID, User: newMessageCreate.Author.Username, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	} else {
 		b.stats.whispersReceived++
-		receiveMessage = events.ReceiveMessage{Type: b.getMessageType(newMessageCreate), UserID: newMessageCreate.Author.ID, Content: newMessageCreate.Content}
+		receiveMessage = model.Post{IsPrivate: true, UserID: newMessageCreate.Author.ID, User: newMessageCreate.Author.Username, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	}
 
-	for plugin, pluginChannel := range b.receivers {
-		log.Debugln("Notifying plugin", plugin.GetName(), "about new message/whisper")
-		select {
-		case pluginChannel <- receiveMessage:
-		default:
-		}
+	for _, plugin := range b.plugins {
+		plugin.OnPost(receiveMessage)
 	}
 }
 

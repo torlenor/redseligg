@@ -10,9 +10,9 @@ import (
 	"github.com/torlenor/abylebotter/plugins/httppingplugin"
 	"github.com/torlenor/abylebotter/plugins/randomplugin"
 
-	"github.com/torlenor/abylebotter/discord"
 	"github.com/torlenor/abylebotter/matrix"
-	
+
+	"github.com/torlenor/abylebotter/platform/discord"
 	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
 
@@ -120,7 +120,7 @@ func createBots(cfg config.Config) error {
 		if err != nil {
 			return fmt.Errorf("Could not create Discord Bot: %s", err)
 		}
-		createPlugins(cfg.Bots.Discord.Plugins, bot)
+		createPlatformPlugins(cfg.Bots.Discord.Plugins, bot)
 		botPool.Add(bot)
 	} else if cfg.Bots.Matrix.Enabled {
 		bot, err := matrixBotCreator(cfg)
