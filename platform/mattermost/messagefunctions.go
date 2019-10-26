@@ -24,21 +24,21 @@ func (b *Bot) sendWhisper(userID string, content string) error {
 	// It is a known channel
 	if _, ok := b.knownChannelIDs[userID]; ok {
 		return b.sendMessage(userID, content)
-	} else {
-		// It is not a known Channel so maybe it is a userID
-		response, err := b.apiRunner("/api/v4/channels/direct", "POST", `[
+	}
+
+	// It is not a known Channel so maybe it is a userID
+	response, err := b.apiRunner("/api/v4/channels/direct", "POST", `[
 			"`+b.MeUser.ID+`",
 			"`+userID+`"
 			]`)
-		if err != nil && response.statusCode > 200 {
-			return err
-		}
-		var channel Channel
-		err = json.Unmarshal(response.body, &channel)
-		if err != nil {
-			return err
-		}
-		b.addKnownChannel(channel)
-		return b.sendMessage(channel.ID, content)
+	if err != nil && response.statusCode > 200 {
+		return err
 	}
+	var channel channelData
+	err = json.Unmarshal(response.body, &channel)
+	if err != nil {
+		return err
+	}
+	b.addKnownChannel(channel)
+	return b.sendMessage(channel.ID, content)
 }

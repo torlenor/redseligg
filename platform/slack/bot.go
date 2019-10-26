@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 
-	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
@@ -140,16 +139,6 @@ func (b *Bot) Stop() {
 	b.ws.Stop()
 
 	b.log.Infoln("SlackBot is SHUT DOWN")
-}
-
-// Status returns the current status of the SlackBot
-func (b *Bot) Status() botinterface.BotStatus {
-	status := botinterface.BotStatus{
-		Running: true,
-		Fail:    false,
-		Fatal:   false,
-	}
-	return status
 }
 
 // AddPlugin takes as argument a plugin and

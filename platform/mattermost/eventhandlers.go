@@ -6,7 +6,7 @@ import (
 	"github.com/torlenor/abylebotter/model"
 )
 
-type Post struct {
+type post struct {
 	ID         string `json:"id"`
 	CreateAt   int64  `json:"create_at"`
 	UpdateAt   int64  `json:"update_at"`
@@ -27,17 +27,17 @@ type Post struct {
 }
 
 func (b *Bot) handleEventPosted(data []byte) {
-	var posted EventPosted
+	var posted eventPosted
 
 	if err := json.Unmarshal(data, &posted); err != nil {
-		b.log.Errorln("UNHANDELED ERROR: ", err)
+		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
 
-	var post Post
+	var post post
 
 	if err := json.Unmarshal([]byte(posted.Data.Post), &post); err != nil {
-		b.log.Errorln("UNHANDELED ERROR: ", err)
+		b.log.Errorln("UNHANDLED ERROR: ", err)
 		return
 	}
 

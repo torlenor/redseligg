@@ -1,42 +1,42 @@
 package mattermost
 
-type Broadcast struct {
+type broadcast struct {
 	OmitUsers interface{} `json:"omit_users"`
 	UserID    string      `json:"user_id"`
 	ChannelID string      `json:"channel_id"`
 	TeamID    string      `json:"team_id"`
 }
 
-type EventStatusChange struct {
+type eventStatusChange struct {
 	Event string `json:"event"`
 	Data  struct {
 		Status string `json:"status"`
 		UserID string `json:"user_id"`
 	} `json:"data"`
-	Broadcast Broadcast `json:"broadcast"`
+	Broadcast broadcast `json:"broadcast"`
 	Seq       int       `json:"seq"`
 }
 
-type EventHello struct {
+type eventHello struct {
 	Event string `json:"event"`
 	Data  struct {
 		ServerVersion string `json:"server_version"`
 	} `json:"data"`
-	Broadcast Broadcast `json:"broadcast"`
+	Broadcast broadcast `json:"broadcast"`
 	Seq       int       `json:"seq"`
 }
 
-type EventTyping struct {
+type eventTyping struct {
 	Event string `json:"event"`
 	Data  struct {
 		ParentID string `json:"parent_id"`
 		UserID   string `json:"user_id"`
 	} `json:"data"`
-	Broadcast Broadcast `json:"broadcast"`
+	Broadcast broadcast `json:"broadcast"`
 	Seq       int       `json:"seq"`
 }
 
-type EventPosted struct {
+type eventPosted struct {
 	Event string `json:"event"`
 	Data  struct {
 		ChannelDisplayName string `json:"channel_display_name"`

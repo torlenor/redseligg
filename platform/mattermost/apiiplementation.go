@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type User struct {
+type userData struct {
 	ID            string `json:"id"`
 	CreateAt      int    `json:"create_at"`
 	UpdateAt      int    `json:"update_at"`
@@ -37,9 +37,9 @@ type User struct {
 	MfaActive          bool `json:"mfa_active"`
 }
 
-type Users []User
+type usersData []userData
 
-func (b *Bot) getUserByID(userID string) (*User, error) {
+func (b *Bot) getUserByID(userID string) (*userData, error) {
 	if val, ok := b.KnownUsers[userID]; ok {
 		return &val, nil
 	}
@@ -50,7 +50,7 @@ func (b *Bot) getUserByID(userID string) (*User, error) {
 	if err != nil && response.statusCode > 200 {
 		return nil, err
 	}
-	var users Users
+	var users usersData
 	err = json.Unmarshal(response.body, &users)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (b *Bot) getUserByID(userID string) (*User, error) {
 	return &users[0], nil
 }
 
-type Channel struct {
+type channelData struct {
 	ID            string `json:"id"`
 	CreateAt      int    `json:"create_at"`
 	UpdateAt      int    `json:"update_at"`
@@ -82,7 +82,7 @@ type Channel struct {
 	CreatorID     string `json:"creator_id"`
 }
 
-func (b *Bot) getChannelByID(channelID string) (*Channel, error) {
+func (b *Bot) getChannelByID(channelID string) (*channelData, error) {
 	if val, ok := b.KnownChannels[channelID]; ok {
 		return &val, nil
 	}
@@ -91,7 +91,7 @@ func (b *Bot) getChannelByID(channelID string) (*Channel, error) {
 	if err != nil && response.statusCode > 200 {
 		return nil, err
 	}
-	var channel Channel
+	var channel channelData
 	err = json.Unmarshal(response.body, &channel)
 	if err != nil {
 		return nil, err

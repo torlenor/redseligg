@@ -1,6 +1,6 @@
 package slack
 
-type EventMessage struct {
+type eventMessage struct {
 	ClientMsgID          string `json:"client_msg_id"`
 	SuppressNotification bool   `json:"suppress_notification"`
 	Type                 string `json:"type"`
@@ -15,13 +15,13 @@ type EventMessage struct {
 	Ts                   string `json:"ts"`
 }
 
-type EventUserTyping struct {
+type eventUserTyping struct {
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
 	User    string `json:"user"`
 }
 
-type EventDesktopNotification struct {
+type eventDesktopNotification struct {
 	Type            string `json:"type"`
 	Title           string `json:"title"`
 	Subtitle        string `json:"subtitle"`
@@ -38,7 +38,7 @@ type EventDesktopNotification struct {
 	EventTs         string `json:"event_ts"`
 }
 
-type EventChannelCreated struct {
+type eventChannelCreated struct {
 	Type    string `json:"type"`
 	Channel struct {
 		ID             string `json:"id"`
@@ -53,7 +53,7 @@ type EventChannelCreated struct {
 	EventTs string `json:"event_ts"`
 }
 
-type EventChannel struct {
+type eventChannel struct {
 	ID                      string        `json:"id"`
 	Name                    string        `json:"name"`
 	IsChannel               bool          `json:"is_channel"`
@@ -104,26 +104,26 @@ type EventChannel struct {
 	Priority      int           `json:"priority"`
 }
 
-type EventChannelJoined struct {
+type eventChannelJoined struct {
 	Type    string       `json:"type"`
-	Channel EventChannel `json:"channel"`
+	Channel eventChannel `json:"channel"`
 }
 
-type EventChannelLeft struct {
+type eventChannelLeft struct {
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
 	ActorID string `json:"actor_id"`
 	EventTs string `json:"event_ts"`
 }
 
-type EventChannelDeleted struct {
+type eventChannelDeleted struct {
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
 	ActorID string `json:"actor_id"`
 	EventTs string `json:"event_ts"`
 }
 
-type EventMemberJoinedChannel struct {
+type eventMemberJoinedChannel struct {
 	Type        string `json:"type"`
 	User        string `json:"user"`
 	Channel     string `json:"channel"`
@@ -134,12 +134,12 @@ type EventMemberJoinedChannel struct {
 	Ts          string `json:"ts"`
 }
 
-type EventGroupJoined struct {
+type eventGroupJoined struct {
 	Type    string       `json:"type"`
-	Channel EventChannel `json:"channel"`
+	Channel eventChannel `json:"channel"`
 }
 
-type EventAck struct {
+type eventAck struct {
 	Ok      bool   `json:"ok"`
 	ReplyTo int    `json:"reply_to"`
 	Ts      string `json:"ts"`

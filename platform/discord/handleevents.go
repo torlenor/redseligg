@@ -6,6 +6,7 @@ import (
 
 type messageType int
 
+// MessageTypes
 const ( // iota is reset to 0
 	UNKNOWN messageType = iota
 	WHISPER

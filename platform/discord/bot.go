@@ -10,7 +10,6 @@ import (
 	"github.com/gorilla/websocket"
 	"golang.org/x/oauth2"
 
-	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
@@ -211,15 +210,6 @@ func (b *Bot) Stop() {
 	}
 
 	log.Infoln("DiscordBot is SHUT DOWN")
-}
-
-// Status returns the current status of the DiscordBot
-func (b *Bot) Status() botinterface.BotStatus {
-	status := botinterface.BotStatus{
-		Running: true,
-		Fail:    false,
-		Fatal:   false}
-	return status
 }
 
 // AddPlugin takes as argument a plugin and

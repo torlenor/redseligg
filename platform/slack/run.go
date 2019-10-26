@@ -30,7 +30,7 @@ func (b *Bot) run() {
 		if event, ok := data["type"]; ok { // Dispatch to event handlers
 			b.eventDispatcher(event, message)
 		} else if _, ok := data["ok"]; ok {
-			ackMessage := EventAck{}
+			ackMessage := eventAck{}
 			if err := json.Unmarshal(message, &ackMessage); err != nil {
 				b.log.Errorln("UNHANDLED ERROR: ", err)
 			} else {

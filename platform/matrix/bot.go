@@ -3,7 +3,6 @@ package matrix
 import (
 	"time"
 
-	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
@@ -59,11 +58,6 @@ func createMatrixBotWithAPI(api api, username string, password string, token str
 func CreateMatrixBot(cfg config.MatrixConfig) (*Bot, error) {
 	api := &matrixAPI{server: cfg.Server, authToken: cfg.Token}
 	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password, cfg.Token)
-}
-
-// Status returns the current status of MatrixBot
-func (b *Bot) Status() botinterface.BotStatus {
-	return botinterface.BotStatus{Running: true}
 }
 
 // AddPlugin takes as argument a plugin and

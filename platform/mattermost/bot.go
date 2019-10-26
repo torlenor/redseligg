@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 
-	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
@@ -46,13 +45,13 @@ type Bot struct {
 
 	MeUser UserObject
 
-	KnownUsers     map[string]User   // key is UserID
-	knownUserNames map[string]string // mapping of UserName to UserID
-	knownUserIDs   map[string]string // mapping of UserID to UserName
+	KnownUsers     map[string]userData // key is UserID
+	knownUserNames map[string]string   // mapping of UserName to UserID
+	knownUserIDs   map[string]string   // mapping of UserID to UserName
 
-	KnownChannels     map[string]Channel // key is ChannelID
-	knownChannelNames map[string]string  // mapping of ChannelName to ChannelID
-	knownChannelIDs   map[string]string  // mapping of ChannelID to UserChannelNameName
+	KnownChannels     map[string]channelData // key is ChannelID
+	knownChannelNames map[string]string      // mapping of ChannelName to ChannelID
+	knownChannelIDs   map[string]string      // mapping of ChannelID to UserChannelNameName
 }
 
 func (b *Bot) startMattermostBot() {
@@ -62,7 +61,7 @@ func (b *Bot) startMattermostBot() {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				b.log.Debugln("Connection closed normally: ", err)
 			} else {
-				b.log.Errorln("UNHANDELED ERROR: ", err)
+				b.log.Errorln("UNHANDLED ERROR: ", err)
 			}
 			break
 		}
@@ -70,7 +69,7 @@ func (b *Bot) startMattermostBot() {
 		var data map[string]interface{}
 
 		if err := json.Unmarshal(message, &data); err != nil {
-			b.log.Errorln("UNHANDELED ERROR: ", err)
+			b.log.Errorln("UNHANDLED ERROR: ", err)
 			continue
 		}
 
@@ -79,10 +78,10 @@ func (b *Bot) startMattermostBot() {
 			case "posted":
 				b.handleEventPosted(message)
 			default:
-				b.log.Warnf("Received unhandeled event %s: %s", event, message)
+				b.log.Warnf("Received unhandled event %s: %s", event, message)
 			}
 		} else {
-			b.log.Warnf("Received unhandeled message: %s", message)
+			b.log.Warnf("Received unhandled message: %s", message)
 		}
 	}
 }
@@ -98,11 +97,11 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 
 		lastWsSeqNumber: 0,
 
-		KnownUsers:     make(map[string]User),
+		KnownUsers:     make(map[string]userData),
 		knownUserNames: make(map[string]string),
 		knownUserIDs:   make(map[string]string),
 
-		KnownChannels:     make(map[string]Channel),
+		KnownChannels:     make(map[string]channelData),
 		knownChannelNames: make(map[string]string),
 		knownChannelIDs:   make(map[string]string),
 	}
@@ -147,15 +146,6 @@ func (b *Bot) Stop() {
 	b.log.Infoln("MattermostBot is SHUT DOWN")
 }
 
-// Status returns the current status of the MattermostBot
-func (b *Bot) Status() botinterface.BotStatus {
-	status := botinterface.BotStatus{
-		Running: true,
-		Fail:    false,
-		Fatal:   false}
-	return status
-}
-
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
@@ -163,14 +153,14 @@ func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
 	b.plugins = append(b.plugins, plugin)
 }
 
-func (b *Bot) addKnownUser(user User) {
+func (b *Bot) addKnownUser(user userData) {
 	b.log.Debugf("Added new known User: %s (%s)", user.Username, user.ID)
 	b.KnownUsers[user.ID] = user
 	b.knownUserNames[user.Username] = user.ID
 	b.knownUserIDs[user.ID] = user.Username
 }
 
-func (b *Bot) addKnownChannel(channel Channel) {
+func (b *Bot) addKnownChannel(channel channelData) {
 	b.log.Debugf("Added new known Channel: %s (%s)", channel.ID, channel.Name)
 	b.KnownChannels[channel.ID] = channel
 	b.knownChannelNames[channel.Name] = channel.ID
