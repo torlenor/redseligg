@@ -10,9 +10,9 @@ import (
 
 	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/plugins"
+	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/abylebotter/plugin"
 )
 
 type stats struct {
@@ -34,13 +34,9 @@ type Bot struct {
 
 	ws *websocket.Conn
 
-	sendMessageChan chan events.SendMessage
-
 	token string
 
-	receivers map[plugins.Plugin]chan events.ReceiveMessage
-
-	knownPlugins []plugins.Plugin
+	plugins []plugin.Hooks
 
 	stats stats
 
@@ -57,21 +53,6 @@ type Bot struct {
 	KnownChannels     map[string]Channel // key is ChannelID
 	knownChannelNames map[string]string  // mapping of ChannelName to ChannelID
 	knownChannelIDs   map[string]string  // mapping of ChannelID to UserChannelNameName
-}
-
-// GetReceiveMessageChannel returns the channel which is used to notify
-// about received messages from the bot
-func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
-	b.log.Debugln("Creating receiveChannel for Plugin", plugin.GetName())
-	b.receivers[plugin] = make(chan events.ReceiveMessage)
-	return b.receivers[plugin]
-}
-
-// GetSendMessageChannel returns the channel which is used to
-// send messages using the bot. For MattermostBot these messages
-// can be normal channel messages, whispers
-func (b Bot) GetSendMessageChannel() chan events.SendMessage {
-	return b.sendMessageChan
 }
 
 func (b *Bot) startMattermostBot() {
@@ -112,10 +93,8 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 	log.Printf("MattermostBot is CREATING itself")
 
 	b := Bot{
-		config:          cfg,
-		log:             log,
-		receivers:       make(map[plugins.Plugin]chan events.ReceiveMessage),
-		sendMessageChan: make(chan events.SendMessage),
+		config: cfg,
+		log:    log,
 
 		lastWsSeqNumber: 0,
 
@@ -149,29 +128,10 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 	return &b, nil
 }
 
-func (b *Bot) startSendChannelReceiver() {
-	for sendMsg := range b.sendMessageChan {
-		switch sendMsg.Type {
-		case events.MESSAGE:
-			err := b.sendMessage(sendMsg.ChannelID, sendMsg.Content)
-			if err != nil {
-				b.log.Errorln("Error sending message:", err)
-			}
-		case events.WHISPER:
-			err := b.sendWhisper(sendMsg.ChannelID, sendMsg.Content)
-			if err != nil {
-				b.log.Errorln("Error sending whisper:", err)
-			}
-		default:
-		}
-	}
-}
-
 // Start the Discord Bot
 func (b *Bot) Start() {
 	b.log.Infoln("MattermostBot is STARTING")
 	go b.startMattermostBot()
-	go b.startSendChannelReceiver()
 	b.log.Infoln("MattermostBot is RUNNING")
 }
 
@@ -183,8 +143,6 @@ func (b *Bot) Stop() {
 	if err != nil {
 		b.log.Errorln("write close:", err)
 	}
-
-	b.disconnectReceivers()
 
 	b.log.Infoln("MattermostBot is SHUT DOWN")
 }
@@ -198,19 +156,11 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return status
 }
 
-// AddPlugin takes as argument a plugin interface and
-// adds it to the MattermostBot by connecting all the required
-// channels and starting it
-func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
-	b.knownPlugins = append(b.knownPlugins, plugin)
-}
-
-func (b *Bot) disconnectReceivers() {
-	for plugin, pluginChannel := range b.receivers {
-		b.log.Debugln("Disconnecting Plugin", plugin.GetName())
-		defer close(pluginChannel)
-	}
+// AddPlugin takes as argument a plugin and
+// adds it to the bot providing it with the API
+func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
+	plugin.SetAPI(b)
+	b.plugins = append(b.plugins, plugin)
 }
 
 func (b *Bot) addKnownUser(user User) {

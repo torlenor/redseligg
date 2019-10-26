@@ -12,7 +12,8 @@ import (
 
 	"github.com/torlenor/abylebotter/discord"
 	"github.com/torlenor/abylebotter/matrix"
-	"github.com/torlenor/abylebotter/mattermost"
+	
+	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
 
 	"github.com/torlenor/abylebotter/ws"
@@ -133,7 +134,7 @@ func createBots(cfg config.Config) error {
 		if err != nil {
 			return fmt.Errorf("Could not create Mattermost Bot: %s", err)
 		}
-		createPlugins(cfg.Bots.Mattermost.Plugins, bot)
+		createPlatformPlugins(cfg.Bots.Mattermost.Plugins, bot)
 		botPool.Add(bot)
 	} else if cfg.Bots.Slack.Enabled {
 		bot, err := slackBotCreator(cfg.Bots.Slack)

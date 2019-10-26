@@ -3,7 +3,7 @@ package mattermost
 import (
 	"encoding/json"
 
-	"github.com/torlenor/abylebotter/events"
+	"github.com/torlenor/abylebotter/model"
 )
 
 type Post struct {
@@ -43,27 +43,20 @@ func (b *Bot) handleEventPosted(data []byte) {
 
 	b.log.Printf("%s", data)
 
-	var messageType events.MessageType
-	var ident string
-
+	isPrivate := false
 	if posted.Data.ChannelType == "D" {
-		messageType = events.WHISPER
-		ident = post.UserID
-	} else {
-		messageType = events.MESSAGE
-		ident = post.ChannelID
+		isPrivate = true
 	}
 
-	receiveMessage := events.ReceiveMessage{Type: messageType, ChannelID: ident, Content: post.Message}
+	var userName string
+	user, err := b.getUserByID(post.UserID)
+	if err != nil {
+		userName = user.Username
+	}
 
-	_, _ = b.getUserByID(post.UserID)
-
-	for plugin, pluginChannel := range b.receivers {
-		b.log.Debugln("Notifying plugin", plugin.GetName(), "about new message/whisper")
-		select {
-		case pluginChannel <- receiveMessage:
-		default:
-		}
+	receiveMessage := model.Post{User: userName, UserID: post.UserID, ChannelID: post.ChannelID, Content: post.Message, IsPrivate: isPrivate}
+	for _, plugin := range b.plugins {
+		plugin.OnPost(receiveMessage)
 	}
 
 }
