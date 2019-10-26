@@ -47,10 +47,6 @@ The HTTPPingPlugin listens to messages starting with `!httpping ` followed by an
 
 This is a classic "Roll/Random" plugin which sends back a random number in the range [0,100] when it receives the `!roll` command. When it receives `!roll {PositiveNumber}` instead, it returns a random number in the range [0, {PositiveNumber}].
 
-### SendMessagePlugin
-
-A small example which shows how one could implement a JSON interface to allow sending messages via an HTTP interface to AbyleBotter.
-
 ## Releases
 
 For releases binaries for Linux, Windows and Mac are provided. Check out the respective section on GitHub.
