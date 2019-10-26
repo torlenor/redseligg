@@ -98,7 +98,7 @@ build-container-tagged: build-static
 	docker build -t ${DOCKERBASETAG}:${VERSION} .
 
 build-container-gitcommit: build-static
-	@echo Building docker image ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
+	@echo Building docker image ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
 	docker build -t ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} .
 
 release-container: build-container-tagged
@@ -110,8 +110,8 @@ release-container-tagged: build-container-tagged
 	docker push ${DOCKERBASETAG}:${VERSION}
 
 release-container-gitcommit: build-container-gitcommit
-	@echo Pushing docker image ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
-	docker push ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
-	docker tag ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} ${DOCKERBASETAG}:latest
+	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
+	docker push ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
+	docker tag ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} ${DOCKERBASETAG}:latest
 	docker push ${DOCKERBASETAG}:latest
 
