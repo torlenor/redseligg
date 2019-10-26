@@ -10,9 +10,9 @@ import (
 
 	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/containers"
 	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/plugins"
+	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/abylebotter/plugin"
 	"github.com/torlenor/abylebotter/utils"
 )
 
@@ -37,7 +37,7 @@ type Bot struct {
 	channels channelManager
 	users    userManager
 
-	plugins containers.PluginContainer
+	plugins []plugin.Hooks
 
 	wg sync.WaitGroup
 
@@ -79,10 +79,6 @@ func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
 	return &b, nil
 }
 
-func (b *Bot) startPluginMessageReceiver() {
-	go b.pluginMessageReceiver()
-}
-
 func (b *Bot) startPingWatchdog() {
 	b.pingSenderStop = make(chan bool)
 	go func() {
@@ -95,7 +91,7 @@ func (b *Bot) startPingWatchdog() {
 
 // Start the Bot
 func (b *Bot) Start() {
-	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", b.plugins.Size())
+	b.log.Infof("SlackBot is STARTING (have %d plugin(s))", len(b.plugins))
 
 	err := b.ws.Dial(b.rtmURL)
 	if err != nil {
@@ -112,8 +108,6 @@ func (b *Bot) Start() {
 	if err != nil {
 		b.log.Warnln("Populating User List failed, no User information will be available:", err)
 	}
-
-	b.startPluginMessageReceiver()
 
 	b.startPingWatchdog()
 
@@ -145,7 +139,6 @@ func (b *Bot) Stop() {
 	b.wg.Wait()
 	b.ws.Stop()
 
-	b.plugins.RemoveAll()
 	b.log.Infoln("SlackBot is SHUT DOWN")
 }
 
@@ -159,9 +152,9 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return status
 }
 
-// AddPlugin takes as argument a plugin interface and
-// adds it to the SlackBot by connecting all the required
-// channels and starting it
-func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	b.plugins.Add(plugin)
+// AddPlugin takes as argument a plugin and
+// adds it to the bot providing it with the API
+func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
+	plugin.SetAPI(b)
+	b.plugins = append(b.plugins, plugin)
 }

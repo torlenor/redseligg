@@ -22,9 +22,6 @@
     enabled = false # Set to true to enable Echo plugin
     onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
 
-    [bots.discord.plugins.sendmessages]
-    enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
-
     [bots.discord.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
 
@@ -41,9 +38,6 @@
     [bots.matrix.plugins.echo]
     enabled = false # Set to true to enable Echo plugin
     onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
-
-    [bots.matrix.plugins.sendmessages]
-    enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
 
     [bots.matrix.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
@@ -63,9 +57,6 @@
       enabled = false # Set to true to enable Echo plugin
       onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
 
-    [bots.mattermost.plugins.sendmessages]
-      enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
-
     [bots.mattermost.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin
 
@@ -80,9 +71,6 @@
     [bots.slack.plugins.echo]
       enabled = false # Set to true to enable Echo plugin
       onlywhispers = false # Set to true if the Echo plugin should only echos in whispers
-
-    [bots.slack.plugins.sendmessages]
-      enabled = false # Set to true to enable SendMessages Plugin (REST API message sending)
     
     [bots.slack.plugins.httpping]
       enabled = false # Set to true to enable HTTPPing plugin

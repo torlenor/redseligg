@@ -29,12 +29,6 @@ type Plugins struct {
 		Enabled      bool `toml:"enabled"`
 		OnlyWhispers bool `toml:"onlywhispers"`
 	} `toml:"echo"`
-	Giveaway struct {
-		Enabled bool `toml:"enabled"`
-	} `toml:"giveaway"`
-	SendMessage struct {
-		Enabled bool `toml:"enabled"`
-	} `toml:"sendmessages"`
 	HTTPPing struct {
 		Enabled bool `toml:"enabled"`
 	} `toml:"httpping"`

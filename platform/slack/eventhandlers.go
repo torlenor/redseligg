@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"regexp"
 
-	"github.com/torlenor/abylebotter/events"
+	"github.com/torlenor/abylebotter/model"
 )
 
 func cleanupMessage(msg string) string {
@@ -57,8 +57,10 @@ func (b *Bot) handleEventMessage(data []byte) {
 	}
 
 	if message.Subtype != "message_deleted" {
-		receiveMessage := events.ReceiveMessage{Type: events.MESSAGE, UserID: message.User, ChannelID: message.Channel, Content: cleanupMessage(message.Text)}
-		b.plugins.Send(receiveMessage)
+		receiveMessage := model.Post{UserID: message.User, ChannelID: message.Channel, Content: cleanupMessage(message.Text)}
+		for _, plugin := range b.plugins {
+			plugin.OnPost(receiveMessage)
+		}
 	} else {
 		b.log.Debugf("Received message::message_deleted event on Channel ID %s", message.Channel)
 	}
