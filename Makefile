@@ -105,6 +105,13 @@ release-container: build-container-tagged
 	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}
 	docker push ${DOCKERBASETAG}:${VERSION}
 
-release-container-gitcommit: build-container-tagged
+release-container-tagged: build-container-tagged
 	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}
 	docker push ${DOCKERBASETAG}:${VERSION}
+
+release-container-gitcommit: build-container-gitcommit
+	@echo Pushing docker image ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
+	docker push ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
+	docker tag ${DOCKERBASETAG}:${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED} ${DOCKERBASETAG}:latest
+	docker push ${DOCKERBASETAG}:latest
+
