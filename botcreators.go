@@ -3,24 +3,19 @@ package main
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
+
 	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugins/echoplugin"
-	"github.com/torlenor/abylebotter/plugins/httppingplugin"
-	"github.com/torlenor/abylebotter/plugins/randomplugin"
-
-	"github.com/torlenor/abylebotter/matrix"
-
 	"github.com/torlenor/abylebotter/platform/discord"
+	"github.com/torlenor/abylebotter/platform/matrix"
 	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
 
-	"github.com/torlenor/abylebotter/ws"
+	"github.com/torlenor/abylebotter/plugin/echoplugin"
+	"github.com/torlenor/abylebotter/plugin/httppingplugin"
+	"github.com/torlenor/abylebotter/plugin/rollplugin"
 
-	newechoplugin "github.com/torlenor/abylebotter/plugin/echoplugin"
-	newhttppingplugin "github.com/torlenor/abylebotter/plugin/httppingplugin"
-	newrollplugin "github.com/torlenor/abylebotter/plugin/rollplugin"
+	"github.com/torlenor/abylebotter/ws"
 )
 
 func discordBotCreator(config config.Config) (*discord.Bot, error) {
@@ -59,47 +54,14 @@ func slackBotCreator(config config.SlackConfig) (*slack.Bot, error) {
 	return bot, nil
 }
 
-func createPlugins(cfg config.Plugins, bot botinterface.Bot) error {
-	if cfg.Echo.Enabled {
-		echoPlugin, err := echoplugin.CreateEchoPlugin()
-		if err != nil {
-			log.Errorln("Could not create EchoPlugin: ", err)
-			return err
-		}
-		echoPlugin.SetOnlyOnWhisper(cfg.Echo.OnlyWhispers)
-		bot.AddPlugin(&echoPlugin)
-		echoPlugin.Start()
-	}
-	if cfg.HTTPPing.Enabled {
-		plugin, err := httppingplugin.CreateHTTPPingPlugin()
-		if err != nil {
-			log.Errorln("Could not create HTTPPingPlugin: ", err)
-			return err
-		}
-		bot.AddPlugin(&plugin)
-		plugin.Start()
-	}
-	if cfg.Random.Enabled {
-		plugin, err := randomplugin.CreateRandomPlugin()
-		if err != nil {
-			log.Errorln("Could not create RandomPlugin: ", err)
-			return err
-		}
-		bot.AddPlugin(&plugin)
-		plugin.Start()
-	}
-
-	return nil
-}
-
 func createPlatformPlugins(cfg config.Plugins, bot platform.Bot) error {
 	if cfg.Echo.Enabled {
-		p := &newechoplugin.EchoPlugin{}
+		p := &echoplugin.EchoPlugin{}
 		p.SetOnlyOnWhisper(cfg.Echo.OnlyWhispers)
 		bot.AddPlugin(p)
 	}
 	if cfg.Random.Enabled {
-		plugin, err := newrollplugin.New()
+		plugin, err := rollplugin.New()
 		if err != nil {
 			log.Errorln("Could not create RollPlugin: ", err)
 			return err
@@ -107,7 +69,7 @@ func createPlatformPlugins(cfg config.Plugins, bot platform.Bot) error {
 		bot.AddPlugin(&plugin)
 	}
 	if cfg.HTTPPing.Enabled {
-		p := &newhttppingplugin.HTTPPingPlugin{}
+		p := &httppingplugin.HTTPPingPlugin{}
 		bot.AddPlugin(p)
 	}
 
@@ -127,7 +89,7 @@ func createBots(cfg config.Config) error {
 		if err != nil {
 			return fmt.Errorf("Could not create Matrix Bot: %s", err)
 		}
-		createPlugins(cfg.Bots.Matrix.Plugins, bot)
+		createPlatformPlugins(cfg.Bots.Matrix.Plugins, bot)
 		botPool.Add(bot)
 	} else if cfg.Bots.Mattermost.Enabled {
 		bot, err := mattermostBotCreator(cfg.Bots.Mattermost)

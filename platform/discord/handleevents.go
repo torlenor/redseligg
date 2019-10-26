@@ -1,22 +1,39 @@
 package discord
 
 import (
-	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/model"
 )
 
-func (b Bot) getMessageType(mc messageCreate) events.MessageType {
+type messageType int
+
+const ( // iota is reset to 0
+	UNKNOWN messageType = iota
+	WHISPER
+	MESSAGE
+)
+
+var messageTypes = [...]string{
+	"UNKNOWN",
+	"WHISPER",
+	"MESSAGE",
+}
+
+func (messageType messageType) String() string {
+	return messageTypes[messageType]
+}
+
+func (b Bot) getMessageType(mc messageCreate) messageType {
 	if val, ok := b.knownChannels[mc.ChannelID]; ok {
 		if len(val.Recipients) == 1 {
-			return events.WHISPER
+			return WHISPER
 		}
 	}
-	return events.MESSAGE
+	return MESSAGE
 }
 
 func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
 	var receiveMessage model.Post
-	if b.getMessageType(newMessageCreate) == events.MESSAGE {
+	if b.getMessageType(newMessageCreate) == MESSAGE {
 		b.stats.messagesReceived++
 		receiveMessage = model.Post{UserID: newMessageCreate.Author.ID, User: newMessageCreate.Author.Username, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	} else {

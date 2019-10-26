@@ -1,16 +1,10 @@
 package botinterface
 
-import (
-	"github.com/torlenor/abylebotter/plugins"
-)
-
 // Bot type interface
 type Bot interface {
 	Start()
 	Stop()
 	Status() BotStatus
-
-	AddPlugin(plugin plugins.Plugin)
 }
 
 // BotStatus gives information about the current status of the bot

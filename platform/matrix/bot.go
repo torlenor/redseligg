@@ -5,9 +5,9 @@ import (
 
 	"github.com/torlenor/abylebotter/botinterface"
 	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/events"
 	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/plugins"
+	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/abylebotter/plugin"
 )
 
 var (
@@ -18,34 +18,17 @@ var (
 type Bot struct {
 	api api
 
-	sendMessageChan chan events.SendMessage
-
 	pollingDone chan bool
 
 	pollingInterval time.Duration
 
-	receivers map[plugins.Plugin]chan events.ReceiveMessage
-
-	knownPlugins []plugins.Plugin
+	plugins []plugin.Hooks
 
 	// We are wasting a little bit of memory and keep maps in both directions
 	knownRooms   map[string]string // mapping of Room to RoomID
 	knownRoomIDs map[string]string // mapping of RoomID to Room
 
 	nextBatch string // contains the next batch to fetch in sync
-}
-
-// GetReceiveMessageChannel returns the channel which is used to notify
-// about received messages from the bot
-func (b *Bot) GetReceiveMessageChannel(plugin plugins.Plugin) chan events.ReceiveMessage {
-	b.receivers[plugin] = make(chan events.ReceiveMessage)
-	return b.receivers[plugin]
-}
-
-// GetSendMessageChannel returns the channel which is used to
-// send messages using the bot
-func (b *Bot) GetSendMessageChannel() chan events.SendMessage {
-	return b.sendMessageChan
 }
 
 // The createMatrixBotWithAPI creates a new instance of a DiscordBot using the api interface api
@@ -66,12 +49,8 @@ func createMatrixBotWithAPI(api api, username string, password string, token str
 	b.pollingDone = make(chan bool)
 	b.pollingInterval = 1000 * time.Millisecond
 
-	b.sendMessageChan = make(chan events.SendMessage)
-
 	b.knownRooms = make(map[string]string)
 	b.knownRoomIDs = make(map[string]string)
-
-	b.receivers = make(map[plugins.Plugin]chan events.ReceiveMessage)
 
 	return &b, nil
 }
@@ -87,11 +66,11 @@ func (b *Bot) Status() botinterface.BotStatus {
 	return botinterface.BotStatus{Running: true}
 }
 
-// AddPlugin adds the given plugin to the current bot
-func (b *Bot) AddPlugin(plugin plugins.Plugin) {
-	plugin.ConnectChannels(b.GetReceiveMessageChannel(plugin), b.GetSendMessageChannel())
-	b.knownPlugins = append(b.knownPlugins, plugin)
-	log.Debugln("Connected plugin", plugin.GetName())
+// AddPlugin takes as argument a plugin and
+// adds it to the bot providing it with the API
+func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
+	plugin.SetAPI(b)
+	b.plugins = append(b.plugins, plugin)
 }
 
 func (b *Bot) addKnownRoom(roomID string, room string) {

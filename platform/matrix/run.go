@@ -26,7 +26,6 @@ func (b *Bot) startBot() {
 func (b *Bot) Start() {
 	log.Println("MatrixBot is STARTING")
 	go b.startBot()
-	go b.startSendChannelReceiver()
 	log.Println("MatrixBot is RUNNING")
 }
 
@@ -36,14 +35,5 @@ func (b *Bot) Stop() {
 
 	b.pollingDone <- true
 
-	b.disconnectReceivers()
-
 	log.Println("MatrixBot is SHUT DOWN")
-}
-
-func (b *Bot) disconnectReceivers() {
-	for plugin, pluginChannel := range b.receivers {
-		log.Debugln("Disconnecting Plugin", plugin.GetName())
-		defer close(pluginChannel)
-	}
 }
