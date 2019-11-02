@@ -10,7 +10,7 @@ FROM scratch
 # Copy SSL root certificates
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-COPY bin/abylebotter /usr/bin/
+COPY bin/* /usr/bin/
 
 CMD ["/usr/bin/abylebotter", "-c", "/app/config/config.toml"]
 

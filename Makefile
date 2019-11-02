@@ -8,6 +8,7 @@
 build-container-tagged build-container-gitcommit release-container release-container-gitcommit
 
 NAME := abylebotter
+BINARIES := abylebotter botterinstance
 VERSION := $(shell cat VERSION)
 COMPTIME := $(shell date -Is)
 LDFLAGS := -X main.version=${VERSION} -X main.compTime=${COMPTIME}
@@ -26,17 +27,32 @@ clean:
 
 build:
 	@echo Building...
-	go build -o ./bin/$(NAME) -ldflags '${LDFLAGS}'
+	@mkdir -p ./bin
+	@for cmd in ${BINARIES}; \
+	do \
+		echo "\t$${cmd}" ;\
+		go build -o ./bin/$${cmd} -ldflags '${LDFLAGS}' ./cmd/$${cmd}/ ;\
+	done
 	@echo Done.
 
 race:
 	@echo Building...
-	go build -o ./bin/$(NAME) -ldflags '${LDFLAGS}' -race
+	mkdir -p ./bin
+	@for cmd in ${BINARIES}; \
+	do \
+		echo "\t$${cmd}" ;\
+		go build -o ./bin/$${cmd} -ldflags '${LDFLAGS}' -race ./cmd/$${cmd}/ ;\
+	done
 	@echo Done.
 
 build-static:
 	@echo Building...
-	CGO_ENABLED=0 go build -o ./bin/$(NAME) -ldflags '-s -w --extldflags "-static" ${LDFLAGS}'
+	mkdir -p ./bin
+	@for cmd in ${BINARIES}; \
+	do \
+		echo "\t$${cmd}" ;\
+		CGO_ENABLED=0 go build -o ./bin/$${cmd} -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
+	done
 	@echo Done.
 
 test:
@@ -49,14 +65,18 @@ test-verbose:
 
 install: build
 	install -d ${DESTDIR}/usr/local/bin/
-	install -m 755 ./bin/${NAME} ${DESTDIR}/usr/local/bin/${NAME}
+	@for cmd in ${BINARIES}; \
+	do \
+		echo "\t$${cmd}" ;\
+		install -m 755 ./bin/$${cmd} ${DESTDIR}/usr/local/bin/$${cmd} ;\
+	done
 
 uninstall:
-	rm -f ${DESTDIR}/usr/local/bin/${NAME}
-
-authors:
-	@git log --format='%aN <%aE>' | LC_ALL=C.UTF-8 sort | uniq -c -i | sort -nr | sed "s/^ *[0-9]* //g" > AUTHORS
-	@cat AUTHORS
+	@for cmd in ${BINARIES}; \
+	do \
+		echo "\t$${cmd}" ;\
+		rm -f ${DESTDIR}/usr/local/bin/$${cmd} ;\
+	done
 
 deps:
 	go get -v ./...
@@ -75,18 +95,22 @@ dist:
 				 "windows 386  0 .exe "  "windows amd64 0 .exe "  \
 				 "darwin  386  0      "  "darwin  amd64 0      "; \
 	do \
-	  set -- $$arch ; \
-	  echo "******************* $$1_$$2 ********************" ;\
-	  distpath="./dist/${VERSION}/$$1_$$2" ;\
-	  mkdir -p $$distpath ; \
-	  CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 go build -v -o $$distpath/$(NAME)$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ${SRCPATH}/*.go ;\
-	  cp "README.md" "LICENSE" "CHANGELOG.md" "AUTHORS" $$distpath ;\
-	  cp "cfg/config.toml" $$distpath/config_example.toml ;\
-	  if [ "$$1" = "linux" ]; then \
-		  cd $$distpath && tar -zcvf ../../${NAME}_${VERSION}_$$1_$$2.tar.gz * && cd - ;\
-	  else \
-		  cd $$distpath && zip -r ../../${NAME}_${VERSION}_$$1_$$2.zip . && cd - ;\
-	  fi \
+		set -- $$arch ; \
+		echo "******************* $$1_$$2 ********************" ;\
+		distpath="./dist/${VERSION}/$$1_$$2" ;\
+		mkdir -p $$distpath ; \
+		for cmd in ${BINARIES}; \
+		do \
+			echo "\t$${cmd}" ;\
+			CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 go build -o $$distpath/$${cmd}$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
+		done ;\
+		cp "README.md" "LICENSE" "CHANGELOG.md" "AUTHORS" $$distpath ;\
+		cp "cfg/config.toml" $$distpath/config_example.toml ;\
+		if [ "$$1" = "linux" ]; then \
+			cd $$distpath && tar -zcvf ../../${NAME}_${VERSION}_$$1_$$2.tar.gz * && cd - ;\
+		else \
+			cd $$distpath && zip -r ../../${NAME}_${VERSION}_$$1_$$2.zip . && cd - ;\
+		fi \
 	done
 
 build-container-latest: build-static
