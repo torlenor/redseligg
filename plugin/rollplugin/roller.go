@@ -1,6 +1,9 @@
 package rollplugin
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
 
 type roller struct {
 	randomizer *rand.Rand
@@ -8,7 +11,7 @@ type roller struct {
 
 func newRoller(seed int64) roller {
 	return roller{
-		randomizer: rand.New(rand.NewSource(99)),
+		randomizer: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
