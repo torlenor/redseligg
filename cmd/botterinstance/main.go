@@ -36,7 +36,6 @@ func setupLogging(loggingLevel string) {
 }
 
 func statusEndpoint(w http.ResponseWriter, r *http.Request) {
-
 	status := fmt.Sprintf(`{"status":"OK", "version":"%s"}`, version)
 
 	io.WriteString(w, string(status))

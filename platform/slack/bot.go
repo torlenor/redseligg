@@ -147,3 +147,13 @@ func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
 	plugin.SetAPI(b)
 	b.plugins = append(b.plugins, plugin)
 }
+
+// GetInfo returns information about the Bot
+func (b *Bot) GetInfo() platform.BotInfo {
+	return platform.BotInfo{
+		BotID:    "",
+		Platform: "Slack",
+		Healthy:  true,
+		Plugins:  []platform.PluginInfo{},
+	}
+}

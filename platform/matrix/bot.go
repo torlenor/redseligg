@@ -84,3 +84,13 @@ func (b *Bot) removeKnownRoomFromID(roomID string) {
 	delete(b.knownRooms, b.knownRoomIDs[roomID])
 	delete(b.knownRoomIDs, roomID)
 }
+
+// GetInfo returns information about the Bot
+func (b *Bot) GetInfo() platform.BotInfo {
+	return platform.BotInfo{
+		BotID:    "",
+		Platform: "Matrix",
+		Healthy:  true,
+		Plugins:  []platform.PluginInfo{},
+	}
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/pool"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 )
@@ -30,6 +31,10 @@ func NewServer(controlAPIConfig config.API) *Server {
 	}
 }
 
+type service interface {
+	Run(context.Context) error
+}
+
 // Server is responsible for running the botter instance
 type Server struct {
 	context            context.Context
@@ -40,25 +45,24 @@ type Server struct {
 	shutdownReason     string
 	shutdownInProgress bool
 
-	api api.API
-}
-
-type service interface {
-	Run(context.Context) error
+	controlAPI *api.API
+	botPool    *pool.BotPool
 }
 
 // Run initializes and starts services. This will block until all services have
 // exited. To initiate shutdown, call the Shutdown method in another goroutine.
 func (s *Server) Run() (err error) {
 
-	controlAPI, err := api.NewAPI(s.cfg)
+	s.controlAPI, err = api.NewAPI(s.cfg)
 	if err != nil {
 		return fmt.Errorf("Error creating the API: %s", err.Error())
 	}
-	controlAPI.AttachModuleGet("/status", statusEndpoint)
-	controlAPI.Init()
+	s.controlAPI.Init()
+	s.controlAPI.AttachModuleGet("/status", statusEndpoint)
+	services := []service{s.controlAPI}
 
-	services := []service{controlAPI}
+	s.botPool = pool.NewBotPool(s.controlAPI)
+	services = append(services, s.botPool)
 
 	// Start background services
 	for _, svc := range services {

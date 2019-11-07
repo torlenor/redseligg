@@ -166,3 +166,13 @@ func (b *Bot) addKnownChannel(channel channelData) {
 	b.knownChannelNames[channel.Name] = channel.ID
 	b.knownChannelIDs[channel.ID] = channel.Name
 }
+
+// GetInfo returns information about the Bot
+func (b *Bot) GetInfo() platform.BotInfo {
+	return platform.BotInfo{
+		BotID:    "",
+		Platform: "Mattermost",
+		Healthy:  true,
+		Plugins:  []platform.PluginInfo{},
+	}
+}
