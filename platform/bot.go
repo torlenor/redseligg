@@ -1,11 +1,18 @@
 package platform
 
-import "github.com/torlenor/abylebotter/plugin"
+import (
+	"context"
+
+	"github.com/torlenor/abylebotter/plugin"
+)
 
 // Bot type interface which every Bot has to implement
 type Bot interface {
 	Start()
 	Stop()
+
+	// Run the Bot (blocking)
+	Run(ctx context.Context) error
 
 	AddPlugin(plugin BotPlugin)
 

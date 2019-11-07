@@ -1,0 +1,40 @@
+#
+# Example Bots configuration for the TomlBotsConfigProvider
+#
+
+[bots]
+
+  [bots.slack_dev]]]]
+    type = "slack"
+    [bots.slack_dev.config]
+      workspace = "something"
+	    token = "token_goes_here"
+
+    [bots.slack_dev.plugins.1]
+      type = "echo"
+      [bots.slack_dev.plugins.1.config]
+        onlywhispers = false
+
+    [bots.slack_dev.plugins.2]
+      type = "httpping"
+
+    [bots.slack_dev.plugins.3]
+      type = "roll"
+
+  [bots.mm_dev]
+    type = "mattermost"
+    [bots.mm_dev.config]
+			server = "https://server.com"
+			username = "username_goes_here"
+			password = "password_goes_here"
+
+    [bots.mm_dev.plugins.1]
+      type = "echo"
+      [bots.mm_dev.plugins.1.config]
+        onlywhispers = false
+
+    [bots.mm_dev.plugins.2]
+      type = "httpping"
+
+    [bots.mm_dev.plugins.3]
+      type = "roll"

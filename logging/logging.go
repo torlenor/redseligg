@@ -29,9 +29,9 @@ func SetLoggingLevel(loggingLevel string) {
 	level, err := logrus.ParseLevel(loggingLevel)
 	if err == nil {
 		logrus.SetLevel(level)
-		Get("logging").Infoln("Setting log level to ", loggingLevel)
+		Get("logging").Infoln("Setting log level to", loggingLevel)
 	} else {
-		Get("logging").Warnln("Error setting log level to ", loggingLevel)
+		Get("logging").Warnln("Error setting log level to", loggingLevel)
 	}
 }
 

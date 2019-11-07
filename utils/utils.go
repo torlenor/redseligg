@@ -10,7 +10,7 @@ func StripCmd(str string, cmd string) string {
 	return strings.TrimPrefix(str, "!"+cmd+" ")
 }
 
-// GenerateErrorResponse generates a Json string with statusCode and statusMessage specified
-func GenerateErrorResponse(statusCode uint16, statusText string) string {
-	return fmt.Sprintf(`{"error": { "code": %d, "message": "%s" } }`, statusCode, statusText)
+// GenerateErrorResponse generates a Json error string
+func GenerateErrorResponse(errorText string) string {
+	return fmt.Sprintf(`{"error": "%s"}`, errorText)
 }

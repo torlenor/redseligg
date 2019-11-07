@@ -9,29 +9,52 @@ import (
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/abylebotter/providers"
+	"golang.org/x/sync/errgroup"
+	"golang.org/x/xerrors"
 )
 
 // BotPool holds a set of bots uniquely identified by an ID
 type BotPool struct {
 	log *logrus.Entry
 
-	bots  map[string]platform.Bot
+	context       context.Context
+	childRoutines *errgroup.Group
+
+	bots        map[string]platform.Bot
+	botContexts map[string]context.Context
+	shutdownFns map[string]context.CancelFunc
+
 	mutex sync.Mutex
 
 	controlAPI *api.API
+
+	botProvider *providers.BotProvider
+
+	isRunning bool
 }
 
 // NewBotPool creates a BotPool with default values.
-func NewBotPool(controlAPI *api.API) *BotPool {
+func NewBotPool(controlAPI *api.API, botProvider *providers.BotProvider) (*BotPool, error) {
 	b := &BotPool{
-		bots:       make(map[string]platform.Bot),
-		log:        logging.Get("BotPool"),
+		bots:        make(map[string]platform.Bot),
+		botContexts: make(map[string]context.Context),
+		shutdownFns: make(map[string]context.CancelFunc),
+
+		log: logging.Get("BotPool"),
+
 		controlAPI: controlAPI,
+
+		botProvider: botProvider,
 	}
 
 	controlAPI.AttachModuleGet("/bots", b.getBotsEndpoint)
+	controlAPI.AttachModulePost("/bots", b.postBotsEndpoint)
 
-	return b
+	controlAPI.AttachModuleGet("/bots/{botId}", b.getBotEndPoint)
+	controlAPI.AttachModuleDelete("/bots/{botId}", b.deleteBotEndpoint)
+
+	return b, nil
 }
 
 // AddViaID will use a BotConfigProvider to get all the necessary information
@@ -41,7 +64,18 @@ func (b *BotPool) AddViaID(id string) error {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	// TODO
+	if _, ok := b.bots[id]; ok {
+		return fmt.Errorf("Bot with ID %s already exists", id)
+	}
+
+	bot, err := b.botProvider.GetBot(id)
+	if err != nil {
+		return fmt.Errorf("Not possible to add bot with id %s: %s", id, err)
+	}
+
+	b.bots[id] = bot
+
+	b.startSingle(id)
 
 	return nil
 }
@@ -52,19 +86,16 @@ func (b *BotPool) RemoveViaID(id string) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	delete(b.bots, id)
-}
+	b.log.Debugf("Removing bot %s", id)
 
-// Add a bot with the provided id. If a bot with that ID already exists and error is returned.
-func (b *BotPool) Add(id string, bot platform.Bot) error {
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
-
-	if _, ok := b.bots[id]; ok {
-		return fmt.Errorf("Bot with ID %s already exists", id)
+	if _, ok := b.bots[id]; !ok {
+		b.log.Debugf("Does not exist, ignoring %s", id)
+		return
 	}
 
-	return nil
+	b.stopSingle(id)
+
+	delete(b.bots, id)
 }
 
 // GetBotIDs returns all known BotIDs in no particular order
@@ -85,12 +116,67 @@ func (b *BotPool) GetBotIDs() []string {
 	return ids
 }
 
-// Run the bots in the pool. If a new bot is added to the pool, it will be automatically started.
+func (b *BotPool) startSingle(id string) {
+	if !b.isRunning {
+		b.log.Infof("Not starting Bot with id %s because we are not running", id)
+		return
+	}
+
+	var bot platform.Bot
+	var ok bool
+	if bot, ok = b.bots[id]; !ok {
+		b.log.Warnf("Cannot start Bot with ID %s, does not exist", id)
+	}
+
+	ctx, botShutdownFn := context.WithCancel(b.context)
+	b.botContexts[id] = ctx
+	b.shutdownFns[id] = botShutdownFn
+
+	b.childRoutines.Go(func() error {
+		if !b.isRunning {
+			return nil
+		}
+
+		if err := bot.Run(ctx); err != nil {
+			if err != context.Canceled {
+				b.log.Errorln("Stopped bot", "reason", err)
+			} else {
+				b.log.Infoln("Stopped bot", "reason", err)
+			}
+		}
+
+		return nil
+	})
+}
+
+func (b *BotPool) stopSingle(id string) {
+	if _, ok := b.bots[id]; !ok {
+		b.log.Warnf("Cannot stop, Bot with ID %s does not exist", id)
+	}
+
+	b.shutdownFns[id]()
+
+	delete(b.shutdownFns, id)
+	delete(b.botContexts, id)
+}
+
+// Run the BotPool. If a new bot is added to the pool, it will be automatically started.
 func (b *BotPool) Run(ctx context.Context) (err error) {
 	b.log.Info("BotPool started")
-	// TODO
+
+	childRoutines, childCtx := errgroup.WithContext(ctx)
+	b.childRoutines = childRoutines
+	b.context = childCtx
+
+	b.isRunning = true
 
 	<-ctx.Done()
+
+	b.isRunning = false
+
+	if err := b.childRoutines.Wait(); err != nil && !xerrors.Is(err, context.Canceled) {
+		b.log.Errorln("Failed waiting for services to shutdown", "err", err)
+	}
 
 	b.log.Info("BotPool shutdown")
 	b.log.Info("BotPool exited properly")

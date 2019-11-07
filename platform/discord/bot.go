@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -197,6 +198,17 @@ func (b *Bot) Start() {
 	go b.startDiscordBot()
 	go b.oauth2Handler.startOAuth2Handler()
 	log.Infoln("DiscordBot is RUNNING")
+}
+
+// Run the Discord Bot (blocking)
+func (b *Bot) Run(ctx context.Context) error {
+	b.Start()
+
+	<-ctx.Done()
+
+	b.Stop()
+
+	return nil
 }
 
 // Stop the Discord Bot

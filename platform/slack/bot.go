@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -122,6 +123,17 @@ func (b *Bot) Start() {
 func (b *Bot) stopPingWatchdog() {
 	b.watchdog.Stop()
 	b.pingSenderStop <- true
+}
+
+// Run the Slack Bot (blocking)
+func (b *Bot) Run(ctx context.Context) error {
+	b.Start()
+
+	<-ctx.Done()
+
+	b.Stop()
+
+	return nil
 }
 
 // Stop the Bot

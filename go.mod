@@ -19,6 +19,6 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190927073244-c990c680b611 // indirect
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
-	google.golang.org/appengine v1.6.4 // indirect
+	google.golang.org/appengine v1.6.4
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

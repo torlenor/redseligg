@@ -1,6 +1,7 @@
 package mattermost
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -127,14 +128,25 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 	return &b, nil
 }
 
-// Start the Discord Bot
+// Start the Mattermost Bot
 func (b *Bot) Start() {
 	b.log.Infoln("MattermostBot is STARTING")
 	go b.startMattermostBot()
 	b.log.Infoln("MattermostBot is RUNNING")
 }
 
-// Stop the Discord Bot
+// Run the Mattermost Bot (blocking)
+func (b *Bot) Run(ctx context.Context) error {
+	b.Start()
+
+	<-ctx.Done()
+
+	b.Stop()
+
+	return nil
+}
+
+// Stop the Mattermost Bot
 func (b *Bot) Stop() {
 	b.log.Infoln("MattermostBot is SHUTING DOWN")
 	b.log.Infof("MattermostBot Stats:\n%s", b.stats.toString())

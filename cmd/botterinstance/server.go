@@ -6,12 +6,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/pool"
+	"github.com/torlenor/abylebotter/providers"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 )
@@ -49,11 +52,40 @@ type Server struct {
 	botPool    *pool.BotPool
 }
 
+func createBotProvider() (*providers.BotProvider, error) {
+
+	cfgSource, exists := os.LookupEnv("BOTTER_BOT_CFG_SOURCE")
+	if !exists {
+		cfgSource = "TOML"
+	}
+	cfgSource = strings.ToUpper(cfgSource)
+
+	switch cfgSource {
+	case "TOML":
+		tomlFile, exists := os.LookupEnv("BOTTER_BOT_CFG_TOML_FILE")
+		if !exists {
+			tomlFile = "/cfg/bots.toml"
+		}
+		cfgs, err := providers.ParseTomlBotConfigFromFile(tomlFile)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing the toml bot config %s (check env variable BOTTER_BOT_CFG_TOML_FILE)", err)
+		}
+
+		botProvider, err := providers.NewBotProvider(cfgs)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating bot provider: %s", err)
+		}
+		return botProvider, nil
+	default:
+		return nil, fmt.Errorf("Unknown BOTTER_BOT_CFG_SOURCE specified")
+	}
+}
+
 // Run initializes and starts services. This will block until all services have
 // exited. To initiate shutdown, call the Shutdown method in another goroutine.
 func (s *Server) Run() (err error) {
 
-	s.controlAPI, err = api.NewAPI(s.cfg)
+	s.controlAPI, err = api.NewAPI(s.cfg, "/v1")
 	if err != nil {
 		return fmt.Errorf("Error creating the API: %s", err.Error())
 	}
@@ -61,7 +93,14 @@ func (s *Server) Run() (err error) {
 	s.controlAPI.AttachModuleGet("/status", statusEndpoint)
 	services := []service{s.controlAPI}
 
-	s.botPool = pool.NewBotPool(s.controlAPI)
+	botProvider, err := createBotProvider()
+	if err != nil {
+		return fmt.Errorf("Error creating the BotProvider: %s", err.Error())
+	}
+	s.botPool, err = pool.NewBotPool(s.controlAPI, botProvider)
+	if err != nil {
+		return fmt.Errorf("Error creating the BotPool: %s", err.Error())
+	}
 	services = append(services, s.botPool)
 
 	// Start background services

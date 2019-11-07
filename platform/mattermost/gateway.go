@@ -27,10 +27,10 @@ func (b *Bot) authWs() {
 		}
 	  }`)
 
-	b.log.Println("DiscordBot: Sending AUTH to gateway")
+	b.log.Println("Sending AUTH to gateway")
 
 	err := b.ws.WriteMessage(websocket.TextMessage, ident)
 	if err != nil {
-		b.log.Fatal("MattermostBot: FATAL: Error sending AUTH to gateway:", err)
+		b.log.Fatal("Error sending AUTH to gateway:", err)
 	}
 }

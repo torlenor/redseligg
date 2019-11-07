@@ -69,9 +69,9 @@ type MattermostConfig struct {
 
 // SlackConfig contains config related to the Mattermost component
 type SlackConfig struct {
-	Enabled   bool    `toml:"enabled"`
-	Workspace string  `toml:"workspace"`
-	Token     string  `toml:"token"`
+	Enabled   bool    `toml:"enabled" json:"enabled"`
+	Workspace string  `toml:"workspace" json:"workspace"`
+	Token     string  `toml:"token" json:"token"`
 	Plugins   Plugins `toml:"plugins"`
 }
 

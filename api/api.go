@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -15,10 +16,16 @@ import (
 	"github.com/torlenor/abylebotter/logging"
 )
 
+// Router is the interface to the router used for distributing to the endpoints
+type router interface {
+	HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) *mux.Route
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+}
+
 // API represents a Rest API instance of a ALoLStats instance
 type API struct {
 	config config.API
-	router *mux.Router
+	router router
 	log    *logrus.Entry
 	prefix string
 
@@ -27,12 +34,32 @@ type API struct {
 }
 
 // NewAPI creates a new Rest API instance
-func NewAPI(cfg config.API) (*API, error) {
+func NewAPI(cfg config.API, prefix string) (*API, error) {
 	a := &API{
 		config: cfg,
 		router: mux.NewRouter(),
 		log:    logging.Get("RestAPI"),
-		prefix: "/v1",
+		prefix: prefix,
+	}
+
+	if len(a.config.Port) == 0 {
+		return nil, fmt.Errorf("REST API activated but no valid configuration found. At least port has to specified")
+	}
+
+	return a, nil
+}
+
+// NewAPICustom creates a new Rest API instance with a custom router
+func NewAPICustom(cfg config.API, prefix string, router router) (*API, error) {
+	a := &API{
+		config: cfg,
+		router: router,
+		log:    logging.Get("RestAPI"),
+		prefix: prefix,
+	}
+
+	if len(a.config.Port) == 0 {
+		return nil, fmt.Errorf("REST API activated but no valid configuration found. At least port has to specified")
 	}
 
 	return a, nil
@@ -69,22 +96,24 @@ func (a *API) run() {
 }
 
 // Init the API instance
-func (a *API) Init() {
+func (a *API) Init() error {
 	var listenAddress string
 	if len(a.config.IP) > 0 && len(a.config.Port) > 0 {
 		listenAddress = a.config.IP + ":" + a.config.Port
 	} else if len(a.config.Port) > 0 {
 		listenAddress = ":" + a.config.Port
 	} else {
-		a.log.Fatal("REST API activated but no valid configuration found. At least port has to specified in config file!")
+		return fmt.Errorf("REST API activated but no valid configuration found. At least port has to specified")
 	}
 
-	a.log.Infof("Starting REST API on %s", listenAddress)
+	a.log.Infof("Configured REST API on %s", listenAddress)
 
 	a.server = &http.Server{
 		Addr:    listenAddress,
 		Handler: handlers.CORS()(a.router),
 	}
+
+	return nil
 }
 
 // Run the REST API (blocking)
