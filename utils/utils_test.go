@@ -24,3 +24,15 @@ func TestCreateMatrixBot(t *testing.T) {
 	result = StripCmd("!CMD2 test", "CMD")
 	assert.Equal("!CMD2 test", result)
 }
+
+func TestGenerateErrorResponse(t *testing.T) {
+	assert := assert.New(t)
+
+	actualError := GenerateErrorResponse("Server error, try again later")
+	expectedError := `{"error": "Server error, try again later"}`
+	assert.Equal(expectedError, actualError)
+
+	actualError = GenerateErrorResponse("something else")
+	expectedError = `{"error": "something else"}`
+	assert.Equal(expectedError, actualError)
+}

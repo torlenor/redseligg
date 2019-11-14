@@ -1,9 +1,7 @@
-package providers
+package config
 
 import (
 	"fmt"
-
-	"github.com/torlenor/abylebotter/config"
 )
 
 // PluginConfig holds the configuration for one plugin
@@ -26,29 +24,29 @@ type BotConfig struct {
 type BotConfigs map[string]BotConfig
 
 // AsSlackConfig converts the config to a SlackConfig
-func (c *BotConfig) AsSlackConfig() (config.SlackConfig, error) {
+func (c *BotConfig) AsSlackConfig() (SlackConfig, error) {
 	if c.Type != "slack" {
-		return config.SlackConfig{}, fmt.Errorf("Not a slack config")
+		return SlackConfig{}, fmt.Errorf("Not a slack config")
 	}
 
 	var configMap map[string]interface{}
 	var ok bool
 	if configMap, ok = c.Config.(map[string]interface{}); !ok {
-		return config.SlackConfig{}, fmt.Errorf("Cannot convert config")
+		return SlackConfig{}, fmt.Errorf("Cannot convert config")
 	}
 
 	var workspace string
 	var token string
 
 	if workspace, ok = configMap["workspace"].(string); !ok {
-		return config.SlackConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible workspace")
+		return SlackConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible workspace")
 	}
 
 	if token, ok = configMap["token"].(string); !ok {
-		return config.SlackConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible token")
+		return SlackConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible token")
 	}
 
-	slackCfg := config.SlackConfig{
+	slackCfg := SlackConfig{
 		Workspace: workspace,
 		Token:     token,
 	}
@@ -57,15 +55,15 @@ func (c *BotConfig) AsSlackConfig() (config.SlackConfig, error) {
 }
 
 // AsMattermostConfig converts the config to a MattermostConfig
-func (c *BotConfig) AsMattermostConfig() (config.MattermostConfig, error) {
+func (c *BotConfig) AsMattermostConfig() (MattermostConfig, error) {
 	if c.Type != "mattermost" {
-		return config.MattermostConfig{}, fmt.Errorf("Not a mattermost config")
+		return MattermostConfig{}, fmt.Errorf("Not a mattermost config")
 	}
 
 	var configMap map[string]interface{}
 	var ok bool
 	if configMap, ok = c.Config.(map[string]interface{}); !ok {
-		return config.MattermostConfig{}, fmt.Errorf("Cannot convert config")
+		return MattermostConfig{}, fmt.Errorf("Cannot convert config")
 	}
 
 	var server string
@@ -73,18 +71,18 @@ func (c *BotConfig) AsMattermostConfig() (config.MattermostConfig, error) {
 	var password string
 
 	if server, ok = configMap["server"].(string); !ok {
-		return config.MattermostConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible server")
+		return MattermostConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible server")
 	}
 
 	if username, ok = configMap["username"].(string); !ok {
-		return config.MattermostConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible username")
+		return MattermostConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible username")
 	}
 
 	if password, ok = configMap["password"].(string); !ok {
-		return config.MattermostConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible password")
+		return MattermostConfig{}, fmt.Errorf("Cannot convert config, missing/unconvertible password")
 	}
 
-	mmCfg := config.MattermostConfig{
+	mmCfg := MattermostConfig{
 		Server:   server,
 		Username: username,
 		Password: password,

@@ -1,10 +1,9 @@
-package providers
+package config
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/torlenor/abylebotter/config"
 )
 
 func TestBotConfig_AsSlackConfig(t *testing.T) {
@@ -18,7 +17,7 @@ func TestBotConfig_AsSlackConfig(t *testing.T) {
 		},
 	}
 
-	expectedSlackConfig := config.SlackConfig{
+	expectedSlackConfig := SlackConfig{
 		Workspace: "something",
 		Token:     "token_goes_here",
 	}
@@ -70,7 +69,7 @@ func TestBotConfig_AsMattermostConfig(t *testing.T) {
 		},
 	}
 
-	expectedMMConfig := config.MattermostConfig{
+	expectedMMConfig := MattermostConfig{
 		Server:   "https://server.com",
 		Username: "username_goes_here",
 		Password: "password_goes_here",

@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/config"
+	"github.com/torlenor/abylebotter/factories"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/pool"
 	"github.com/torlenor/abylebotter/providers"
@@ -60,6 +61,9 @@ func createBotProvider() (*providers.BotProvider, error) {
 	}
 	cfgSource = strings.ToUpper(cfgSource)
 
+	botFactory := &factories.BotFactory{}
+	pluginFactory := &factories.PluginFactory{}
+
 	switch cfgSource {
 	case "TOML":
 		tomlFile, exists := os.LookupEnv("BOTTER_BOT_CFG_TOML_FILE")
@@ -71,7 +75,7 @@ func createBotProvider() (*providers.BotProvider, error) {
 			return nil, fmt.Errorf("Error parsing the toml bot config %s (check env variable BOTTER_BOT_CFG_TOML_FILE)", err)
 		}
 
-		botProvider, err := providers.NewBotProvider(cfgs)
+		botProvider, err := providers.NewBotProvider(cfgs, botFactory, pluginFactory)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating bot provider: %s", err)
 		}

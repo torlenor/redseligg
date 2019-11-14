@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/torlenor/abylebotter/config"
 )
 
 type tomlBotConfig struct {
-	Bots BotConfigs `toml:"bots"`
+	Bots config.BotConfigs `toml:"bots"`
 }
 
 // TomlBotConfigProvider is a provider for bot configurations stored in a TOML file
@@ -41,10 +42,10 @@ func ParseTomlBotConfigFromFile(fileName string) (*TomlBotConfigProvider, error)
 }
 
 // GetBotConfig returns a config for the given ID if it exists
-func (c *TomlBotConfigProvider) GetBotConfig(id string) (BotConfig, error) {
+func (c *TomlBotConfigProvider) GetBotConfig(id string) (config.BotConfig, error) {
 	if cfg, ok := c.cfg.Bots[id]; ok {
 		return cfg, nil
 	}
 
-	return BotConfig{}, fmt.Errorf("Bot ID %s not known", id)
+	return config.BotConfig{}, fmt.Errorf("Bot ID %s not known", id)
 }

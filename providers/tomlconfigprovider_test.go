@@ -7,18 +7,19 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/torlenor/abylebotter/config"
 )
 
 func TestTomlBotProvider_GetBotConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	expectedTomlBotConfig := tomlBotConfig{
-		Bots: BotConfigs{
-			"bot1": BotConfig{
+		Bots: config.BotConfigs{
+			"bot1": config.BotConfig{
 				Type:   "SomePlatform",
 				Config: "something",
-				Plugins: PluginConfigs{
-					"plugin1": PluginConfig{
+				Plugins: config.PluginConfigs{
+					"plugin1": config.PluginConfig{
 						Type:   "plugintype",
 						Config: "somePluginConfig",
 					},
@@ -49,37 +50,37 @@ func TestTomlBotProvider_ParseTomlBotConfigFromFile(t *testing.T) {
 	}
 
 	expectedTomlBotConfig := tomlBotConfig{
-		Bots: BotConfigs{
-			"slack_dev": BotConfig{
+		Bots: config.BotConfigs{
+			"slack_dev": config.BotConfig{
 				Type: "slack",
 				Config: map[string]interface{}{
 					"workspace": "something",
 					"token":     "token_goes_here",
 				},
-				Plugins: PluginConfigs{
-					"1": PluginConfig{
+				Plugins: config.PluginConfigs{
+					"1": config.PluginConfig{
 						Type: "echo",
 						Config: map[string]interface{}{
 							"onlywhispers": false,
 						},
 					},
-					"3": PluginConfig{
+					"3": config.PluginConfig{
 						Type: "roll",
 					},
 				},
 			},
-			"mm_dev": BotConfig{
+			"mm_dev": config.BotConfig{
 				Type: "mattermost",
 				Config: map[string]interface{}{
 					"server":   "https://server.com",
 					"username": "username_goes_here",
 					"password": "password_goes_here",
 				},
-				Plugins: PluginConfigs{
-					"2": PluginConfig{
+				Plugins: config.PluginConfigs{
+					"2": config.PluginConfig{
 						Type: "httpping",
 					},
-					"3": PluginConfig{
+					"3": config.PluginConfig{
 						Type: "roll",
 					},
 				},
