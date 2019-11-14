@@ -57,7 +57,11 @@ func (b *BotProvider) createPlatformPlugins(plugins map[string]config.PluginConf
 		bot.AddPlugin(p)
 	}
 
-	return fmt.Errorf("Could not create all plugins, last error was: %s", lastError)
+	if lastError != nil {
+		return fmt.Errorf("Could not create all plugins, last error was: %s", lastError)
+	}
+
+	return nil
 }
 
 // GetBot creates the bot with the given id
