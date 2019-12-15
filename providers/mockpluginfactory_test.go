@@ -3,7 +3,8 @@ package providers
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/config"
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/platform"
 )
 
@@ -13,7 +14,7 @@ type MockPluginFactory struct {
 }
 
 // CreatePlugin creates a new plugin with the provided configuration
-func (b *MockPluginFactory) CreatePlugin(plugin string, pluginConfig config.PluginConfig) (platform.BotPlugin, error) {
+func (b *MockPluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {

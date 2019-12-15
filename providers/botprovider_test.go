@@ -3,8 +3,8 @@ package providers
 import (
 	"testing"
 
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
 	"github.com/stretchr/testify/assert"
-	"github.com/torlenor/abylebotter/config"
 )
 
 func TestNewBotProvider(t *testing.T) {
@@ -58,17 +58,17 @@ func TestBotProvider_GetBot(t *testing.T) {
 }
 
 func TestBotProvider_GetBot_WithPlugins(t *testing.T) {
-	plConfig := config.PluginConfigs{
-		"1": config.PluginConfig{
+	plConfig := botconfig.PluginConfigs{
+		"1": botconfig.PluginConfig{
 			Type: "mockEcho",
 			Config: map[string]interface{}{
 				"onlywhispers": false,
 			},
 		},
-		"2": config.PluginConfig{
+		"2": botconfig.PluginConfig{
 			Type: "somethingWhichFails",
 		},
-		"3": config.PluginConfig{
+		"3": botconfig.PluginConfig{
 			Type: "mockRoll",
 		},
 	}

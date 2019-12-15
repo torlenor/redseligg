@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 
-	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
@@ -28,7 +28,7 @@ type webSocketClient interface {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
-	config config.SlackConfig
+	config botconfig.SlackConfig
 	log    *logrus.Entry
 
 	rtmURL string
@@ -49,7 +49,7 @@ type Bot struct {
 }
 
 // CreateSlackBot creates a new instance of a SlackBot
-func CreateSlackBot(cfg config.SlackConfig, ws webSocketClient) (*Bot, error) {
+func CreateSlackBot(cfg botconfig.SlackConfig, ws webSocketClient) (*Bot, error) {
 	log := logging.Get("SlackBot")
 	log.Printf("SlackBot is CREATING itself")
 

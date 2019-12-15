@@ -8,7 +8,8 @@
 build-container-tagged build-container-gitcommit release-container release-container-gitcommit
 
 NAME := abylebotter
-BINARIES := abylebotter botterinstance
+# BINARIES := abylebotter botterinstance
+BINARIES := botterinstance
 VERSION := $(shell cat VERSION)
 COMPTIME := $(shell date -Is)
 LDFLAGS := -X main.version=${VERSION} -X main.compTime=${COMPTIME}

@@ -3,7 +3,8 @@ package factories
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/config"
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin/echoplugin"
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
@@ -15,7 +16,7 @@ type PluginFactory struct {
 }
 
 // CreatePlugin creates a new plugin with the provided configuration
-func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig config.PluginConfig) (platform.BotPlugin, error) {
+func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {

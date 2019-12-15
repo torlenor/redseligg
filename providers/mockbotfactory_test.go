@@ -3,7 +3,8 @@ package providers
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/config"
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/platform"
 )
 
@@ -13,7 +14,7 @@ type MockBotFactory struct {
 }
 
 // CreateBot creates a new bot for the given platform with the provided configuration
-func (b *MockBotFactory) CreateBot(p string, config config.BotConfig) (platform.Bot, error) {
+func (b *MockBotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.Bot, error) {
 	var bot platform.Bot
 
 	switch p {

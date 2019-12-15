@@ -10,14 +10,17 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
+	"golang.org/x/xerrors"
+
+	"git.abyle.org/reseligg/botorchestrator/botconfigprovider"
+
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/factories"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/pool"
 	"github.com/torlenor/abylebotter/providers"
-	"golang.org/x/sync/errgroup"
-	"golang.org/x/xerrors"
 )
 
 // NewServer returns a new instance of Server
@@ -70,7 +73,7 @@ func createBotProvider() (*providers.BotProvider, error) {
 		if !exists {
 			tomlFile = "/cfg/bots.toml"
 		}
-		cfgs, err := providers.ParseTomlBotConfigFromFile(tomlFile)
+		cfgs, err := botconfigprovider.ParseTomlBotConfigFromFile(tomlFile)
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing the toml bot config %s (check env variable BOTTER_BOT_CFG_TOML_FILE)", err)
 		}

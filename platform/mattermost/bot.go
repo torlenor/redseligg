@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 
-	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
@@ -30,7 +30,7 @@ func (s stats) toString() string {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
-	config config.MattermostConfig
+	config botconfig.MattermostConfig
 
 	ws *websocket.Conn
 
@@ -88,7 +88,7 @@ func (b *Bot) startMattermostBot() {
 }
 
 // CreateMattermostBot creates a new instance of a MattermostBot
-func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
+func CreateMattermostBot(cfg botconfig.MattermostConfig) (*Bot, error) {
 	log := logging.Get("MattermostBot")
 	log.Printf("MattermostBot is CREATING itself")
 
@@ -107,19 +107,15 @@ func CreateMattermostBot(cfg config.MattermostConfig) (*Bot, error) {
 		knownChannelIDs:   make(map[string]string),
 	}
 
-	if b.config.UseToken == true {
-		b.token = b.config.Token
-	} else {
-		err := b.login()
-		if err != nil {
-			b.log.Fatalf("Error logging in: %s", err)
-		}
+	err := b.login()
+	if err != nil {
+		return nil, fmt.Errorf("Error logging in: %s", err)
 	}
 
 	wsServer := strings.Replace(b.config.Server, "https", "wss", 1)
 	ws, err := b.dialGateway(wsServer + "/api/v4/websocket")
 	if err != nil {
-		b.log.Fatalf(err.Error())
+		return nil, err
 	}
 	b.ws = ws
 

@@ -4,21 +4,23 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/torlenor/abylebotter/config"
+
+	"git.abyle.org/reseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 )
 
 type configProvider interface {
-	GetBotConfig(id string) (config.BotConfig, error)
+	GetBotConfig(id string) (botconfig.BotConfig, error)
 }
 
 type botFactory interface {
-	CreateBot(platform string, config config.BotConfig) (platform.Bot, error)
+	CreateBot(platform string, config botconfig.BotConfig) (platform.Bot, error)
 }
 
 type pluginFactory interface {
-	CreatePlugin(plugin string, pluginConfig config.PluginConfig) (platform.BotPlugin, error)
+	CreatePlugin(plugin string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error)
 }
 
 // BotProvider creates configured bots ready to run
@@ -45,7 +47,7 @@ func NewBotProvider(botConfigProvider configProvider, botFactory botFactory, plu
 	return &bp, nil
 }
 
-func (b *BotProvider) createPlatformPlugins(plugins map[string]config.PluginConfig, bot platform.Bot) error {
+func (b *BotProvider) createPlatformPlugins(plugins map[string]botconfig.PluginConfig, bot platform.Bot) error {
 	var lastError error
 
 	for _, plugin := range plugins {
@@ -66,7 +68,7 @@ func (b *BotProvider) createPlatformPlugins(plugins map[string]config.PluginConf
 
 // GetBot creates the bot with the given id
 func (b *BotProvider) GetBot(id string) (platform.Bot, error) {
-	var botConfig config.BotConfig
+	var botConfig botconfig.BotConfig
 	var err error
 	if botConfig, err = b.botConfigs.GetBotConfig(id); err != nil {
 		return nil, fmt.Errorf("Bot ID %s not known: %s", id, err)
