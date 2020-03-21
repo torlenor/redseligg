@@ -1,4 +1,5 @@
 pkg/
 coverage.out
 .vscode
+.gitconfig
 
