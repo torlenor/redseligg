@@ -17,6 +17,7 @@ SRCPATH := .
 DOCKERBASETAG := hpsch/abylebotter
 CURRENTGITCOMMIT := $(shell git log -1 --format=%h)
 CURRENTGITUNTRACKED := $(shell git diff-index --quiet HEAD -- || echo "_untracked")
+ENVFLAGS := GONOSUMDB=git.abyle.org/redseligg GONOPROXY=git.abyle.org/redseligg
 
 default: build
 
@@ -32,7 +33,7 @@ build:
 	@for cmd in ${BINARIES}; \
 	do \
 		echo "\t$${cmd}" ;\
-		go build -o ./bin/$${cmd} -ldflags '${LDFLAGS}' ./cmd/$${cmd}/ ;\
+		${ENVFLAGS} go build -o ./bin/$${cmd} -ldflags '${LDFLAGS}' ./cmd/$${cmd}/ ;\
 	done
 	@echo Done.
 
@@ -42,7 +43,7 @@ race:
 	@for cmd in ${BINARIES}; \
 	do \
 		echo "\t$${cmd}" ;\
-		go build -o ./bin/$${cmd} -ldflags '${LDFLAGS}' -race ./cmd/$${cmd}/ ;\
+		${ENVFLAGS} go build -o ./bin/$${cmd} -ldflags '${LDFLAGS}' -race ./cmd/$${cmd}/ ;\
 	done
 	@echo Done.
 
@@ -52,17 +53,17 @@ build-static:
 	@for cmd in ${BINARIES}; \
 	do \
 		echo "\t$${cmd}" ;\
-		CGO_ENABLED=0 go build -o ./bin/$${cmd} -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
+		CGO_ENABLED=0 ${ENVFLAGS} go build -o ./bin/$${cmd} -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
 	done
 	@echo Done.
 
 test:
 	@echo "Running unit tests"
-	@go test -covermode=count -coverprofile=coverage.out ./...
+	@${ENVFLAGS} go test -covermode=count -coverprofile=coverage.out ./...
 
 test-verbose:
 	@echo "Running unit tests"
-	@go test -v -covermode=count -coverprofile=coverage.out ./...
+	@${ENVFLAGS} go test -v -covermode=count -coverprofile=coverage.out ./...
 
 install: build
 	install -d ${DESTDIR}/usr/local/bin/
@@ -80,7 +81,7 @@ uninstall:
 	done
 
 deps:
-	go get -v ./...
+	${ENVFLAGS} go get -v ./...
 
 clean-dist:
 	rm -rf ./dist/${VERSION}
@@ -89,7 +90,7 @@ dist:
 	@# For linux 386 when building on linux amd64 you'll need 'libc6-dev-i386' package
 	@echo Building dist
 	# we need this for Windows
-	GOOS=windows GOARCH=386 go get -v github.com/konsorten/go-windows-terminal-sequences
+	GOOS=windows GOARCH=386 ${ENVFLAGS} go get -v github.com/konsorten/go-windows-terminal-sequences
 
 	@#             os    arch  cgo ext
 	@for arch in "linux   386  1      "  "linux   amd64 1      "  \
@@ -103,7 +104,7 @@ dist:
 		for cmd in ${BINARIES}; \
 		do \
 			echo "\t$${cmd}" ;\
-			CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 go build -o $$distpath/$${cmd}$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
+			CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 ${ENVFLAGS} go build -o $$distpath/$${cmd}$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
 		done ;\
 		cp "README.md" "LICENSE" "CHANGELOG.md" "AUTHORS" $$distpath ;\
 		cp "cfg/config.toml" $$distpath/config_example.toml ;\

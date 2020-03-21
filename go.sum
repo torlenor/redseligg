@@ -1,5 +1,6 @@
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-git.abyle.org/redseligg/botorchestrator v0.0.0-20200321161947-736116e0b3f5 h1:Y3RBRCHLFWgcVTF07f/DsJrVsE4XeJkn1/2E8707DcE=
+git.abyle.org/redseligg/botorchestrator v0.0.0-20200321164203-1308eb5c4efb h1:tlAfKgKcWxFQuuGO0flCUyRr6qPOGR6rkbdC/C4ffDg=
+git.abyle.org/redseligg/botorchestrator v0.0.0-20200321164203-1308eb5c4efb/go.mod h1:UGF3+he+X5jXIp24QEktZrfVgkK4EZPt+FMiLXPCKaE=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
