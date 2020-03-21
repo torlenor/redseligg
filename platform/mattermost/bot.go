@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.abyle.org/reseligg/botorchestrator/botconfig"
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 

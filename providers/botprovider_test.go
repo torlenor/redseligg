@@ -3,7 +3,7 @@ package providers
 import (
 	"testing"
 
-	"git.abyle.org/reseligg/botorchestrator/botconfig"
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/stretchr/testify/assert"
 )
 

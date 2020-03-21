@@ -13,8 +13,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
-	mongodbbotconfigprovider "git.abyle.org/reseligg/botorchestrator/botconfigprovider/mongodb"
-	tomlbotconfigprovider "git.abyle.org/reseligg/botorchestrator/botconfigprovider/toml"
+	mongodbbotconfigprovider "git.abyle.org/redseligg/botorchestrator/botconfigprovider/mongodb"
+	tomlbotconfigprovider "git.abyle.org/redseligg/botorchestrator/botconfigprovider/toml"
 
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/config"

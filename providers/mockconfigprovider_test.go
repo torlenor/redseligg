@@ -3,7 +3,7 @@ package providers
 import (
 	"fmt"
 
-	"git.abyle.org/reseligg/botorchestrator/botconfig"
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
 )
 
 type mockConfigProvider struct {

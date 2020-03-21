@@ -3,7 +3,7 @@ package factories
 import (
 	"fmt"
 
-	"git.abyle.org/reseligg/botorchestrator/botconfig"
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin/echoplugin"
