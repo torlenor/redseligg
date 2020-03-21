@@ -17,5 +17,5 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
-	google.golang.org/appengine v1.6.4
+	google.golang.org/appengine v1.6.4 // indirect
 )

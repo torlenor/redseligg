@@ -13,7 +13,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
-	"git.abyle.org/reseligg/botorchestrator/botconfigprovider"
+	mongodbbotconfigprovider "git.abyle.org/reseligg/botorchestrator/botconfigprovider/mongodb"
+	tomlbotconfigprovider "git.abyle.org/reseligg/botorchestrator/botconfigprovider/toml"
 
 	"github.com/torlenor/abylebotter/api"
 	"github.com/torlenor/abylebotter/config"
@@ -60,7 +61,7 @@ func createBotProvider() (*providers.BotProvider, error) {
 
 	cfgSource, exists := os.LookupEnv("BOTTER_BOT_CFG_SOURCE")
 	if !exists {
-		cfgSource = "TOML"
+		return nil, fmt.Errorf("Error determining bot config type, environment variable BOTTER_BOT_CFG_SOURCE not set")
 	}
 	cfgSource = strings.ToUpper(cfgSource)
 
@@ -73,10 +74,32 @@ func createBotProvider() (*providers.BotProvider, error) {
 		if !exists {
 			tomlFile = "/cfg/bots.toml"
 		}
-		cfgs, err := botconfigprovider.ParseTomlBotConfigFromFile(tomlFile)
+		cfgs, err := tomlbotconfigprovider.ParseTomlBotConfigFromFile(tomlFile)
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing the toml bot config %s (check env variable BOTTER_BOT_CFG_TOML_FILE)", err)
 		}
+
+		botProvider, err := providers.NewBotProvider(cfgs, botFactory, pluginFactory)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating bot provider: %s", err)
+		}
+		return botProvider, nil
+	case "MONGODB":
+		fallthrough
+	case "MONGO":
+		url, exists := os.LookupEnv("BOTTER_BOT_CFG_MONGO_URL")
+		if !exists {
+			return nil, fmt.Errorf("Error in setting up MongoDB bot config: MongoDB URL not set, check environment variable BOTTER_BOT_CFG_MONGO_URL")
+		}
+		db, exists := os.LookupEnv("BOTTER_BOT_CFG_MONGO_DB")
+		if !exists {
+			return nil, fmt.Errorf("Error in setting up MongoDB bot config: MongoDB database not set, check environment variable BOTTER_BOT_CFG_MONGO_DB")
+		}
+		cfgs, err := mongodbbotconfigprovider.NewBackend(url, db)
+		if err != nil {
+			return nil, fmt.Errorf("Error in setting up MongoDB bot config: %s", err)
+		}
+		cfgs.Connect()
 
 		botProvider, err := providers.NewBotProvider(cfgs, botFactory, pluginFactory)
 		if err != nil {
