@@ -10,26 +10,29 @@ stages:
   - deploy
 
 build:
-  image: golang:1.12
+  image: golang:1.14
   stage: build
   script:
+    - echo -e "machine git.abyle.org\nlogin ${PRIVATE_REPO_LOGIN_USER}\npassword ${PRIVATE_REPO_LOGIN_TOKEN}" > ~/.netrc
     - make
 
 unit_tests:
-  image: golang:1.12
+  image: golang:1.14
   stage: test
   script:
+    - echo -e "machine git.abyle.org\nlogin ${PRIVATE_REPO_LOGIN_USER}\npassword ${PRIVATE_REPO_LOGIN_TOKEN}" > ~/.netrc
     - make test
     - go tool cover -func coverage.out
 
 build_static:
-  image: golang:1.12
+  image: golang:1.14
   stage: build_static
   artifacts:
     expire_in: 1 week
     paths:
     - ./bin/
   script:
+    - echo -e "machine git.abyle.org\nlogin ${PRIVATE_REPO_LOGIN_USER}\npassword ${PRIVATE_REPO_LOGIN_TOKEN}" > ~/.netrc
     - make build-static
 
 create_docker_image:
