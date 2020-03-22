@@ -62,7 +62,7 @@ func TestCreateMatrixBot(t *testing.T) {
 	api.reset()
 
 	// Login with user and password
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", "")
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
 
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create MatrixBot from username and password")
@@ -76,7 +76,7 @@ func TestCreateMatrixBot(t *testing.T) {
 	api.reset()
 	api.letLoginFail = true
 
-	bot, err = createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", "")
+	bot, err = createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
 
 	if bot != nil || err == nil {
 		t.Fatalf("Created Matrix bot even though login failed")
@@ -85,31 +85,13 @@ func TestCreateMatrixBot(t *testing.T) {
 	if api.loginCalled != true {
 		t.Fatalf("Login not called even though user and password were provided")
 	}
-
-	// No login, but token provided
-	api.reset()
-
-	bot, err = createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
-
-	if bot == nil || err != nil {
-		t.Fatalf("Could not create MatrixBot from token")
-	}
-
-	if api.loginCalled != false {
-		t.Fatalf("Login called even though token was provided")
-	}
-
-	if api.authToken != "TEST_TOKEN" {
-		t.Fatalf("Auth token was not updated")
-	}
-
 }
 
 func TestMatrixBotPolling(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}
@@ -157,7 +139,7 @@ func TestMatrixBotStartingAndStopping(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}
@@ -172,7 +154,7 @@ func TestMatrixBotAddRemoveRoom(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "", "", "TEST_TOKEN")
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}

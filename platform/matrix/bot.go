@@ -3,7 +3,8 @@ package matrix
 import (
 	"time"
 
-	"github.com/torlenor/abylebotter/config"
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
@@ -30,19 +31,14 @@ type Bot struct {
 	nextBatch string // contains the next batch to fetch in sync
 }
 
-// The createMatrixBotWithAPI creates a new instance of a DiscordBot using the api interface api
-func createMatrixBotWithAPI(api api, username string, password string, token string) (*Bot, error) {
+// The createMatrixBotWithAPI creates a new instance of a MatrixBot using the api interface api
+func createMatrixBotWithAPI(api api, username string, password string) (*Bot, error) {
 	log.Printf("MatrixBot is CREATING itself")
 	b := Bot{api: api}
 
-	if len(token) == 0 {
-		err := b.api.login(username, password)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		// just use the provided access token
-		b.api.updateAuthToken(token)
+	err := b.api.login(username, password)
+	if err != nil {
+		return nil, err
 	}
 
 	b.pollingDone = make(chan bool)
@@ -55,9 +51,9 @@ func createMatrixBotWithAPI(api api, username string, password string, token str
 }
 
 // CreateMatrixBot creates a new instance of a DiscordBot
-func CreateMatrixBot(cfg config.MatrixConfig) (*Bot, error) {
-	api := &matrixAPI{server: cfg.Server, authToken: cfg.Token}
-	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password, cfg.Token)
+func CreateMatrixBot(cfg botconfig.MatrixConfig) (*Bot, error) {
+	api := &matrixAPI{server: cfg.Server}
+	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password)
 }
 
 // AddPlugin takes as argument a plugin and

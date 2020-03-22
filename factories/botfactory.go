@@ -7,6 +7,7 @@ import (
 
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/platform/discord"
+	"github.com/torlenor/abylebotter/platform/matrix"
 	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
 	"github.com/torlenor/abylebotter/ws"
@@ -41,7 +42,6 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 		if err != nil {
 			return nil, fmt.Errorf("Error creating mattermost bot: %s", err)
 		}
-
 	case "discord":
 		discordCfg, err := config.AsDiscordConfig()
 		if err != nil {
@@ -49,6 +49,16 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 		}
 
 		bot, err = discord.CreateDiscordBot(discordCfg)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+		}
+	case "matrix":
+		matrixCfg, err := config.AsMatrixConfig()
+		if err != nil {
+			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+		}
+
+		bot, err = matrix.CreateMatrixBot(matrixCfg)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}
