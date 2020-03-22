@@ -145,7 +145,7 @@ func (b *Bot) startDiscordBot() {
 			case "PRESENCES_REPLACE":
 				b.handlePresencesReplace(data)
 			default:
-				log.Errorln("Unhandeled message:", string(message))
+				log.Errorln("Unhandled message:", string(message))
 				b.handleUnknown(data)
 			}
 			b.currentSeqNumber = int(data["s"].(float64))
@@ -197,7 +197,7 @@ func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
 func (b *Bot) Start() {
 	log.Infoln("DiscordBot is STARTING")
 	go b.startDiscordBot()
-	go b.oauth2Handler.startOAuth2Handler()
+	// go b.oauth2Handler.startOAuth2Handler()
 	log.Infoln("DiscordBot is RUNNING")
 }
 
