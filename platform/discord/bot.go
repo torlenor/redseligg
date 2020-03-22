@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"strings"
 
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
+
 	"github.com/gorilla/websocket"
 	"golang.org/x/oauth2"
 
-	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
@@ -161,7 +162,7 @@ func (b *Bot) startDiscordBot() {
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg config.DiscordConfig) (*Bot, error) {
+func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
 	log.Info("DiscordBot is CREATING itself")
 
 	b := Bot{token: cfg.Token}
