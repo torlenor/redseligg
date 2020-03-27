@@ -11,12 +11,13 @@ import (
 	"github.com/torlenor/abylebotter/utils"
 )
 
-type getBotsResponse struct {
+// GetBotsResponse is the response for bots endpoint
+type GetBotsResponse struct {
 	Bots []string `json:"bots"`
 }
 
 func (b *BotPool) getBotsEndpoint(w http.ResponseWriter, r *http.Request) {
-	response := getBotsResponse{
+	response := GetBotsResponse{
 		Bots: b.GetBotIDs(),
 	}
 
@@ -55,7 +56,7 @@ func (b *BotPool) postBotsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	err = b.AddViaID(botID)
 	if err != nil {
-		http.Error(w, utils.GenerateErrorResponse(fmt.Sprintf("Not able to add Bot: %s", err)), http.StatusBadRequest)
+		http.Error(w, utils.GenerateErrorResponse(fmt.Sprintf("Not able to add Bot with ID %s: %s", botID, err)), http.StatusBadRequest)
 		return
 	}
 
@@ -76,7 +77,7 @@ func (b *BotPool) getBotEndPoint(w http.ResponseWriter, r *http.Request) {
 	botID := vars["botId"]
 
 	if _, ok := b.bots[botID]; !ok {
-		http.Error(w, utils.GenerateErrorResponse(fmt.Sprintf("Bot ID unknown")), http.StatusBadRequest)
+		http.Error(w, utils.GenerateErrorResponse(fmt.Sprintf("Bot ID %s unknown", botID)), http.StatusBadRequest)
 		return
 	}
 

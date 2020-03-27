@@ -8,7 +8,7 @@
 
 ## Description
 
-This is AbyleBotter, an extensible Chat Bot for various platforms.
+This is AbyleBotter, an extensible Chat Bot for various platforms. It is based on a server architecture which can be controlled via a REST API.
 
 At the moment the Bot is in a proof of concept/API/interface development phase with very limited functional use.
 
@@ -83,22 +83,74 @@ Independent of the way you obtain it, you have to configure the bot first and it
 - Mattermost: For Mattermost a username and password with the necessary rights on the specified server is enough.
 - Slack: The bot as to be added to the workspace and a token has to be generated.
 
-Then please take a look at the provided example configuration in _config/config.toml_ and adapt it to match your settings.
+The bot configuration can either be stored in a toml file or in a MongoDB. An example for a toml file is provided in this repository in *cfg/bots.toml*.
 
-To start AbyleBotter using the self-built or downloaded binary enter
+### Self-built or downloaded release
 
-```
-./path/to/abylebotter -c /path/to/config/file.toml
-```
+To start the AbyleBotter BotterInstance using the self-built or downloaded binary enter for use with a TOML config
 
-The Bot should now connect automatically to the service and should be ready to use.
-
-## Using Docker
-
-Probably the easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it just type
-
-```
-docker run --name abylebotter -v /path/to/config/file.toml:/app/config/config.toml:ro hpsch/abylebotter:latest
+```bash
+BOTTER_BOT_CFG_SOURCE="TOML" BOTTER_BOT_CFG_TOML_FILE=/path/to/config/file.toml ./botterinstance
 ```
 
-where _/path/to/config/file.toml_ has to be replaced with the path to your config file (see above for remarks about bot accounts for the various services).
+or 
+
+```bash
+BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" ./botterinstance
+```
+
+for use with a MongoDB for the Bot configuration.
+
+### Using Docker
+
+Probably an easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it type
+
+```
+docker run --name abylebotter --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/abylebotter:latest
+```
+
+or for MongoDB type
+
+```
+docker run --name abylebotter BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/abylebotter:latest
+```
+
+## How to control it
+
+We are providing a simple command line tool to control a BotterInstance called BotterControl.
+
+### Get all running bots of a BotterInstance
+
+```bash
+./bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
+```
+
+or
+
+```bash
+docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
+```
+
+### Start a bot on a BotterInstance
+
+```bash
+./bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
+```
+
+or
+
+```bash
+docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
+```
+
+### Stop a bot on a BotterInstance
+
+```bash
+./bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
+```
+
+or
+
+```bash
+docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
+```
