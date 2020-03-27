@@ -46,6 +46,8 @@ type Bot struct {
 	watchdog *watchdog
 
 	idProvider utils.IDProvider
+
+	healthy bool
 }
 
 // CreateSlackBot creates a new instance of a SlackBot
@@ -165,7 +167,7 @@ func (b *Bot) GetInfo() platform.BotInfo {
 	return platform.BotInfo{
 		BotID:    "",
 		Platform: "Slack",
-		Healthy:  true,
+		Healthy:  b.healthy,
 		Plugins:  []platform.PluginInfo{},
 	}
 }

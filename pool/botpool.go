@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/torlenor/abylebotter/api"
@@ -25,11 +26,15 @@ type BotPool struct {
 	botContexts map[string]context.Context
 	shutdownFns map[string]context.CancelFunc
 
+	wg sync.WaitGroup
+
 	mutex sync.Mutex
 
 	controlAPI *api.API
 
 	botProvider *providers.BotProvider
+
+	checkerStop chan bool
 
 	isRunning bool
 }
@@ -160,6 +165,34 @@ func (b *BotPool) stopSingle(id string) {
 	delete(b.botContexts, id)
 }
 
+func (b *BotPool) restartSingle(id string) {
+	b.stopSingle(id)
+	b.startSingle(id)
+}
+
+// checkBots continuously monitores the bots and tries to restart them if they are not healthy
+func (b *BotPool) checkBots(interval time.Duration, stop chan bool) {
+	ticker := time.NewTicker(interval)
+	for {
+		select {
+		case <-stop:
+			ticker.Stop()
+			return
+		case <-ticker.C:
+			b.log.Debugf("Running bots check")
+			b.mutex.Lock()
+			for id, bot := range b.bots {
+				b.log.Debugf("Checking bot with ID %s", id)
+				if !bot.GetInfo().Healthy {
+					b.log.Warnf("Bot %s unhealthy. Restarting it", id)
+					b.restartSingle(id)
+				}
+			}
+			b.mutex.Unlock()
+		}
+	}
+}
+
 // Run the BotPool. If a new bot is added to the pool, it will be automatically started.
 func (b *BotPool) Run(ctx context.Context) (err error) {
 	b.log.Info("BotPool started")
@@ -168,11 +201,21 @@ func (b *BotPool) Run(ctx context.Context) (err error) {
 	b.childRoutines = childRoutines
 	b.context = childCtx
 
+	b.checkerStop = make(chan bool)
+	go func() {
+		b.wg.Add(1)
+		b.checkBots(5*time.Second, b.checkerStop)
+		defer b.wg.Done()
+	}()
+
 	b.isRunning = true
 
 	<-ctx.Done()
 
 	b.isRunning = false
+
+	b.checkerStop <- true
+	b.wg.Wait()
 
 	if err := b.childRoutines.Wait(); err != nil && !xerrors.Is(err, context.Canceled) {
 		b.log.Errorln("Failed waiting for services to shutdown", "err", err)

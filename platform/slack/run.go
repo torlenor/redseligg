@@ -8,6 +8,8 @@ import (
 )
 
 func (b *Bot) run() {
+	b.healthy = true
+
 	for {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
@@ -43,6 +45,7 @@ func (b *Bot) run() {
 			b.log.Warnf("Received unhandled message: %s", message)
 		}
 	}
+	b.healthy = false
 }
 
 func pingSender(interval time.Duration, f func() error, stop chan bool) {
@@ -60,6 +63,9 @@ func pingSender(interval time.Duration, f func() error, stop chan bool) {
 
 func (b *Bot) onFail() {
 	b.log.Warnf("Encountered an error, trying to restart the bot...")
+
+	b.healthy = false
+
 	b.stopPingWatchdog()
 	err := b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
