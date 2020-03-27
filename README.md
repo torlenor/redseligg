@@ -11,8 +11,6 @@
 
 This is AbyleBotter, an extensible Chat Bot for various platforms. It is based on a server architecture which can be controlled via a REST API.
 
-At the moment the Bot is in a proof of concept/API/interface development phase with very limited functional use.
-
 ## Supported platforms
 
 These platforms are current supported (at least with the functionality to send and receive messages):
@@ -60,7 +58,7 @@ For releases binaries for Linux, Windows and Mac are provided. Check out the res
 
 ### Building
 
-Clone the sources from GitHub and compile AbyleBotter with
+Clone the sources from the repository and compile it with
 
 ```
 make deps
@@ -107,18 +105,18 @@ for use with a MongoDB for the Bot configuration.
 Probably an easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it type
 
 ```
-docker run --name abylebotter --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/abylebotter:latest
+docker run -d --name abylebotter --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/abylebotter:latest
 ```
 
 or for MongoDB type
 
 ```
-docker run --name abylebotter BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/abylebotter:latest
+docker run -d --name abylebotter BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/abylebotter:latest
 ```
 
 ## How to control it
 
-We are providing a simple command line tool to control a BotterInstance called BotterControl.
+We are providing a command line tool to control a BotterInstance called BotterControl.
 
 ### Get all running bots of a BotterInstance
 
@@ -129,7 +127,7 @@ We are providing a simple command line tool to control a BotterInstance called B
 or
 
 ```bash
-docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
+docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
 ```
 
 ### Start a bot on a BotterInstance
@@ -141,7 +139,7 @@ docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c G
 or
 
 ```bash
-docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
+docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
 ```
 
 ### Stop a bot on a BotterInstance
@@ -153,5 +151,5 @@ docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c S
 or
 
 ```bash
-docker run hpsch/abylebotter:latest bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
+docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
 ```
