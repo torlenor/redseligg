@@ -12,11 +12,14 @@ func (b *Bot) run() {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-				b.log.Debugln("Connection closed normally: ", err)
-				break
+				b.log.Debugln("Connection closed normally:", err)
+				return
+			} else if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+				b.log.Errorln("Unexpected Close of WebSocket:", err)
+				return
 			} else {
-				b.log.Errorln("UNHANDLED ERROR: ", err)
-				continue
+				b.log.Errorln("Unhandled error in ReadMessage from WebSocket:", err)
+				return
 			}
 		}
 
