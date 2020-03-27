@@ -12,10 +12,10 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY bin/* /usr/bin/
 
-CMD ["/usr/bin/abylebotter", "-c", "/app/config/config.toml"]
+CMD ["/usr/bin/botterinstance"]
 
 LABEL org.label-schema.vendor="Abyle.org" \
-      org.label-schema.url="https://github.com/torlenor/AbyleBotter" \
+      org.label-schema.url="https://git.abyle.org/hps/abylebotter" \
       org.label-schema.name="Abylebotter" \
       org.label-schema.description="An extensible chat bot for Discord written in GO"
 
