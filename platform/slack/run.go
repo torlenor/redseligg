@@ -23,7 +23,7 @@ func (b *Bot) run() {
 		var data map[string]interface{}
 
 		if err := json.Unmarshal(message, &data); err != nil {
-			b.log.Errorln("UNHANDLED ERROR: ", err)
+			b.log.Errorf("Error unmarshalling received message from WebSocket: %s, message was: %s", err, data)
 			continue
 		}
 
@@ -32,7 +32,7 @@ func (b *Bot) run() {
 		} else if _, ok := data["ok"]; ok {
 			ackMessage := eventAck{}
 			if err := json.Unmarshal(message, &ackMessage); err != nil {
-				b.log.Errorln("UNHANDLED ERROR: ", err)
+				b.log.Errorln("Unable to handle ACK, error unmarshalling JSON:", err)
 			} else {
 				b.log.Debugf("Received an ACK to a message we sent, not used yet: %s", message)
 			}

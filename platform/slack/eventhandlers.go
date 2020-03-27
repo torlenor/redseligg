@@ -52,7 +52,7 @@ func (b *Bot) handleEventMessage(data []byte) {
 	var message eventMessage
 
 	if err := json.Unmarshal(data, &message); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event Message, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (b *Bot) handleEventUserTyping(data []byte) {
 	var userTyping eventUserTyping
 
 	if err := json.Unmarshal(data, &userTyping); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event UserTyping, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (b *Bot) handleEventDesktopNotification(data []byte) {
 	var desktopNotification eventDesktopNotification
 
 	if err := json.Unmarshal(data, &desktopNotification); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event DesktopNotification, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (b *Bot) handleEventChannelCreated(data []byte) {
 	var channelCreated eventChannelCreated
 
 	if err := json.Unmarshal(data, &channelCreated); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event ChannelCreated, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -103,7 +103,7 @@ func (b *Bot) handleEventChannelJoined(data []byte) {
 	var channelJoined eventChannelJoined
 
 	if err := json.Unmarshal(data, &channelJoined); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event ChannelJoined, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -114,7 +114,7 @@ func (b *Bot) handleEventChannelLeft(data []byte) {
 	var channelLeft eventChannelLeft
 
 	if err := json.Unmarshal(data, &channelLeft); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event ChannelLeft, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -125,7 +125,7 @@ func (b *Bot) handleEventChannelDeleted(data []byte) {
 	var channelDeleted eventChannelDeleted
 
 	if err := json.Unmarshal(data, &channelDeleted); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event ChannelDeleted, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -136,7 +136,7 @@ func (b *Bot) handleEventMemberJoinedChannel(data []byte) {
 	var memberJoinedChannel eventMemberJoinedChannel
 
 	if err := json.Unmarshal(data, &memberJoinedChannel); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event ChannelJoined, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -147,7 +147,7 @@ func (b *Bot) handleEventGroupJoined(data []byte) {
 	var groupJoined eventGroupJoined
 
 	if err := json.Unmarshal(data, &groupJoined); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event GroupJoined, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -162,7 +162,7 @@ func (b *Bot) handleEventUserChanged(data []byte) {
 	var userChanged eventUser
 
 	if err := json.Unmarshal(data, &userChanged); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event EventUserChanged, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -173,7 +173,7 @@ func (b *Bot) handleEventTeamJoin(data []byte) {
 	var teamJoin eventUser
 
 	if err := json.Unmarshal(data, &teamJoin); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event TeamJoin, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -184,7 +184,7 @@ func (b *Bot) handleEventDnDUpdatedUser(data []byte) {
 	var dndUpdatedUser eventDnDUpdatedUser
 
 	if err := json.Unmarshal(data, &dndUpdatedUser); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event DnDUpdatedUser, error unmarshalling JSON: ", err)
 		return
 	}
 
@@ -195,7 +195,7 @@ func (b *Bot) handleEventIMCreated(data []byte) {
 	var imCreated eventIMCreated
 
 	if err := json.Unmarshal(data, &imCreated); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to handle Event IMCreated, error unmarshalling JSON: ", err)
 		return
 	}
 

@@ -41,7 +41,7 @@ func (b *Bot) receivePong(data []byte) {
 	var pong Pong
 
 	if err := json.Unmarshal(data, &pong); err != nil {
-		b.log.Errorln("UNHANDLED ERROR: ", err)
+		b.log.Errorln("Unable to receive Pong, error unmarshalling JSON:", err)
 		return
 	}
 
