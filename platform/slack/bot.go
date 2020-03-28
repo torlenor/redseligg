@@ -167,7 +167,7 @@ func (b *Bot) GetInfo() platform.BotInfo {
 	return platform.BotInfo{
 		BotID:    "",
 		Platform: "Slack",
-		Healthy:  b.healthy,
+		Healthy:  true,
 		Plugins:  []platform.PluginInfo{},
 	}
 }
