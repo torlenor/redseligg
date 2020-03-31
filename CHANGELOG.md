@@ -1,19 +1,19 @@
-# Changelog
+# Change Log
 
-## [0.0.2] - 2018-10-06
+## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/v0.0.3) (TBD)
 
-### Added
+*Major rework of the whole project to a modern and more Go-like structure.*
 
-- First release
+**Implemented enhancements:**
 
-### Bug Fixes
+- Migrated to a server architecture where AbyleBotter is controlled via REST API
+- Introduce the command line tool BotterControl to control a AbyleBotter instance
+- Cleaner plugin interface and therefore much easier to implement new plugins
 
-- None
+**Fixed bugs:**
 
-### Fixed Issues
+- Various bugs fixed all over the place
 
-- None
+## [0.0.2](https://git.abyle.org/hps/abylebotter/-/tree/0.0.2) (2018-10-06)
 
-### Known Issues
-
-- None
+*First release.*
