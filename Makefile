@@ -106,7 +106,7 @@ dist:
 			CGO_ENABLED=$$3 GOOS=$$1 GOARCH=$$2 ${ENVFLAGS} go build -o $$distpath/$${cmd}$$4 -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
 		done ;\
 		cp "README.md" "LICENSE" "CHANGELOG.md" "AUTHORS" $$distpath ;\
-		cp "cfg/config.toml" $$distpath/config_example.toml ;\
+		cp "cfg/bots.toml" $$distpath/bots.toml ;\
 		if [ "$$1" = "linux" ]; then \
 			cd $$distpath && tar -zcvf ../../${NAME}_${VERSION}_$$1_$$2.tar.gz * && cd - ;\
 		else \
@@ -128,6 +128,7 @@ build-container-gitcommit: build-static
 
 release-container: build-container-tagged
 	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}
+	docker tag ${DOCKERBASETAG}:${VERSION} ${DOCKERBASETAG}:latest
 	docker push ${DOCKERBASETAG}:${VERSION}
 
 release-container-tagged: build-container-tagged
