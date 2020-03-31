@@ -1,5 +1,7 @@
 # Change Log
 
+## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (TBD)
+
 ## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/0.0.3) (2020-03-31)
 
 *Major rework of the whole project to a modern and more Go-like structure.*
