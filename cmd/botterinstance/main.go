@@ -13,6 +13,7 @@ import (
 
 	"github.com/torlenor/abylebotter/config"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/utils"
 )
 
 const (
@@ -22,9 +23,10 @@ const (
 )
 
 /**
- * Version should be set while build using ldflags (see Makefile)
+ * version and compTime should be set while build using ldflags (see Makefile)
  */
 var version string
+var compTime string
 
 var log *logrus.Entry
 
@@ -53,7 +55,7 @@ func main() {
 	flag.Parse()
 
 	if *v {
-		fmt.Printf("Version %s\n", version)
+		fmt.Printf("Version %s (%s)\n", version, compTime)
 		os.Exit(0)
 	}
 
@@ -64,6 +66,9 @@ func main() {
 		Port:    *port,
 		IP:      *listenAddress,
 	}
+
+	utils.Version().Set(version)
+	utils.Version().SetCompTime(compTime)
 
 	server := NewServer(controlAPIConfig)
 

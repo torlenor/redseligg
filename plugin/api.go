@@ -46,4 +46,7 @@ type API interface {
 
 	// LogError writes a log message to the server log file.
 	LogError(msg string)
+
+	// GetVersion returns the version of the server.
+	GetVersion() string
 }

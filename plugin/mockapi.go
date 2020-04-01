@@ -60,3 +60,8 @@ func (b *MockAPI) LogWarn(msg string) {}
 
 // LogError writes a log message to the server log file.
 func (b *MockAPI) LogError(msg string) {}
+
+// GetVersion returns the version of the server.
+func (b *MockAPI) GetVersion() string {
+	return "0.0.1"
+}

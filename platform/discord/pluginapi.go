@@ -2,7 +2,10 @@ package discord
 
 import (
 	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/utils"
 )
+
+var version string
 
 // RegisterCommand registers a custom slash or ! command, depending on what the bot supports.
 func (b *Bot) RegisterCommand(command string) error { return nil }
@@ -56,3 +59,8 @@ func (b *Bot) LogWarn(msg string) {}
 
 // LogError writes a log message to the server log file.
 func (b *Bot) LogError(msg string) {}
+
+// GetVersion returns the version of the server.
+func (b *Bot) GetVersion() string {
+	return utils.Version().Get() + " (" + utils.Version().GetCompTime() + ")"
+}
