@@ -21,6 +21,9 @@
     [bots.slack_dev.plugins.3]
       type = "roll"
 
+    [bots.slack_dev.plugins.4]
+      type = "version"
+
   [bots.mm_dev]
     type = "mattermost"
     [bots.mm_dev.config]
