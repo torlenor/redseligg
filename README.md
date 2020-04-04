@@ -38,6 +38,37 @@ The EchoPlugin echos back all messages it received to the sender of the message.
 
 - **onlywhispers**: When set to true the EchoPlugin only echos in whispers (when supported by the used Bot)
 
+### GiveawayPlugin
+
+Lets you hold giveaways in your channel and let the bot pick a winner.
+
+#### Starting a giveaway
+
+To start a giveaway in the current channel type
+
+```
+!gstart <time> <secretword> [winners] [prize]
+```
+
+* `<time>` is the time the giveaway should run. It should include s/m/h to indicate seconds/minutes/hours.
+* `<secretword>` is the word the bot should react for the people to participate.
+* `[winners]` is the number of winners to pick in the end.
+* `[prize]` is the prize the people can win.
+
+Example:
+
+```
+!gstart 1m hello 2 Bananas
+```
+
+#### Ending a giveaway
+
+To stop a currently running giveaway type `!gend`.
+
+#### Rerolling the winner
+
+Type `!greroll` to pick a new winner from the running giveaway.
+
 ### HTTPPingPlugin
 
 The HTTPPingPlugin listens to messages starting with `!httpping ` followed by an URL. If the URL is valid it will try to contact the server and reports back the request duration or an error if the URL was not reachable.

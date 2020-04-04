@@ -16,12 +16,15 @@
         onlywhispers = false
 
     [bots.slack_dev.plugins.2]
-      type = "httpping"
+      type = "giveaway"
 
     [bots.slack_dev.plugins.3]
-      type = "roll"
+      type = "httpping"
 
     [bots.slack_dev.plugins.4]
+      type = "roll"
+
+    [bots.slack_dev.plugins.5]
       type = "version"
 
   [bots.mm_dev]

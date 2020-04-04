@@ -7,6 +7,7 @@ import (
 
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin/echoplugin"
+	"github.com/torlenor/abylebotter/plugin/giveawayplugin"
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
 	"github.com/torlenor/abylebotter/plugin/rollplugin"
 	"github.com/torlenor/abylebotter/plugin/versionplugin"
@@ -23,6 +24,12 @@ func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.Plugi
 	switch pluginConfig.Type {
 	case "echo":
 		p = &echoplugin.EchoPlugin{}
+	case "giveaway":
+		rp, err := giveawayplugin.New()
+		if err != nil {
+			return nil, err
+		}
+		p = &rp
 	case "roll":
 		rp, err := rollplugin.New()
 		if err != nil {
