@@ -9,3 +9,4 @@ type MockPlugin struct{}
 
 func (m *MockPlugin) SetAPI(api plugin.API) {}
 func (m *MockPlugin) OnPost(model.Post)     {}
+func (m *MockPlugin) OnRun()                {}

@@ -27,6 +27,9 @@ func (b *Bot) startBot() {
 func (b *Bot) Start() {
 	log.Println("MatrixBot is STARTING")
 	go b.startBot()
+	for _, plugin := range b.plugins {
+		plugin.OnRun()
+	}
 	log.Println("MatrixBot is RUNNING")
 }
 

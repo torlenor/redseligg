@@ -198,6 +198,9 @@ func (b *Bot) Start() {
 	log.Infoln("DiscordBot is STARTING")
 	go b.startDiscordBot()
 	// go b.oauth2Handler.startOAuth2Handler()
+	for _, plugin := range b.plugins {
+		plugin.OnRun()
+	}
 	log.Infoln("DiscordBot is RUNNING")
 }
 
