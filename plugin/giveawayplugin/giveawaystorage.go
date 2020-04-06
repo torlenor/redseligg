@@ -70,7 +70,7 @@ func (p *GiveawayPlugin) endGiveaway(giveaway *giveaway) {
 
 	participants := giveaway.participantIDs
 	p.randomizer.Shuffle(len(participants), func(i, j int) { participants[i], participants[j] = participants[j], participants[i] })
-	for i := 0; i < giveaway.numOfWinners; i++ {
+	for i := 0; i < min(giveaway.numOfWinners, len(participants)); i++ {
 		winner := participants[i]
 		winners = append(winners, "<@"+giveaway.participants[winner].ID+">")
 	}
