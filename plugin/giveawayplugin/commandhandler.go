@@ -11,19 +11,19 @@ import (
 
 func parseTimeStringToDuration(timeStr string) (time.Duration, error) {
 	if len(timeStr) == 0 {
-		return time.Duration(0), fmt.Errorf("giveaway duration cannot be empty")
+		return time.Duration(0), fmt.Errorf("Giveaway duration cannot be empty")
 	}
 
 	duration, err := time.ParseDuration(timeStr)
 	if err != nil {
-		return time.Duration(0), fmt.Errorf("giveaway duration invalid")
+		return time.Duration(0), fmt.Errorf("Giveaway duration invalid")
 	}
 
 	return duration, nil
 }
 
 func (p *GiveawayPlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway")
+	p.returnMessage(channelID, "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.")
 }
 
 func (p *GiveawayPlugin) returnMessage(channelID, msg string) {
@@ -71,16 +71,16 @@ func (p *GiveawayPlugin) onCommandGStart(post model.Post) {
 	prizeStr := strings.Join(prize, " ")
 
 	if _, ok := p.runningGiveaways[post.ChannelID]; ok {
-		p.returnMessage(post.ChannelID, "Giveaway already running")
+		p.returnMessage(post.ChannelID, "Giveaway already running.")
 		return
 	}
 
-	giveaway := newGiveaway(post.ChannelID, word, duration, winners, prizeStr)
+	giveaway := newGiveaway(post.ChannelID, post.UserID, word, duration, winners, prizeStr)
 
 	p.runningGiveaways[post.ChannelID] = &giveaway
 
 	p.runningGiveaways[post.ChannelID].start(time.Now())
-	p.returnMessage(post.ChannelID, "Giveaway started! Type "+word+" to participate")
+	p.returnMessage(post.ChannelID, "Giveaway started! Type "+word+" to participate.")
 }
 
 func (p *GiveawayPlugin) onCommandGEnd(post model.Post) {
@@ -88,8 +88,10 @@ func (p *GiveawayPlugin) onCommandGEnd(post model.Post) {
 		p.endGiveaway(g)
 		return
 	}
+
+	p.returnMessage(post.ChannelID, "No giveaway running. Use !gstart command to start a new one.")
 }
 
 func (p *GiveawayPlugin) onCommandGReroll(post model.Post) {
-	p.returnMessage(post.ChannelID, "Sorry !greroll not implemented, yet")
+	p.returnMessage(post.ChannelID, "Sorry !greroll not implemented, yet.")
 }

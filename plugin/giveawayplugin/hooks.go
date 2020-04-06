@@ -42,11 +42,14 @@ func (p *GiveawayPlugin) OnPost(post model.Post) {
 	if strings.HasPrefix(msg, "!gstart ") {
 		p.onCommandGStart(post)
 		return
-	} else if strings.HasPrefix(msg, "!gend") {
+	} else if msg == "!gend" {
 		p.onCommandGEnd(post)
 		return
-	} else if strings.HasPrefix(msg, "!greroll") {
+	} else if msg == "!greroll" {
 		p.onCommandGReroll(post)
+		return
+	} else if msg == "!gstart" || msg == "!ghelp" {
+		p.returnHelp(post.ChannelID)
 		return
 	}
 
