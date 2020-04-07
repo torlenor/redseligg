@@ -2,6 +2,14 @@
 
 ## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (TBD)
 
+**Implemented enhancements:**
+
+- Added GetVersion() to the Bot/Plugin API.
+
+**New plugins:**
+
+- Version Plugin: To the command *!version* the plugin will answer with the version of the Bot.
+
 ## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/0.0.3) (2020-03-31)
 
 *Major rework of the whole project to a modern and more Go-like structure.*

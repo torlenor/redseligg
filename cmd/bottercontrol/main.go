@@ -11,9 +11,10 @@ import (
 )
 
 /**
- * Version should be set while build using ldflags (see Makefile)
+ * version and compTime should be set while build using ldflags (see Makefile)
  */
 var version string
+var compTime string
 
 func getBots(url string) {
 	data, code, err := realAPICall(url, "/bots", "GET", "")
@@ -93,7 +94,7 @@ func stopBot(url string, botID string) {
 
 func main() {
 
-	fmt.Printf("BotterControl Version %s\n\n", version)
+	fmt.Printf("BotterControl Version %s (%s)\n\n", version, compTime)
 
 	var (
 		url          = flag.String("u", "", "URL to the Botter API")
@@ -106,7 +107,7 @@ func main() {
 	flag.Parse()
 
 	if *v {
-		fmt.Printf("Version %s\n", version)
+		fmt.Printf("Version %s (%s)\n", version, compTime)
 		os.Exit(0)
 	}
 
