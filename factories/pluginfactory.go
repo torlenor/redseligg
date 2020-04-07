@@ -25,11 +25,11 @@ func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.Plugi
 	case "echo":
 		p = &echoplugin.EchoPlugin{}
 	case "giveaway":
-		rp, err := giveawayplugin.New()
+		rp, err := giveawayplugin.New(pluginConfig)
 		if err != nil {
 			return nil, err
 		}
-		p = &rp
+		p = rp
 	case "roll":
 		rp, err := rollplugin.New()
 		if err != nil {

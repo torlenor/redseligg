@@ -3,6 +3,8 @@ package giveawayplugin
 import (
 	"testing"
 
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
@@ -26,7 +28,11 @@ func (r *mockRandomizer) Shuffle(arg int, swap func(i, j int)) {
 func TestCreateGiveawayPlugin(t *testing.T) {
 	assert := assert.New(t)
 
-	p, err := New()
+	p, err := New(botconfig.PluginConfig{Type: "something"})
+	assert.Error(err)
+	assert.Nil(p)
+
+	p, err = New(botconfig.PluginConfig{Type: "giveaway"})
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
@@ -37,7 +43,7 @@ func TestCreateGiveawayPlugin(t *testing.T) {
 func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	assert := assert.New(t)
 
-	p, err := New()
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
@@ -134,7 +140,7 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	assert := assert.New(t)
 
-	p, err := New()
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
@@ -258,7 +264,7 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	assert := assert.New(t)
 
-	p, err := New()
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
@@ -350,7 +356,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	assert := assert.New(t)
 
-	p, err := New()
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
@@ -417,7 +423,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	// assert := assert.New(t)
 
-	// p, err := New()
+	// p, err := New(botconfig.PluginConfig{Type: "giveaway"})
 	// assert.NoError(err)
 	// assert.Equal(nil, p.API)
 

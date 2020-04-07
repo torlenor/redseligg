@@ -17,6 +17,9 @@
 
     [bots.slack_dev.plugins.2]
       type = "giveaway"
+      [bots.slack_dev.plugins.2.config]
+        mods = ["user1", "user2"]
+        onlymods = true
 
     [bots.slack_dev.plugins.3]
       type = "httpping"

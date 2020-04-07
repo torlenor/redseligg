@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"time"
 
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/plugin"
 )
 
@@ -16,6 +18,8 @@ type randomizer interface {
 type GiveawayPlugin struct {
 	plugin.AbyleBotterPlugin
 
+	cfg config
+
 	runningGiveaways runningGiveaways
 
 	randomizer randomizer
@@ -25,11 +29,17 @@ type GiveawayPlugin struct {
 }
 
 // New returns a new GiveawayPlugin
-func New() (GiveawayPlugin, error) {
+func New(pluginConfig botconfig.PluginConfig) (*GiveawayPlugin, error) {
+	cfg, err := parseConfig(pluginConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	ep := GiveawayPlugin{
+		cfg:              cfg,
 		runningGiveaways: make(map[string]*giveaway),
 		randomizer:       rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
-	return ep, nil
+	return &ep, nil
 }
