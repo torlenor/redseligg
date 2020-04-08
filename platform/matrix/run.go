@@ -48,6 +48,10 @@ func (b *Bot) Run(ctx context.Context) error {
 func (b *Bot) Stop() {
 	log.Println("MatrixBot is SHUTING DOWN")
 
+	for _, plugin := range b.plugins {
+		plugin.OnStop()
+	}
+
 	b.pollingDone <- true
 
 	log.Println("MatrixBot is SHUT DOWN")

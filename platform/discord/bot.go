@@ -210,6 +210,10 @@ func (b *Bot) Run(ctx context.Context) error {
 
 	<-ctx.Done()
 
+	for _, plugin := range b.plugins {
+		plugin.OnStop()
+	}
+
 	b.Stop()
 
 	return nil

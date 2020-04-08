@@ -7,6 +7,8 @@ import "github.com/torlenor/abylebotter/model"
 type Hooks interface {
 	// OnRun is called when the bot is operational and ready to run
 	OnRun()
+	// OnStop is called when the bot is shutting down
+	OnStop()
 	// OnPost is called when a new post is made
 	OnPost(model.Post)
 }
