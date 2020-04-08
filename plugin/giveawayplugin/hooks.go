@@ -26,10 +26,15 @@ func (p *GiveawayPlugin) OnRun() {
 			}
 		}
 	}()
+}
 
-	// TODO
-	// ticker.Stop()
-	// done <- true
+// OnStop implements the hook from the bot
+func (p *GiveawayPlugin) OnStop() {
+	p.ticker.Stop()
+	if p.ticker != nil {
+		p.ticker.Stop()
+		p.tickerDoneChan <- true
+	}
 }
 
 func contains(s []string, e string) bool {
