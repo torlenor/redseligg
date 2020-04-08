@@ -119,6 +119,12 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	p.OnPost(postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	postToPlugin.Content = "!gstart 1m hello"
+	postToPlugin.IsPrivate = true
+	p.OnPost(postToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
 }
 
 func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
@@ -214,6 +220,82 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 
 	api.Reset()
 	postToPlugin.Content = "!gend"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	assert.Equal(randomizer.Argument, 1)
+}
+
+func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
+	assert := assert.New(t)
+
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	allowedUser := "User 2"
+	notAllowedUser := "User 1"
+
+	p.cfg.OnlyMods = true
+	p.cfg.Mods = []string{allowedUser}
+
+	randomizer := &mockRandomizer{}
+	p.randomizer = randomizer
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+
+	postToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: notAllowedUser},
+		Content:   "MESSAGE CONTENT",
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	secretword := "hello"
+	postToPlugin.Content = "!gstart 10m " + secretword
+	p.OnPost(postToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
+	api.Reset()
+	secretword = "hello"
+	postToPlugin.User = model.User{ID: "SOME USER ID", Name: allowedUser}
+	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Giveaway started! Type " + secretword + " to participate.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	userPostToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
+		Content:   secretword,
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	p.OnPost(userPostToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
+	api.Reset()
+	postToPlugin.Content = "!gend"
+	postToPlugin.User = model.User{ID: "SOME USER ID", Name: notAllowedUser}
+	p.OnPost(postToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
+	api.Reset()
+	postToPlugin.User = model.User{ID: "SOME USER ID", Name: allowedUser}
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",

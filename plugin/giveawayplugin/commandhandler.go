@@ -10,10 +10,6 @@ import (
 )
 
 func parseTimeStringToDuration(timeStr string) (time.Duration, error) {
-	if len(timeStr) == 0 {
-		return time.Duration(0), fmt.Errorf("Giveaway duration cannot be empty")
-	}
-
 	duration, err := time.ParseDuration(timeStr)
 	if err != nil {
 		return time.Duration(0), fmt.Errorf("Giveaway duration invalid")
