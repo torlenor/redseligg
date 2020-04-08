@@ -41,6 +41,18 @@ func Test_parseConfig(t *testing.T) {
 			want: config{Mods: mods},
 		},
 		{
+			name: "Valid config, with only one mod in list",
+			args: args{
+				c: botconfig.PluginConfig{
+					Type: "giveaway",
+					Config: map[string]interface{}{
+						"mods": []string{"user1"},
+					},
+				},
+			},
+			want: config{Mods: []string{"user1"}},
+		},
+		{
 			name: "Valid config, with mods and onlymods = true",
 			args: args{
 				c: botconfig.PluginConfig{

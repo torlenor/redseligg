@@ -20,7 +20,15 @@ func parseConfig(c botconfig.PluginConfig) (config, error) {
 	var onlyMods bool
 
 	var ok bool
-	if mods, ok = c.Config["mods"].([]string); !ok {
+
+	if modEntries, ok := c.Config["mods"].([]interface{}); ok {
+		for _, modEntry := range modEntries {
+			if mod, ok := modEntry.(string); ok {
+				mods = append(mods, mod)
+			}
+		}
+	} else if modEntries, ok := c.Config["mods"].([]string); ok {
+		mods = modEntries
 	}
 
 	if onlyMods, ok = c.Config["onlymods"].(bool); !ok {

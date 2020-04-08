@@ -32,6 +32,15 @@ func (p *GiveawayPlugin) OnRun() {
 	// done <- true
 }
 
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 // OnPost implements the hook from the Bot
 func (p *GiveawayPlugin) OnPost(post model.Post) {
 	if post.IsPrivate {
@@ -39,23 +48,27 @@ func (p *GiveawayPlugin) OnPost(post model.Post) {
 	}
 
 	msg := strings.Trim(post.Content, " ")
-	if strings.HasPrefix(msg, "!gstart ") {
-		p.onCommandGStart(post)
-		return
-	} else if msg == "!gend" {
-		p.onCommandGEnd(post)
-		return
-	} else if msg == "!greroll" {
-		p.onCommandGReroll(post)
-		return
-	} else if msg == "!gstart" || msg == "!ghelp" {
-		p.returnHelp(post.ChannelID)
-		return
+	if !p.cfg.OnlyMods || contains(p.cfg.Mods, post.User.Name) {
+		if strings.HasPrefix(msg, "!gstart ") {
+			p.onCommandGStart(post)
+			return
+		} else if msg == "!gend" {
+			p.onCommandGEnd(post)
+			return
+		} else if msg == "!greroll" {
+			p.onCommandGReroll(post)
+			return
+		} else if msg == "!gstart" || msg == "!ghelp" {
+			p.returnHelp(post.ChannelID)
+			return
+		}
+	} else {
+		p.API.LogDebug("Not parsing as command, because User " + post.User.Name + " is not part of mods")
 	}
 
 	if g, ok := p.runningGiveaways[post.ChannelID]; ok {
 		if msg == g.word {
-			g.addParticipant(post.UserID, post.User)
+			g.addParticipant(post.User.ID, post.User.Name)
 		}
 	}
 }
