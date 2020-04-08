@@ -2,6 +2,7 @@ package giveawayplugin
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
@@ -20,7 +21,9 @@ type GiveawayPlugin struct {
 
 	cfg config
 
+	giveawaysMutex   sync.Mutex
 	runningGiveaways runningGiveaways
+	endedGiveaways   runningGiveaways
 
 	randomizer randomizer
 
@@ -38,6 +41,7 @@ func New(pluginConfig botconfig.PluginConfig) (*GiveawayPlugin, error) {
 	ep := GiveawayPlugin{
 		cfg:              cfg,
 		runningGiveaways: make(map[string]*giveaway),
+		endedGiveaways:   make(map[string]*giveaway),
 		randomizer:       rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 

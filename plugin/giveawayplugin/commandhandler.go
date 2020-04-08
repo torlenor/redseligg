@@ -66,6 +66,9 @@ func (p *GiveawayPlugin) onCommandGStart(post model.Post) {
 	}
 	prizeStr := strings.Join(prize, " ")
 
+	p.giveawaysMutex.Lock()
+	defer p.giveawaysMutex.Unlock()
+
 	if _, ok := p.runningGiveaways[post.ChannelID]; ok {
 		p.returnMessage(post.ChannelID, "Giveaway already running.")
 		return
@@ -89,5 +92,40 @@ func (p *GiveawayPlugin) onCommandGEnd(post model.Post) {
 }
 
 func (p *GiveawayPlugin) onCommandGReroll(post model.Post) {
-	p.returnMessage(post.ChannelID, "Sorry !greroll not implemented, yet.")
+	p.giveawaysMutex.Lock()
+	defer p.giveawaysMutex.Unlock()
+
+	if _, ok := p.runningGiveaways[post.ChannelID]; ok {
+		p.returnMessage(post.ChannelID, "Cannot pick a new winner. There is currently a giveaway running in this channel.")
+		return
+	}
+
+	if g, ok := p.endedGiveaways[post.ChannelID]; ok {
+		if len(g.participants) == 0 {
+			p.returnMessage(g.channelID, "Cannot pick a new winner. There were no participants to the previous giveaway.")
+			return
+		}
+
+		winnerID := g.getParticipantIDs()[p.randomizer.Intn(len(g.participants))]
+		winner, err := g.getParticipant(winnerID)
+		if err != nil {
+			p.API.LogError("Something went wrong in rerolling a winner: " + err.Error())
+			p.returnMessage(g.channelID, "There was an error in picking a new winner. Please start a new giveway. Sorry for the inconvenience.")
+			return
+		}
+
+		endMessage := "The new winner is <@" + winner.ID + ">."
+
+		if len(g.prize) > 0 {
+			endMessage += " You won '" + g.prize + "'."
+		}
+
+		endMessage += " Congratulations!"
+
+		p.returnMessage(g.channelID, endMessage)
+
+		return
+	}
+
+	p.returnMessage(post.ChannelID, "No previous giveaway in that channel. Use !gstart command to start a new one.")
 }

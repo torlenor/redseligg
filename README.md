@@ -55,7 +55,6 @@ Example:
 
 When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to start/end giveaways. Per default everybody is allowed.
 
-
 #### Starting a giveaway
 
 To start a giveaway in the current channel type
@@ -81,7 +80,7 @@ To stop a currently running giveaway type `!gend`.
 
 #### Rerolling the winner
 
-Type `!greroll` to pick a new winner from the running giveaway.
+Type `!greroll` to pick a new winner from the last ended giveaway.
 
 ### HTTPPingPlugin
 

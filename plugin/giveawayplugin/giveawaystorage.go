@@ -90,7 +90,11 @@ func (g *giveaway) getParticipant(participantID string) (participant, error) {
 type runningGiveaways map[string]*giveaway // [channel]
 
 func (p *GiveawayPlugin) endGiveaway(giveaway *giveaway) {
+	p.giveawaysMutex.Lock()
+	defer p.giveawaysMutex.Unlock()
+
 	delete(p.runningGiveaways, giveaway.channelID)
+	p.endedGiveaways[giveaway.channelID] = giveaway
 
 	var winners []string
 

@@ -449,123 +449,141 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 }
 
 func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
-	// assert := assert.New(t)
+	assert := assert.New(t)
 
-	// p, err := New(botconfig.PluginConfig{Type: "giveaway"})
-	// assert.NoError(err)
-	// assert.Equal(nil, p.API)
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
 
-	// randomizer := &mockRandomizer{}
-	// p.randomizer = randomizer
+	randomizer := &mockRandomizer{}
+	p.randomizer = randomizer
 
-	// api := plugin.MockAPI{}
-	// p.SetAPI(&api)
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
 
-	// postToPlugin := model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "SOME CHANNEL",
-	// 	UserID:    "SOME USER ID",
-	// 	User:      "USER 1",
-	// 	Content:   "MESSAGE CONTENT",
-	// 	IsPrivate: false,
-	// }
+	postToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		Content:   "MESSAGE CONTENT",
+		IsPrivate: false,
+	}
 
-	// api.Reset()
-	// secretword := "sonne"
-	// postToPlugin.Content = "!gstart 5m " + secretword + " 1"
-	// expectedPostFromPlugin := model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "",
-	// 	UserID:    "",
-	// 	User:      "",
-	// 	Content:   "Giveaway started! Type " + secretword + " to participate.",
-	// 	IsPrivate: false,
-	// }
-	// p.OnPost(postToPlugin)
-	// assert.Equal(true, api.WasCreatePostCalled)
-	// assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	api.Reset()
+	postToPlugin.Content = "!greroll"
+	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "No previous giveaway in that channel. Use !gstart command to start a new one.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	// userPostToPlugin := model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "SOME CHANNEL",
-	// 	UserID:    "PARTICIPANT_1_ID",
-	// 	User:      "PARTICIPANT_1",
-	// 	Content:   secretword,
-	// 	IsPrivate: false,
-	// }
+	api.Reset()
+	secretword := "hello"
+	postToPlugin.Content = "!gstart 10m " + secretword
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Giveaway started! Type " + secretword + " to participate.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	// api.Reset()
-	// p.OnPost(userPostToPlugin)
-	// assert.Equal(false, api.WasCreatePostCalled)
+	api.Reset()
+	postToPlugin.Content = "!greroll"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Cannot pick a new winner. There is currently a giveaway running in this channel.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	// userPostToPlugin = model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "SOME CHANNEL",
-	// 	UserID:    "PARTICIPANT_2_ID",
-	// 	User:      "PARTICIPANT_2",
-	// 	Content:   secretword,
-	// 	IsPrivate: false,
-	// }
+	userPostToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
+		Content:   secretword,
+		IsPrivate: false,
+	}
 
-	// api.Reset()
-	// p.OnPost(userPostToPlugin)
-	// assert.Equal(false, api.WasCreatePostCalled)
+	api.Reset()
+	p.OnPost(userPostToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
 
-	// userPostToPlugin = model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "SOME CHANNEL",
-	// 	UserID:    "PARTICIPANT_3_ID",
-	// 	User:      "PARTICIPANT_3",
-	// 	Content:   secretword,
-	// 	IsPrivate: false,
-	// }
+	api.Reset()
+	postToPlugin.Content = "!gend"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	assert.Equal(randomizer.Argument, 1)
 
-	// api.Reset()
-	// p.OnPost(userPostToPlugin)
-	// assert.Equal(false, api.WasCreatePostCalled)
+	api.Reset()
+	postToPlugin.Content = "!greroll"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "The new winner is <@" + userPostToPlugin.User.ID + ">. Congratulations!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	assert.Equal(randomizer.Argument, 1)
 
-	// api.Reset()
-	// postToPlugin.Content = "!greroll"
-	// expectedPostFromPlugin = model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "",
-	// 	UserID:    "",
-	// 	User:      "",
-	// 	Content:   "Cannot reroll when there is still a giveaway ongoing.",
-	// 	IsPrivate: false,
-	// }
-	// p.OnPost(postToPlugin)
-	// assert.Equal(true, api.WasCreatePostCalled)
-	// assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-	// assert.Equal(randomizer.Argument, 3)
+	api.Reset()
+	prize := "SOME AWESOME PRIZE"
+	postToPlugin.Content = "!gstart 10m " + secretword + " 1 " + prize
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Giveaway started! Type " + secretword + " to participate.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	// api.Reset()
-	// postToPlugin.Content = "!gend"
-	// expectedPostFromPlugin = model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "",
-	// 	UserID:    "",
-	// 	User:      "",
-	// 	Content:   "The winner(s) is/are <@" + "PARTICIPANT_1_ID" + ">. Congratulations!",
-	// 	IsPrivate: false,
-	// }
-	// p.OnPost(postToPlugin)
-	// assert.Equal(true, api.WasCreatePostCalled)
-	// assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-	// assert.Equal(randomizer.Argument, 3)
+	userPostToPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
+		Content:   secretword,
+		IsPrivate: false,
+	}
 
-	// api.Reset()
-	// postToPlugin.Content = "!greroll"
-	// expectedPostFromPlugin = model.Post{
-	// 	ChannelID: "CHANNEL ID",
-	// 	Channel:   "",
-	// 	UserID:    "",
-	// 	User:      "",
-	// 	Content:   "The winner(s) is/are <@" + "PARTICIPANT_1_ID" + ">. Congratulations!",
-	// 	IsPrivate: false,
-	// }
-	// p.OnPost(postToPlugin)
-	// assert.Equal(true, api.WasCreatePostCalled)
-	// assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-	// assert.Equal(randomizer.Argument, 3)
+	api.Reset()
+	p.OnPost(userPostToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
+	api.Reset()
+	postToPlugin.Content = "!gend"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. You won '" + prize + "'. Congratulations!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	assert.Equal(randomizer.Argument, 1)
+
+	api.Reset()
+	postToPlugin.Content = "!greroll"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "The new winner is <@" + userPostToPlugin.User.ID + ">. You won '" + prize + "'. Congratulations!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	assert.Equal(randomizer.Argument, 1)
 }

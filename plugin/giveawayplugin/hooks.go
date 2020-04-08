@@ -71,6 +71,9 @@ func (p *GiveawayPlugin) OnPost(post model.Post) {
 		p.API.LogDebug("Not parsing as command, because User " + post.User.Name + " is not part of mods")
 	}
 
+	p.giveawaysMutex.Lock()
+	defer p.giveawaysMutex.Unlock()
+
 	if g, ok := p.runningGiveaways[post.ChannelID]; ok {
 		if msg == g.word {
 			g.addParticipant(post.User.ID, post.User.Name)
