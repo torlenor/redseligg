@@ -6,6 +6,7 @@
 
 - Added GetVersion() to the Bot/Plugin API.
 - Added OnRun() hook from Bot to Plugin which is called when the Bot is ready to serve the plugins.
+- Added OnStop() hook from Bot to Plugin which is called when the Bot is shutting down.
 
 **New plugins:**
 
