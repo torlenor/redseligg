@@ -2,6 +2,7 @@ package giveawayplugin
 
 import (
 	"testing"
+	"time"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
@@ -229,6 +230,69 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
+}
+
+func TestGiveawayPluginCreateAndAutomaticEndGiveaway(t *testing.T) {
+	assert := assert.New(t)
+
+	p, err := New(botconfig.PluginConfig{Type: "giveaway"})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	randomizer := &mockRandomizer{}
+	p.randomizer = randomizer
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+	p.OnRun()
+
+	postToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		Content:   "MESSAGE CONTENT",
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	secretword := "sonne"
+	postToPlugin.Content = "!gstart 2s " + secretword
+	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Giveaway started! Type " + secretword + " to participate.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	userPostToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
+		Content:   secretword,
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	p.OnPost(userPostToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
+	api.Reset()
+	// TODO refactor that to not use that ugly sleep here
+	time.Sleep(4 * time.Second)
+	assert.Equal(true, api.WasCreatePostCalled)
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
+		IsPrivate: false,
+	}
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+	assert.Equal(randomizer.Argument, 1)
+
+	p.OnStop()
+	// TODO refactor that to not use that ugly sleep here
+	time.Sleep(1 * time.Second)
 }
 
 func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
@@ -586,4 +650,38 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
+
+	api.Reset()
+	secretword = "hello"
+	postToPlugin.Content = "!gstart 10m " + secretword
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Giveaway started! Type " + secretword + " to participate.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	postToPlugin.Content = "!gend"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Cannot pick a winner. There were no participants to the giveaway.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	postToPlugin.Content = "!greroll"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Cannot pick a new winner. There were no participants to the previous giveaway.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
