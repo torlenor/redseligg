@@ -42,6 +42,20 @@ The EchoPlugin echos back all messages it received to the sender of the message.
 
 Lets you hold giveaways in your channel and let the bot pick a winner.
 
+#### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "giveaway"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to start/end giveaways. Per default everybody is allowed.
+
+
 #### Starting a giveaway
 
 To start a giveaway in the current channel type
