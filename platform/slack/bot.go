@@ -119,6 +119,10 @@ func (b *Bot) Start() {
 		defer b.wg.Done()
 	}()
 
+	for _, plugin := range b.plugins {
+		plugin.OnRun()
+	}
+
 	b.log.Infoln("SlackBot is RUNNING")
 }
 
@@ -132,6 +136,10 @@ func (b *Bot) Run(ctx context.Context) error {
 	b.Start()
 
 	<-ctx.Done()
+
+	for _, plugin := range b.plugins {
+		plugin.OnStop()
+	}
 
 	b.Stop()
 

@@ -24,7 +24,7 @@ func (p *RollPlugin) OnPost(post model.Post) {
 		} else if num <= 0 {
 			response = fmt.Sprintf("Number must be > 0")
 		} else {
-			response = "<@" + post.UserID + "> rolled *" + strconv.Itoa(p.randomizer.random(num)) + "* in [0," + strconv.Itoa(num) + "]"
+			response = "<@" + post.User.ID + "> rolled *" + strconv.Itoa(p.randomizer.random(num)) + "* in [0," + strconv.Itoa(num) + "]"
 		}
 		echo := post
 		echo.Content = response

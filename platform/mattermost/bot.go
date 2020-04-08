@@ -128,6 +128,9 @@ func CreateMattermostBot(cfg botconfig.MattermostConfig) (*Bot, error) {
 func (b *Bot) Start() {
 	b.log.Infoln("MattermostBot is STARTING")
 	go b.startMattermostBot()
+	for _, plugin := range b.plugins {
+		plugin.OnRun()
+	}
 	b.log.Infoln("MattermostBot is RUNNING")
 }
 
@@ -136,6 +139,10 @@ func (b *Bot) Run(ctx context.Context) error {
 	b.Start()
 
 	<-ctx.Done()
+
+	for _, plugin := range b.plugins {
+		plugin.OnStop()
+	}
 
 	b.Stop()
 

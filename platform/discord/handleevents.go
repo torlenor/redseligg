@@ -36,10 +36,10 @@ func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
 	var receiveMessage model.Post
 	if b.getMessageType(newMessageCreate) == MESSAGE {
 		b.stats.messagesReceived++
-		receiveMessage = model.Post{UserID: newMessageCreate.Author.ID, User: newMessageCreate.Author.Username, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
+		receiveMessage = model.Post{User: model.User{ID: newMessageCreate.Author.ID, Name: newMessageCreate.Author.Username}, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	} else {
 		b.stats.whispersReceived++
-		receiveMessage = model.Post{IsPrivate: true, UserID: newMessageCreate.Author.ID, User: newMessageCreate.Author.Username, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
+		receiveMessage = model.Post{IsPrivate: true, User: model.User{ID: newMessageCreate.Author.ID, Name: newMessageCreate.Author.Username}, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	}
 
 	for _, plugin := range b.plugins {

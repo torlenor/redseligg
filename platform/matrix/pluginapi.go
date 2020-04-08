@@ -31,7 +31,7 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 // CreatePost creates a post.
 func (b *Bot) CreatePost(post model.Post) error {
 	if post.IsPrivate {
-		err := b.sendWhisper(post.UserID, post.Content)
+		err := b.sendWhisper(post.User.ID, post.Content)
 		if err != nil {
 			log.Errorln("Error sending whisper:", err)
 		}
@@ -46,19 +46,29 @@ func (b *Bot) CreatePost(post model.Post) error {
 }
 
 // LogTrace writes a log message to the server log file.
-func (b *Bot) LogTrace(msg string) {}
+func (b *Bot) LogTrace(msg string) {
+	log.Tracef("Error from plugin: %s", msg)
+}
 
 // LogDebug writes a log message to the server log file.
-func (b *Bot) LogDebug(msg string) {}
+func (b *Bot) LogDebug(msg string) {
+	log.Debugf("From plugin: %s", msg)
+}
 
 // LogInfo writes a log message to the server log file.
-func (b *Bot) LogInfo(msg string) {}
+func (b *Bot) LogInfo(msg string) {
+	log.Infof("From plugin: %s", msg)
+}
 
 // LogWarn writes a log message to the server log file.
-func (b *Bot) LogWarn(msg string) {}
+func (b *Bot) LogWarn(msg string) {
+	log.Warnf("From plugin: %s", msg)
+}
 
 // LogError writes a log message to the server log file.
-func (b *Bot) LogError(msg string) {}
+func (b *Bot) LogError(msg string) {
+	log.Errorf("From plugin: %s", msg)
+}
 
 // GetVersion returns the version of the server.
 func (b *Bot) GetVersion() string {

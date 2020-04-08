@@ -40,8 +40,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
@@ -53,9 +52,8 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
-		Content:   "<@" + postToPlugin.UserID + "> rolled *" + strconv.Itoa(123) + "* in [0,100]",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		Content:   "<@" + postToPlugin.User.ID + "> rolled *" + strconv.Itoa(123) + "* in [0,100]",
 		IsPrivate: false,
 	}
 	p.OnPost(postToPlugin)
@@ -67,9 +65,8 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
-		Content:   "<@" + postToPlugin.UserID + "> rolled *" + strconv.Itoa(123) + "* in [0,1000]",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		Content:   "<@" + postToPlugin.User.ID + "> rolled *" + strconv.Itoa(123) + "* in [0,1000]",
 		IsPrivate: false,
 	}
 	p.OnPost(postToPlugin)
@@ -81,8 +78,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "Number must be > 0",
 		IsPrivate: false,
 	}
@@ -95,8 +91,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "Not a number",
 		IsPrivate: false,
 	}

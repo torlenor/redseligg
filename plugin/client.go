@@ -17,3 +17,9 @@ func (p *AbyleBotterPlugin) SetAPI(api API) {
 
 // OnPost in its default implementation
 func (p *AbyleBotterPlugin) OnPost(post model.Post) {}
+
+// OnRun in its default implementation
+func (p *AbyleBotterPlugin) OnRun() {}
+
+// OnStop in its default implementation
+func (p *AbyleBotterPlugin) OnStop() {}

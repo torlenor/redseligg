@@ -48,8 +48,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
@@ -69,8 +68,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "FAIL (Not a valid url).",
 		IsPrivate: false,
 	}
@@ -84,8 +82,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "SUCCESS. Request took ",
 		IsPrivate: false,
 	}
@@ -101,8 +98,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "FAIL (Error pinging the url: Some error).",
 		IsPrivate: false,
 	}
