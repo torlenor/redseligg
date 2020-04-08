@@ -35,11 +35,11 @@ func (b *Bot) CreatePost(post model.Post) error {
 
 	if post.IsPrivate {
 		var userID string
-		if len(post.UserID) != 0 {
-			userID = post.UserID
-		} else if len(post.User) != 0 {
+		if len(post.User.ID) != 0 {
+			userID = post.User.ID
+		} else if len(post.User.Name) != 0 {
 			var err error
-			userID, err = b.users.getUserNameByID(post.User)
+			userID, err = b.users.getUserNameByID(post.User.Name)
 			if err != nil {
 				return fmt.Errorf("User not found, not sending Whisper")
 			}

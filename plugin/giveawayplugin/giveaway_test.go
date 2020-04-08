@@ -53,8 +53,7 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
@@ -70,9 +69,6 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!gstart help"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
 		IsPrivate: false,
 	}
@@ -84,9 +80,6 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!gstart    "
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
 		IsPrivate: false,
 	}
@@ -98,9 +91,6 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!gstart 1m"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
 		IsPrivate: false,
 	}
@@ -112,9 +102,6 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!gstart 1kk hello"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
 		IsPrivate: false,
 	}
@@ -126,9 +113,6 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!gstart 1m hello k"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
 		IsPrivate: false,
 	}
@@ -153,8 +137,7 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
@@ -163,9 +146,6 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = "!gend"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "No giveaway running. Use !gstart command to start a new one.",
 		IsPrivate: false,
 	}
@@ -178,9 +158,6 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = "!gstart 10m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
@@ -192,9 +169,6 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = "!gend"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Cannot pick a winner. There were no participants to the giveaway.",
 		IsPrivate: false,
 	}
@@ -207,9 +181,6 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = "!gstart 5m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
@@ -220,8 +191,7 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	userPostToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "PARTICIPANT_1_ID",
-		User:      "PARTICIPANT_1",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
 		Content:   secretword,
 		IsPrivate: false,
 	}
@@ -235,9 +205,6 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = "!gstart 10m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Giveaway already running.",
 		IsPrivate: false,
 	}
@@ -249,10 +216,7 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = "!gend"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
-		Content:   "The winner(s) is/are <@" + userPostToPlugin.UserID + ">. Congratulations!",
+		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
 		IsPrivate: false,
 	}
 	p.OnPost(postToPlugin)
@@ -277,8 +241,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
@@ -288,9 +251,6 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	postToPlugin.Content = "!gstart 5m " + secretword + " 2"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
@@ -301,8 +261,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	userPostToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "PARTICIPANT_1_ID",
-		User:      "PARTICIPANT_1",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
 		Content:   secretword,
 		IsPrivate: false,
 	}
@@ -314,8 +273,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	userPostToPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "PARTICIPANT_2_ID",
-		User:      "PARTICIPANT_2",
+		User:      model.User{ID: "PARTICIPANT_2_ID", Name: "PARTICIPANT_2"},
 		Content:   secretword,
 		IsPrivate: false,
 	}
@@ -327,8 +285,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	userPostToPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "PARTICIPANT_3_ID",
-		User:      "PARTICIPANT_3",
+		User:      model.User{ID: "PARTICIPANT_3_ID", Name: "PARTICIPANT_3"},
 		Content:   secretword,
 		IsPrivate: false,
 	}
@@ -341,9 +298,6 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	postToPlugin.Content = "!gend"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "The winner(s) is/are <@" + "PARTICIPANT_1_ID" + ">, <@" + "PARTICIPANT_2_ID" + ">. Congratulations!",
 		IsPrivate: false,
 	}
@@ -369,8 +323,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "SOME USER ID",
-		User:      "USER 1",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
@@ -381,9 +334,6 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	postToPlugin.Content = "!gstart 5m " + secretword + " 1 " + prize
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
@@ -394,8 +344,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	userPostToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		UserID:    "PARTICIPANT_1_ID",
-		User:      "PARTICIPANT_1",
+		User:      model.User{ID: "PARTICIPANT_1_ID", Name: "PARTICIPANT_1"},
 		Content:   secretword,
 		IsPrivate: false,
 	}
@@ -408,10 +357,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	postToPlugin.Content = "!gend"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Channel:   "",
-		UserID:    "",
-		User:      "",
-		Content:   "The winner(s) is/are <@" + userPostToPlugin.UserID + ">. You won 'That awesome PRIZE'. Congratulations!",
+		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. You won 'That awesome PRIZE'. Congratulations!",
 		IsPrivate: false,
 	}
 	p.OnPost(postToPlugin)

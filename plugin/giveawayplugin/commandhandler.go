@@ -75,7 +75,7 @@ func (p *GiveawayPlugin) onCommandGStart(post model.Post) {
 		return
 	}
 
-	giveaway := newGiveaway(post.ChannelID, post.UserID, word, duration, winners, prizeStr)
+	giveaway := newGiveaway(post.ChannelID, post.User.ID, word, duration, winners, prizeStr)
 
 	p.runningGiveaways[post.ChannelID] = &giveaway
 

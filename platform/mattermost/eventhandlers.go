@@ -54,7 +54,7 @@ func (b *Bot) handleEventPosted(data []byte) {
 		userName = user.Username
 	}
 
-	receiveMessage := model.Post{User: userName, UserID: post.UserID, ChannelID: post.ChannelID, Content: post.Message, IsPrivate: isPrivate}
+	receiveMessage := model.Post{User: model.User{Name: userName, ID: post.UserID}, ChannelID: post.ChannelID, Content: post.Message, IsPrivate: isPrivate}
 	for _, plugin := range b.plugins {
 		plugin.OnPost(receiveMessage)
 	}

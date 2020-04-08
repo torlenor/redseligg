@@ -31,7 +31,7 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 // CreatePost creates a post.
 func (b *Bot) CreatePost(post model.Post) error {
 	if post.IsPrivate {
-		err := b.sendWhisper(post.UserID, post.Content)
+		err := b.sendWhisper(post.User.ID, post.Content)
 		if err != nil {
 			log.Errorln("Error sending whisper:", err)
 		}
