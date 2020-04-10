@@ -73,7 +73,35 @@ func (b *Bot) apiCall(path string, method string, args string, body string) (*ap
 		return nil, err
 	}
 
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiResponse{
+		body:       responseBody,
+		header:     response.Header,
+		statusCode: response.StatusCode,
+	}, nil
+}
+
+func (b *Bot) apiCallJON(path string, method string, body string) (*apiResponse, error) {
+	client := &http.Client{}
+
+	req, err := http.NewRequest(method, "https://slack.com"+path, strings.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+b.config.Token)
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	response, err := client.Do(req)
 	if err != nil {

@@ -14,6 +14,9 @@ func (p *VersionPlugin) OnPost(post model.Post) {
 		versionPost := post
 		versionPost.Content = p.API.GetVersion()
 		p.API.LogTrace(fmt.Sprintf("Echoing version back to Channel = %s, content = %s", versionPost.Channel, versionPost.Content))
-		p.API.CreatePost(versionPost)
+		_, err := p.API.CreatePost(versionPost)
+		if err != nil {
+			p.API.LogError("VersionPlugin: Error sending message: " + err.Error())
+		}
 	}
 }

@@ -11,3 +11,14 @@ type Post struct {
 
 	IsPrivate bool // IsPrivate indicates it is a whisper or similar (depending on the Bot)
 }
+
+// MessageIdentifier is a unique identifier for a message on a platform
+type MessageIdentifier struct {
+	ID      string
+	Channel string
+}
+
+// PostResponse contains infos about posted messages
+type PostResponse struct {
+	PostedMessageIdent MessageIdentifier
+}

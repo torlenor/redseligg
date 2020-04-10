@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"fmt"
+
 	"github.com/torlenor/abylebotter/model"
 )
 
@@ -40,10 +42,20 @@ func (b *MockAPI) GetChannel(channelID string) (model.Channel, error) { return m
 func (b *MockAPI) GetChannelByName(name string) (model.Channel, error) { return model.Channel{}, nil }
 
 // CreatePost creates a post.
-func (b *MockAPI) CreatePost(post model.Post) error {
+func (b *MockAPI) CreatePost(post model.Post) (model.PostResponse, error) {
 	b.WasCreatePostCalled = true
 	b.LastCreatePostPost = post
-	return nil
+	return model.PostResponse{}, nil
+}
+
+// UpdatePost updates a post.
+func (b *MockAPI) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
+	return model.PostResponse{}, fmt.Errorf("Not implemented")
+}
+
+// DeletePost deletes a post.
+func (b *MockAPI) DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error) {
+	return model.PostResponse{}, fmt.Errorf("Not implemented")
 }
 
 // LogTrace writes a log message to the server log file.

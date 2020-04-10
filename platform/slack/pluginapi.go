@@ -31,7 +31,8 @@ func (b *Bot) GetChannel(channelID string) (model.Channel, error) { return model
 func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return model.Channel{}, nil }
 
 // CreatePost creates a post.
-func (b *Bot) CreatePost(post model.Post) error {
+func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
+	var response genericChatResponse
 
 	if post.IsPrivate {
 		var userID string
@@ -41,23 +42,42 @@ func (b *Bot) CreatePost(post model.Post) error {
 			var err error
 			userID, err = b.users.getUserNameByID(post.User.Name)
 			if err != nil {
-				return fmt.Errorf("User not found, not sending Whisper")
+				return model.PostResponse{}, fmt.Errorf("User not found, not sending Whisper")
 			}
 		} else {
-			return fmt.Errorf("Plugin did not provide User or UserID, not sending Whisper")
+			return model.PostResponse{}, fmt.Errorf("Plugin did not provide User or UserID, not sending Whisper")
 		}
-		err := b.sendWhisper(userID, post.Content)
+		var err error
+		response, err = b.sendWhisper(userID, post.Content)
 		if err != nil {
-			return fmt.Errorf("Error sending whisper: %s", err)
+			return model.PostResponse{}, fmt.Errorf("Error sending whisper: %s", err)
 		}
 	} else {
-		err := b.sendMessage(post.ChannelID, post.Content)
+		var err error
+		response, err = b.sendMessage(post.ChannelID, post.Content)
 		if err != nil {
-			return fmt.Errorf("Error sending message: %s", err)
+			return model.PostResponse{}, fmt.Errorf("Error sending message: %s", err)
 		}
 	}
 
-	return nil
+	b.log.Debugf("Got response from message/whisper sending: %v", response)
+
+	return model.PostResponse{PostedMessageIdent: model.MessageIdentifier{ID: response.TS, Channel: response.Channel}}, nil
+}
+
+// UpdatePost updates a post.
+func (b *Bot) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
+	return model.PostResponse{}, fmt.Errorf("Not implemented")
+}
+
+// DeletePost deletes a post.
+func (b *Bot) DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error) {
+	response, err := b.chatDelete(messageID.Channel, messageID.ID)
+	if err != nil {
+		return model.PostResponse{}, fmt.Errorf("Error sending message: %s", err)
+	}
+
+	return model.PostResponse{PostedMessageIdent: model.MessageIdentifier{ID: response.TS, Channel: response.Channel}}, nil
 }
 
 // LogTrace writes a log message to the server log file.

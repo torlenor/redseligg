@@ -30,7 +30,17 @@ type API interface {
 	GetChannelByName(name string) (model.Channel, error)
 
 	// CreatePost creates a post.
-	CreatePost(post model.Post) error
+	CreatePost(post model.Post) (model.PostResponse, error)
+
+	// UpdatePost updates a previous post.
+	// The messageID must be a valid model.MessageIdentifier.
+	// Currently such a messageID is supplied in CreatePost calls when the platform supports it.
+	UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error)
+
+	// DeletePost deletes a previous post.
+	// The messageID must be a valid model.MessageIdentifier.
+	// Currently such a messageID is supplied in CreatePost calls when the platform supports it.
+	DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error)
 
 	// LogTrace writes a log message to the server log file.
 	LogTrace(msg string)
