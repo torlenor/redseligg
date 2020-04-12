@@ -15,11 +15,17 @@ func (p *AbyleBotterPlugin) SetAPI(api API) {
 
 // Default hook implementations (see hooks.go)
 
-// OnPost in its default implementation
-func (p *AbyleBotterPlugin) OnPost(post model.Post) {}
-
 // OnRun in its default implementation
 func (p *AbyleBotterPlugin) OnRun() {}
 
 // OnStop in its default implementation
 func (p *AbyleBotterPlugin) OnStop() {}
+
+// OnPost in its default implementation.
+func (p *AbyleBotterPlugin) OnPost(post model.Post) {}
+
+// OnReactionAdded in its default implementation.
+func (p *AbyleBotterPlugin) OnReactionAdded(model.Reaction) {}
+
+// OnReactionRemoved in its default implementation.
+func (p *AbyleBotterPlugin) OnReactionRemoved(model.Reaction) {}
