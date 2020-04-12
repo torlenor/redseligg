@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateMatrixBot(t *testing.T) {
+func TestStripCmd(t *testing.T) {
 	assert := assert.New(t)
 
 	result := StripCmd("!CMD test", "CMD")
@@ -35,4 +35,38 @@ func TestGenerateErrorResponse(t *testing.T) {
 	actualError = GenerateErrorResponse("something else")
 	expectedError = `{"error": "something else"}`
 	assert.Equal(expectedError, actualError)
+}
+
+func TestStringSliceContains(t *testing.T) {
+	type args struct {
+		s []string
+		e string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "nil slice",
+			args: args{s: nil, e: "something"},
+			want: false,
+		},
+		{
+			name: "regular slice, containting entry",
+			args: args{s: []string{"something", "something else"}, e: "something"},
+			want: true,
+		},
+		{
+			name: "regular slice, does not contain entry",
+			args: args{s: []string{"something", "something else"}, e: "blub"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := StringSliceContains(tt.args.s, tt.args.e); got != tt.want {
+				t.Errorf("StringSliceContains() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
