@@ -1,6 +1,9 @@
 package voteplugin
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/torlenor/abylebotter/model"
 )
 
@@ -16,18 +19,70 @@ func (p *VotePlugin) returnMessage(channelID, msg string) {
 	p.API.CreatePost(post)
 }
 
-func (p *VotePlugin) onCommandVoteStart(post model.Post) {
-	// cont := strings.Split(post.Content, " ")
-	// args := cont[1:]
+func (p *VotePlugin) postAndStartVote(vote *vote) {
+	post := vote.getCurrentPost()
 
-	// p.returnMessage(post.ChannelID, "Giveaway started! Type "+word+" to participate.")
+	msgID, err := p.API.CreatePost(post)
+	if err != nil {
+		p.API.LogError("Something went wrong in creating the Vote message: " + err.Error())
+		p.returnMessage(post.ChannelID, "Sorry to inform you, but we failed to create the Vote! Please try again later.")
+		return
+	}
+
+	vote.messageIdent = msgID.PostedMessageIdent
+	fmt.Printf("Created vote and got MessageIdent: %v\n", vote.messageIdent)
+	vote.start()
+}
+
+func (p *VotePlugin) updatePost(vote *vote) {
+	post := vote.getCurrentPost()
+
+	_, err := p.API.UpdatePost(vote.messageIdent, post)
+	if err != nil {
+		p.API.LogError("Something went wrong in updating the Vote message: " + err.Error())
+		return
+	}
+}
+
+// onCommandVoteStart starts a new vote with the settings extracted
+// from the received !vote command.
+// Note: The command requires a valid !vote command. This check
+// shall be performed at post retrieval.
+func (p *VotePlugin) onCommandVoteStart(post model.Post) {
+	cont := strings.Split(post.Content, " ")
+	args := cont[1:]
+
+	// TODO parse options
+	// if empty, add Yes/No defaults
+	description := strings.Join(args, " ")
+	options := []string{"Yes", "No"}
+
+	p.votesMutex.Lock()
+	defer p.votesMutex.Unlock()
+	nVote := newVote(voteSettings{
+		ChannelID: post.ChannelID,
+		Text:      description,
+		Options:   options,
+	})
+
+	p.postAndStartVote(&nVote)
+	p.runningVotes[nVote.Settings.Text] = &nVote
 }
 
 func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
-	// if g, ok := p.runningGiveaways[post.ChannelID]; ok {
-	// 	p.endGiveaway(g)
-	// 	return
-	// }
+	cont := strings.Split(post.Content, " ")
+	args := cont[1:]
 
-	p.returnMessage(post.ChannelID, "No vote running. Use !vote command to start a new one.")
+	p.votesMutex.Lock()
+	defer p.votesMutex.Unlock()
+	description := strings.Join(args, " ")
+	if v, ok := p.runningVotes[description]; ok {
+		if v.messageIdent.Channel == post.ChannelID {
+			v.end()
+			delete(p.runningVotes, description)
+			return
+		}
+	}
+
+	p.returnMessage(post.ChannelID, "No vote running with that description in this channel. Use the !vote command to start a new one.")
 }
