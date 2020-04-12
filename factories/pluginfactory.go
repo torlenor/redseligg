@@ -11,6 +11,7 @@ import (
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
 	"github.com/torlenor/abylebotter/plugin/rollplugin"
 	"github.com/torlenor/abylebotter/plugin/versionplugin"
+	"github.com/torlenor/abylebotter/plugin/voteplugin"
 )
 
 // PluginFactory can be used to generate plugins
@@ -40,6 +41,12 @@ func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.Plugi
 		p = &httppingplugin.HTTPPingPlugin{}
 	case "version":
 		p = &versionplugin.VersionPlugin{}
+	case "vote":
+		rp, err := voteplugin.New(pluginConfig)
+		if err != nil {
+			return nil, err
+		}
+		p = rp
 	default:
 		return nil, fmt.Errorf("Unknown plugin type %s", pluginConfig.Type)
 	}
