@@ -218,30 +218,30 @@ func (b *Bot) handleEventReactionAddedOrRemoved(data []byte) {
 		return
 	}
 
-	var reactionType string
-	switch reaction.Type {
-	case "reaction_added":
-		// example: {"type":"reaction_added","user":"UNL92ERS4","item":{"type":"message","channel":"G011C8YPGET","ts":"1586690851.001000"},"reaction":"wink","item_user":"UNL92ERS4","event_ts":"1586690859.001100","ts":"1586690859.001100"}
-		reactionType = "added"
-	case "reaction_removed":
-		// example: {"type":"reaction_removed","user":"UNL92ERS4","item":{"type":"message","channel":"G011C8YPGET","ts":"1586690851.001000"},"reaction":"wink","item_user":"UNL92ERS4","event_ts":"1586691109.001200","ts":"1586691109.001200"}
-		reactionType = "removed"
-	default:
-		b.log.Warnf("Received unknown Event Reaction of type %s on Channel ID %s", reaction.Type, reaction.Item.Channel)
-		return
-	}
-
 	forPlugin := model.Reaction{
 		Message: model.MessageIdentifier{
 			ID: reaction.Item.Ts, Channel: reaction.Item.Channel,
 		},
 
-		Type:     reactionType,
 		Reaction: reaction.Reaction,
 		User:     model.User{ID: reaction.User},
 	}
 
-	for _, plugin := range b.plugins {
-		plugin.OnReactionAdded(forPlugin)
+	switch reaction.Type {
+	case "reaction_added":
+		// example: {"type":"reaction_added","user":"UNL92ERS4","item":{"type":"message","channel":"G011C8YPGET","ts":"1586690851.001000"},"reaction":"wink","item_user":"UNL92ERS4","event_ts":"1586690859.001100","ts":"1586690859.001100"}
+		forPlugin.Type = "added"
+		for _, plugin := range b.plugins {
+			plugin.OnReactionAdded(forPlugin)
+		}
+	case "reaction_removed":
+		// example: {"type":"reaction_removed","user":"UNL92ERS4","item":{"type":"message","channel":"G011C8YPGET","ts":"1586690851.001000"},"reaction":"wink","item_user":"UNL92ERS4","event_ts":"1586691109.001200","ts":"1586691109.001200"}
+		forPlugin.Type = "removed"
+		for _, plugin := range b.plugins {
+			plugin.OnReactionRemoved(forPlugin)
+		}
+	default:
+		b.log.Warnf("Received unknown Event Reaction of type %s on Channel ID %s", reaction.Type, reaction.Item.Channel)
+		return
 	}
 }
