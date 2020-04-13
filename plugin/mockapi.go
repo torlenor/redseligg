@@ -18,6 +18,8 @@ type MockAPI struct {
 	LastUpdatePostPost      model.Post
 
 	PostResponse model.PostResponse
+
+	ErrorToReturn error
 }
 
 // Reset the MockAPI
@@ -55,7 +57,7 @@ func (b *MockAPI) GetChannelByName(name string) (model.Channel, error) { return 
 func (b *MockAPI) CreatePost(post model.Post) (model.PostResponse, error) {
 	b.WasCreatePostCalled = true
 	b.LastCreatePostPost = post
-	return b.PostResponse, nil
+	return b.PostResponse, b.ErrorToReturn
 }
 
 // UpdatePost updates a post.
@@ -63,7 +65,7 @@ func (b *MockAPI) UpdatePost(messageID model.MessageIdentifier, newPost model.Po
 	b.WasUpdatePostCalled = true
 	b.LastUpdatePostPost = newPost
 	b.LastUpdatePostMessageID = messageID
-	return b.PostResponse, nil
+	return b.PostResponse, b.ErrorToReturn
 }
 
 // DeletePost deletes a post.

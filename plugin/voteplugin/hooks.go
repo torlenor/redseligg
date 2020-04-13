@@ -39,8 +39,6 @@ func (p *VotePlugin) getVoteForMessageIdent(messageIdent model.MessageIdentifier
 		}
 	}
 
-	fmt.Printf("Not found: %v\n", messageIdent)
-
 	return nil
 }
 

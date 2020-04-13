@@ -1,6 +1,7 @@
 package voteplugin
 
 import (
+	"fmt"
 	"testing"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
@@ -63,6 +64,49 @@ func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
 
 	api.Reset()
 	postToPlugin.Content = "!vote    "
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	postToPlugin.Content = "!vote something"
+	postToPlugin.IsPrivate = true
+	p.OnPost(postToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+}
+
+func TestVotePlugin_FailOnPost(t *testing.T) {
+	assert := assert.New(t)
+
+	expectedChannel := "CHANNEL ID"
+	expectedMessageID := "SOME MESSAGE ID"
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+	api.ErrorToReturn = fmt.Errorf("Some error")
+
+	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
+
+	postToPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	voteText := "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText
+	expectedPostFromPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Content:   "Sorry to inform you, but we failed to create the Vote! Please try again later.",
+		IsPrivate: false,
+	}
 	p.OnPost(postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
