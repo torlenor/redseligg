@@ -33,28 +33,44 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 // CreatePost creates a post.
 func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
 	if post.IsPrivate {
-		err := b.sendWhisper(post.User.ID, post.Content)
+		mo, err := b.sendWhisper(post.User.ID, post.Content)
 		if err != nil {
 			return model.PostResponse{}, fmt.Errorf("Error sending whisper: %s", err)
 		}
+		return model.PostResponse{
+			PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
+		}, nil
 	} else {
-		err := b.sendMessage(post.ChannelID, post.Content)
+		mo, err := b.sendMessage(post.ChannelID, post.Content)
 		if err != nil {
 			return model.PostResponse{}, fmt.Errorf("Error sending message: %s", err)
 		}
+		return model.PostResponse{
+			PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
+		}, nil
 	}
-
-	return model.PostResponse{}, nil
 }
 
 // UpdatePost updates a post.
 func (b *Bot) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
-	return model.PostResponse{}, fmt.Errorf("Not implemented")
+	mo, err := b.updateMessage(messageID, newPost.Content)
+	if err != nil {
+		return model.PostResponse{}, fmt.Errorf("Error updating message: %s", err)
+	}
+	return model.PostResponse{
+		PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
+	}, nil
 }
 
 // DeletePost deletes a post.
 func (b *Bot) DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error) {
-	return model.PostResponse{}, fmt.Errorf("Not implemented")
+	b.deleteMessage(messageID)
+	return model.PostResponse{PostedMessageIdent: messageID}, nil
+}
+
+// GetReaction gives back the platform specific string for a reaction, e.g., one -> :one:
+func (b *Bot) GetReaction(reactionName string) (string, error) {
+	return "", fmt.Errorf("Not implemented")
 }
 
 // LogTrace writes a log message to the server log file.

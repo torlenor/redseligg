@@ -42,6 +42,10 @@ type API interface {
 	// Currently such a messageID is supplied in CreatePost calls when the platform supports it.
 	DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error)
 
+	// GetReaction gives back the platform specific string for a reaction, e.g., one -> :one:
+	// If the reaction is unknown returns an error.
+	GetReaction(reactionName string) (string, error)
+
 	// LogTrace writes a log message to the server log file.
 	LogTrace(msg string)
 

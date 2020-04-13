@@ -12,7 +12,7 @@ type gatewayResponse struct {
 
 func (b *Bot) getGateway() string {
 	log.Debugln("DiscordBot: Requesting the Discord gateway address")
-	response, err := b.apiCall("/gateway", "GET", "")
+	response, _, err := b.apiCall("/gateway", "GET", "")
 	if err != nil {
 		log.Fatalln("FATAL: Could not get the Discord gateway:", err)
 	}

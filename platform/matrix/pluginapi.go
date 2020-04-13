@@ -57,6 +57,11 @@ func (b *Bot) DeletePost(messageID model.MessageIdentifier) (model.PostResponse,
 	return model.PostResponse{}, fmt.Errorf("Not implemented")
 }
 
+// GetReaction gives back the platform specific string for a reaction, e.g., one -> :one:
+func (b *Bot) GetReaction(reactionName string) (string, error) {
+	return "", fmt.Errorf("Not implemented")
+}
+
 // LogTrace writes a log message to the server log file.
 func (b *Bot) LogTrace(msg string) {
 	log.Tracef("Error from plugin: %s", msg)

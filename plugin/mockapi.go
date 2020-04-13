@@ -58,6 +58,11 @@ func (b *MockAPI) DeletePost(messageID model.MessageIdentifier) (model.PostRespo
 	return model.PostResponse{}, fmt.Errorf("Not implemented")
 }
 
+// GetReaction gives back the platform specific string for a reaction, e.g., one -> :one:
+func (b *MockAPI) GetReaction(reactionName string) (string, error) {
+	return "", fmt.Errorf("Not implemented")
+}
+
 // LogTrace writes a log message to the server log file.
 func (b *MockAPI) LogTrace(msg string) {}
 

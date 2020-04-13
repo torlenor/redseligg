@@ -392,10 +392,22 @@ type messageReactionAdd struct {
 	// D  struct {
 	UserID    string `json:"user_id"`
 	MessageID string `json:"message_id"`
-	Emoji     struct {
-		Name     string      `json:"name"`
-		ID       interface{} `json:"id"`
-		Animated bool        `json:"animated"`
+	Member    struct {
+		User struct {
+			Username      string `json:"username"`
+			ID            string `json:"id"`
+			Discriminator string `json:"discriminator"`
+			Avatar        string `json:"avatar"`
+		} `json:"user"`
+		Roles       []interface{} `json:"roles"`
+		Mute        bool          `json:"mute"`
+		JoinedAt    time.Time     `json:"joined_at"`
+		HoistedRole interface{}   `json:"hoisted_role"`
+		Deaf        bool          `json:"deaf"`
+	} `json:"member"`
+	Emoji struct {
+		Name string      `json:"name"`
+		ID   interface{} `json:"id"`
 	} `json:"emoji"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id"`
@@ -407,6 +419,20 @@ func decodeMessageReactionAdd(data map[string]interface{}) (messageReactionAdd, 
 	err := mapstructure.Decode(data["d"], &newMessageReactionAdd)
 	if err != nil {
 		return messageReactionAdd{}, errors.New("decodeMessageReactionAdd: " + err.Error())
+	}
+
+	// FIXME: Workaround things not decoded correctly
+	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
+		newMessageReactionAdd.UserID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
+		newMessageReactionAdd.ChannelID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["message_id"].(string); ok {
+		newMessageReactionAdd.MessageID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["guild_id"].(string); ok {
+		newMessageReactionAdd.GuildID = str
 	}
 
 	return newMessageReactionAdd, nil
@@ -442,6 +468,20 @@ func decodeMessageReactionRemove(data map[string]interface{}) (messageReactionRe
 	err := mapstructure.Decode(data["d"], &newMessageReactionRemove)
 	if err != nil {
 		return messageReactionRemove{}, errors.New("decodeMessageReactionRemove: " + err.Error())
+	}
+
+	// FIXME: Workaround things not decoded correctly
+	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
+		newMessageReactionRemove.UserID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
+		newMessageReactionRemove.ChannelID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["message_id"].(string); ok {
+		newMessageReactionRemove.MessageID = str
+	}
+	if str, ok := data["d"].(map[string]interface{})["guild_id"].(string); ok {
+		newMessageReactionRemove.GuildID = str
 	}
 
 	return newMessageReactionRemove, nil
