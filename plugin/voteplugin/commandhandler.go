@@ -1,13 +1,18 @@
 package voteplugin
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/torlenor/abylebotter/model"
 )
 
+const (
+	HELP_TEXT = "Type '!vote What is the best color? [Red, Green, Blue]' to start a new giveaway.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
+)
+
 func (p *VotePlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, "Type '!vote What is the best color? [Red, Green, Blue]' to start a new giveaway.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote.")
+	p.returnMessage(channelID, HELP_TEXT)
 }
 
 func (p *VotePlugin) returnMessage(channelID, msg string) {
@@ -73,6 +78,10 @@ func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
 	p.votesMutex.Lock()
 	defer p.votesMutex.Unlock()
 	description := strings.Join(args, " ")
+	fmt.Printf("\nDescription = %s\n", description)
+	for k, v := range p.runningVotes {
+		fmt.Printf("k = %s, v: Text = %s, Channel = %s\n", k, v.Settings.Text, v.Settings.ChannelID)
+	}
 	if v, ok := p.runningVotes[description]; ok {
 		if v.messageIdent.Channel == post.ChannelID {
 			v.end()

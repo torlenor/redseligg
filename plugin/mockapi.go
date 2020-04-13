@@ -12,12 +12,22 @@ import (
 type MockAPI struct {
 	WasCreatePostCalled bool
 	LastCreatePostPost  model.Post
+
+	WasUpdatePostCalled     bool
+	LastUpdatePostMessageID model.MessageIdentifier
+	LastUpdatePostPost      model.Post
+
+	PostResponse model.PostResponse
 }
 
 // Reset the MockAPI
 func (b *MockAPI) Reset() {
 	b.WasCreatePostCalled = false
 	b.LastCreatePostPost = model.Post{}
+
+	b.WasUpdatePostCalled = false
+	b.LastUpdatePostMessageID = model.MessageIdentifier{}
+	b.LastUpdatePostPost = model.Post{}
 }
 
 // RegisterCommand registers a custom slash "/" or "!" command, depending on what the bot supports.
@@ -45,12 +55,15 @@ func (b *MockAPI) GetChannelByName(name string) (model.Channel, error) { return 
 func (b *MockAPI) CreatePost(post model.Post) (model.PostResponse, error) {
 	b.WasCreatePostCalled = true
 	b.LastCreatePostPost = post
-	return model.PostResponse{}, nil
+	return b.PostResponse, nil
 }
 
 // UpdatePost updates a post.
 func (b *MockAPI) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
-	return model.PostResponse{}, fmt.Errorf("Not implemented")
+	b.WasUpdatePostCalled = true
+	b.LastUpdatePostPost = newPost
+	b.LastUpdatePostMessageID = messageID
+	return b.PostResponse, nil
 }
 
 // DeletePost deletes a post.
