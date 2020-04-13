@@ -19,7 +19,7 @@ func (p *VotePlugin) OnPost(post model.Post) {
 		if strings.HasPrefix(msg, "!vote ") {
 			p.onCommandVoteStart(post)
 			return
-		} else if msg == "!voteend" {
+		} else if strings.HasPrefix(msg, "!voteend ") {
 			p.onCommandVoteEnd(post)
 			return
 		} else if msg == "!vote" || msg == "!votehelp" {

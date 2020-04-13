@@ -1,7 +1,6 @@
 package voteplugin
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/torlenor/abylebotter/model"
@@ -30,8 +29,6 @@ func (p *VotePlugin) postAndStartVote(vote *vote) {
 	}
 
 	vote.messageIdent = msgID.PostedMessageIdent
-	fmt.Printf("Created vote and got MessageIdent: %v\n", vote.messageIdent)
-	vote.start()
 }
 
 func (p *VotePlugin) updatePost(vote *vote) {
@@ -79,6 +76,7 @@ func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
 	if v, ok := p.runningVotes[description]; ok {
 		if v.messageIdent.Channel == post.ChannelID {
 			v.end()
+			p.updatePost(v)
 			delete(p.runningVotes, description)
 			return
 		}

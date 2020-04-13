@@ -29,6 +29,8 @@ type vote struct {
 	Settings voteSettings
 	Options  []*voteOption
 
+	Ended bool
+
 	// messageIdent stores the info about the created message
 	// and will be used to update the message with the current
 	// or end results
@@ -50,12 +52,10 @@ func newVote(voteSettings voteSettings) vote {
 	}
 }
 
-// start is initiating the voting and starts
-// updating the post when there are new votes.
-func (v *vote) start() {}
-
 // end ends a vote and posting the final results.
-func (v *vote) end() {}
+func (v *vote) end() {
+	v.Ended = true
+}
 
 func (v *vote) getContent() string {
 	var content string
@@ -71,7 +71,11 @@ func (v *vote) getContent() string {
 		content += "\n"
 	}
 
-	content += "Participate by reacting with the appropriate emoji corresponding to the option you want to vote for!"
+	if !v.Ended {
+		content += "Participate by reacting with the appropriate emoji corresponding to the option you want to vote for!"
+	} else {
+		content += "This vote has ended, thanks for participating!"
+	}
 
 	return content
 }
@@ -88,6 +92,10 @@ func (v *vote) getCurrentPost() model.Post {
 }
 
 func (v *vote) countVote(reaction string) bool {
+	if v.Ended {
+		return false
+	}
+
 	for _, option := range v.Options {
 		if option.AssignedReaction == reaction {
 			option.Votes++
@@ -98,6 +106,10 @@ func (v *vote) countVote(reaction string) bool {
 }
 
 func (v *vote) removeVote(reaction string) bool {
+	if v.Ended {
+		return false
+	}
+
 	for _, option := range v.Options {
 		if option.AssignedReaction == reaction {
 			option.Votes--
