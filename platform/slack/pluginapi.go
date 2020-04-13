@@ -67,14 +67,19 @@ func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
 
 // UpdatePost updates a post.
 func (b *Bot) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
-	return model.PostResponse{}, fmt.Errorf("Not implemented")
+	response, err := b.chatUpdate(messageID.Channel, messageID.ID, newPost.Content)
+	if err != nil {
+		return model.PostResponse{}, fmt.Errorf("Error updating post: %s", err)
+	}
+
+	return model.PostResponse{PostedMessageIdent: model.MessageIdentifier{ID: response.TS, Channel: response.Channel}}, nil
 }
 
 // DeletePost deletes a post.
 func (b *Bot) DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error) {
 	response, err := b.chatDelete(messageID.Channel, messageID.ID)
 	if err != nil {
-		return model.PostResponse{}, fmt.Errorf("Error sending message: %s", err)
+		return model.PostResponse{}, fmt.Errorf("Error deleting post: %s", err)
 	}
 
 	return model.PostResponse{PostedMessageIdent: model.MessageIdentifier{ID: response.TS, Channel: response.Channel}}, nil
