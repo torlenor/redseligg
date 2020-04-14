@@ -19,9 +19,6 @@ import (
 )
 
 var (
-	// Some random string, random for each request
-	oauthStateString = "random"
-
 	log = logging.Get("DiscordBot")
 )
 
@@ -65,8 +62,6 @@ type Bot struct {
 	stats stats
 
 	discordOauthConfig *oauth2.Config
-
-	oauth2Handler *oauth2Handler
 }
 
 func (b Bot) apiCall(path string, method string, body string) (r []byte, statusCode int, e error) {
@@ -179,19 +174,6 @@ func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
 	b.guilds = make(map[string]guildCreate)
 	b.guildNameToID = make(map[string]string)
 
-	b.discordOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/cb",
-		ClientID:     cfg.ID,
-		ClientSecret: cfg.Secret,
-		Scopes:       []string{"bot"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://discordapp.com/api/oauth2/authorize",
-			TokenURL: "https://discordapp.com/api/oauth2/token",
-		},
-	}
-
-	b.oauth2Handler = createOAuth2Handler(*b.discordOauthConfig)
-
 	return &b, nil
 }
 
@@ -199,7 +181,6 @@ func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
 func (b *Bot) Start() {
 	log.Infoln("DiscordBot is STARTING")
 	go b.startDiscordBot()
-	// go b.oauth2Handler.startOAuth2Handler()
 	for _, plugin := range b.plugins {
 		plugin.OnRun()
 	}

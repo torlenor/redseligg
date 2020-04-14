@@ -152,7 +152,7 @@ to run tests.
 
 Independent of the way you obtain it, you have to configure the bot first and it is necessary to have a registered bot account for the service you want to use. 
 
-- Discord: Please take a look at https://discordapp.com/developers/docs/intro on how to set up a bot user and generate the required authentication token.
+- Discord: Please take a look at https://discordapp.com/developers/docs/intro on how to set up a bot user and generate the required authentication token. Then use the bot OAuth2 authorization link, which can be generated on your applications page at OAuth2 when you select as scope "Bot". Note: This authentication flow is much easier than the normal OAuth2 user challenge and does not require a callback link. For details on that visit https://discordapp.com/developers/docs/topics/oauth2#bot-authorization-flow.
 - Matrix: For Matrix it is simpler, just create a user for the bot on your preferred Matrix server.
 - Mattermost: For Mattermost a username and password with the necessary rights on the specified server is enough.
 - Slack: The bot as to be added to the workspace and a token has to be generated.
