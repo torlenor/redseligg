@@ -14,6 +14,13 @@
 - Giveaway Plugin: Lets you hold giveaways in your channel and let the bot pick a winner.
 - Vote Plugin: Initiate a vote in the channel about arbitrary topics.
 
+**Platform specific changes:**
+
+- Discord: Initial mapping of AbyleBotter to Discord emojis.
+- Discord: Initial converter between AbyleBotter and Discord text format.
+- Discord: Support for updating/deleting message.
+- Slack: Support for updating/deleting messages.
+
 ## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/0.0.3) (2020-03-31)
 
 *Major rework of the whole project to a modern and more Go-like structure.*
