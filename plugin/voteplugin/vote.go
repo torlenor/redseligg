@@ -12,7 +12,7 @@ func getDefaultReactions() []string {
 	return []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "keycap_ten"}
 }
 
-type runningVotes map[string]*vote // [Description]
+type runningVotes map[string]map[string]*vote // [Channel][Description]
 
 type voteSettings struct {
 	ChannelID string   // ChannelID where the vote shall be started

@@ -78,8 +78,14 @@ func (p *VotePlugin) extractDescriptionAndOptions(fullText string) (string, []st
 func (p *VotePlugin) onCommandVoteStart(post model.Post) {
 	description, options := p.extractDescriptionAndOptions(post.Content)
 	if len(options) == 0 {
-		// if empty, add Yes/No defaults
 		options = []string{"Yes", "No"}
+	}
+
+	if k, ok := p.runningVotes[post.ChannelID]; ok {
+		if _, ok := k[description]; ok {
+			p.returnMessage(post.ChannelID, "A vote with the same description is already running. End that vote first or enter a different description.")
+			return
+		}
 	}
 
 	p.votesMutex.Lock()
@@ -96,7 +102,10 @@ func (p *VotePlugin) onCommandVoteStart(post model.Post) {
 	}
 
 	p.postAndStartVote(&nVote)
-	p.runningVotes[nVote.Settings.Text] = &nVote
+	if _, ok := p.runningVotes[nVote.messageIdent.Channel]; !ok {
+		p.runningVotes[nVote.messageIdent.Channel] = make(map[string]*vote)
+	}
+	p.runningVotes[nVote.messageIdent.Channel][nVote.Settings.Text] = &nVote
 }
 
 func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
@@ -106,8 +115,8 @@ func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
 	p.votesMutex.Lock()
 	defer p.votesMutex.Unlock()
 	description := strings.Join(args, " ")
-	if v, ok := p.runningVotes[description]; ok {
-		if v.messageIdent.Channel == post.ChannelID {
+	if k, ok := p.runningVotes[post.ChannelID]; ok {
+		if v, ok := k[description]; ok {
 			v.end()
 			p.updatePost(v)
 			delete(p.runningVotes, description)

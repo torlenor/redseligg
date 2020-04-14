@@ -33,9 +33,11 @@ func (p *VotePlugin) OnPost(post model.Post) {
 
 // if not found returns nil
 func (p *VotePlugin) getVoteForMessageIdent(messageIdent model.MessageIdentifier) *vote {
-	for _, v := range p.runningVotes {
-		if v.messageIdent.Channel == messageIdent.Channel && v.messageIdent.ID == messageIdent.ID {
-			return v
+	if k, ok := p.runningVotes[messageIdent.Channel]; ok {
+		for _, v := range k {
+			if v.messageIdent.Channel == messageIdent.Channel && v.messageIdent.ID == messageIdent.ID {
+				return v
+			}
 		}
 	}
 

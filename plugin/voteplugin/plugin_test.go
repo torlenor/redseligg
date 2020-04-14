@@ -269,6 +269,68 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
 }
 
+func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
+	assert := assert.New(t)
+
+	expectedChannel := "CHANNEL ID"
+	expectedOtherChannel := "OTHER CHANNEL ID"
+	expectedMessageID := "SOME MESSAGE ID"
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+
+	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
+
+	postToPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	voteText := "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText
+	expectedPostFromPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	voteText = "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   "A vote with the same description is already running. End that vote first or enter a different description.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	voteText = "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText
+	postToPlugin.ChannelID = expectedOtherChannel
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedOtherChannel,
+		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+}
+
 func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 	assert := assert.New(t)
 
