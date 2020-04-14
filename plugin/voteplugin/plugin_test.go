@@ -275,6 +275,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 	expectedChannel := "CHANNEL ID"
 	expectedOtherChannel := "OTHER CHANNEL ID"
 	expectedMessageID := "SOME MESSAGE ID"
+	expectedOtherMessageID := "SOME OTHER MESSAGE ID"
 
 	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
 	assert.NoError(err)
@@ -321,8 +322,42 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 	voteText = "hello this is a vote"
 	postToPlugin.Content = "!vote " + voteText
 	postToPlugin.ChannelID = expectedOtherChannel
+	api.PostResponse.PostedMessageIdent.Channel = expectedOtherChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedOtherMessageID
 	expectedPostFromPlugin = model.Post{
 		ChannelID: expectedOtherChannel,
+		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	// If the vote has ended, we shall be allowed to create it again
+	api.Reset()
+	postToPlugin.Content = "!voteend " + voteText
+	postToPlugin.ChannelID = expectedChannel
+	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nThis vote has ended, thanks for participating!",
+		IsPrivate: false,
+	}
+	expectedMessageIDFromPlugin := model.MessageIdentifier{
+		ID:      expectedMessageID,
+		Channel: expectedChannel,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasUpdatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
+	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+
+	api.Reset()
+	voteText = "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}

@@ -127,7 +127,7 @@ func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
 		if v, ok := k[description]; ok {
 			v.end()
 			p.updatePost(v)
-			delete(p.runningVotes, description)
+			delete(p.runningVotes[post.ChannelID], description)
 			return
 		}
 	}
