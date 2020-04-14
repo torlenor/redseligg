@@ -110,7 +110,7 @@ Example:
         onlymods = true
 ```
 
-When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to start/end giveaways. Per default everybody is allowed.
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to start/end vots. Per default everybody is allowed.
 
 #### Starting a vote
 Type `!vote message` to start the vote. The vote is limited to the channel where you initiate the vote. Per default the options are Yes/No. They can be changed by providing custom options (see below).
