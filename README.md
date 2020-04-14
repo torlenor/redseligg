@@ -94,6 +94,33 @@ This is a classic "Roll/Random" plugin which sends back a random number in the r
 
 The VersionPlugin answers to `!version` with the version of the bot.
 
+
+### Vote Plugin
+
+Initiate a vote in the channel about arbitrary topics.
+
+#### Starting a vote
+Type `!vote message` to start the vote. The vote is limited to the channel where you initiate the vote. Per default the options are Yes/No. They can be changed by providing custom options (see below).
+
+#### How to participate in the vote
+React with the emoji assigned to the options you want to vote for.
+
+#### Custom voting options
+Provide the custom options in square brackets after the message, e.g., 
+```
+!vote What is the best color? [Red, Green, Blue]
+```
+
+#### Ending a vote
+
+Type '!voteend message' to end a vote. No additional choices will be counted. For example to end the vote started above type
+```
+!voteend What is the best color?
+```
+
+#### Deleting a vote
+Just delete the vote message.
+
 ## Releases
 
 For releases binaries for Linux, Windows and Mac are provided. Check out the respective section on GitHub.
