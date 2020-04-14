@@ -66,6 +66,14 @@ func (p *VotePlugin) extractDescriptionAndOptions(fullText string) (string, []st
 			options[i] = strings.Trim(options[i], " ")
 			options[i] = strings.Trim(options[i], ",")
 		}
+		n := 0
+		for _, x := range options {
+			if len(x) != 0 {
+				options[n] = x
+				n++
+			}
+		}
+		options = options[:n]
 	}
 
 	return strings.Trim(matches[0][captureGroupDescription], " "), options

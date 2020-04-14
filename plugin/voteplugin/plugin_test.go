@@ -383,6 +383,38 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+
+	// Empty string, i.e., ',' at the end of custom options shall not lead to another empty option
+	customOptions = append(customOptions, "")
+	customOptionsStr = "[" + strings.Join(customOptions, ",") + "]"
+
+	api.Reset()
+	voteText = "hello this is another vote"
+	postToPlugin.Content = "!vote " + voteText + " " + customOptionsStr
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	// Empty options, i.e., ',,' somewhere in the custom options shall not lead to another empty option
+	customOptions = append(customOptions, "")
+	customOptionsStr = "[" + customOptions[0] + ",," + customOptions[1] + "," + customOptions[2] + "]"
+
+	api.Reset()
+	voteText = "hello this is yet another vote"
+	postToPlugin.Content = "!vote " + voteText + " " + customOptionsStr
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
 
 func TestVotePlugin_CustomVoteCounting(t *testing.T) {
