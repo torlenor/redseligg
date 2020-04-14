@@ -7,6 +7,7 @@
 - Added GetVersion() to the Bot/Plugin API.
 - Added OnRun() hook from Bot to Plugin which is called when the Bot is ready to serve the plugins.
 - Added OnStop() hook from Bot to Plugin which is called when the Bot is shutting down.
+- Added OnReactionAdded, OnReactionRemoved hooks from Bot to Plugin.
 
 **New plugins:**
 
@@ -19,7 +20,9 @@
 - Discord: Initial mapping of AbyleBotter to Discord emojis.
 - Discord: Initial converter between AbyleBotter and Discord text format.
 - Discord: Support for updating/deleting message.
-- Slack: Support for updating/deleting messages.
+- Discord: Support for receiving reactions to messages.
+- Slack: Support for updating messages.
+- Slack: Support for receiving reactions to messages.
 
 ## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/0.0.3) (2020-03-31)
 
