@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/utils"
 )
 
 // OnRun implements the hook from the bot
@@ -37,15 +38,6 @@ func (p *GiveawayPlugin) OnStop() {
 	}
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
 // OnPost implements the hook from the Bot
 func (p *GiveawayPlugin) OnPost(post model.Post) {
 	if post.IsPrivate {
@@ -53,7 +45,7 @@ func (p *GiveawayPlugin) OnPost(post model.Post) {
 	}
 
 	msg := strings.Trim(post.Content, " ")
-	if !p.cfg.OnlyMods || contains(p.cfg.Mods, post.User.Name) {
+	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
 		if strings.HasPrefix(msg, "!gstart ") {
 			p.onCommandGStart(post)
 			return

@@ -170,7 +170,7 @@ func (b *BotPool) restartSingle(id string) {
 	b.startSingle(id)
 }
 
-// checkBots continuously monitores the bots and tries to restart them if they are not healthy
+// checkBots continuously monitors the bots and tries to restart them if they are not healthy
 func (b *BotPool) checkBots(interval time.Duration, stop chan bool) {
 	ticker := time.NewTicker(interval)
 	for {

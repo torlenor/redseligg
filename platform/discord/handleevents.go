@@ -133,7 +133,21 @@ func (b *Bot) handleMessageReactionAdd(data map[string]interface{}) {
 		return
 	}
 
-	log.Debugln("Received: MESSAGE_REACTION_ADD:", newMessageReactionAdd)
+	emoji, err := getAbyleBotterEmojiFromDiscordEmoji(newMessageReactionAdd.Emoji.Name)
+
+	reaction := model.Reaction{
+		Message: model.MessageIdentifier{
+			ID:      newMessageReactionAdd.MessageID,
+			Channel: newMessageReactionAdd.ChannelID,
+		},
+		Type:     "added",
+		Reaction: emoji,
+		User:     model.User{ID: newMessageReactionAdd.UserID},
+	}
+
+	for _, plugin := range b.plugins {
+		plugin.OnReactionAdded(reaction)
+	}
 }
 
 func (b *Bot) handleMessageReactionRemove(data map[string]interface{}) {
@@ -143,7 +157,21 @@ func (b *Bot) handleMessageReactionRemove(data map[string]interface{}) {
 		return
 	}
 
-	log.Debugln("Received: MESSAGE_REACTION_REMOVE", newMessageReactionRemove)
+	emoji, err := getAbyleBotterEmojiFromDiscordEmoji(newMessageReactionRemove.Emoji.Name)
+
+	reaction := model.Reaction{
+		Message: model.MessageIdentifier{
+			ID:      newMessageReactionRemove.MessageID,
+			Channel: newMessageReactionRemove.ChannelID,
+		},
+		Type:     "removed",
+		Reaction: emoji,
+		User:     model.User{ID: newMessageReactionRemove.UserID},
+	}
+
+	for _, plugin := range b.plugins {
+		plugin.OnReactionRemoved(reaction)
+	}
 }
 
 func (b *Bot) handleMessageDelete(data map[string]interface{}) {

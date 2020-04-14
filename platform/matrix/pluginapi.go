@@ -1,6 +1,8 @@
 package matrix
 
 import (
+	"fmt"
+
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/utils"
 )
@@ -29,20 +31,35 @@ func (b *Bot) GetChannel(channelID string) (model.Channel, error) { return model
 func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return model.Channel{}, nil }
 
 // CreatePost creates a post.
-func (b *Bot) CreatePost(post model.Post) error {
+func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
 	if post.IsPrivate {
 		err := b.sendWhisper(post.User.ID, post.Content)
 		if err != nil {
-			log.Errorln("Error sending whisper:", err)
+			return model.PostResponse{}, fmt.Errorf("Error sending whisper: %s", err)
 		}
 	} else {
 		err := b.sendRoomMessage(post.ChannelID, post.Content)
 		if err != nil {
-			log.Errorln("Error sending message:", err)
+			return model.PostResponse{}, fmt.Errorf("Error sending message: %s", err)
 		}
 	}
 
-	return nil
+	return model.PostResponse{}, nil
+}
+
+// UpdatePost updates a post.
+func (b *Bot) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
+	return model.PostResponse{}, fmt.Errorf("Not implemented")
+}
+
+// DeletePost deletes a post.
+func (b *Bot) DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error) {
+	return model.PostResponse{}, fmt.Errorf("Not implemented")
+}
+
+// GetReaction gives back the platform specific string for a reaction, e.g., one -> :one:
+func (b *Bot) GetReaction(reactionName string) (string, error) {
+	return "", fmt.Errorf("Not implemented")
 }
 
 // LogTrace writes a log message to the server log file.

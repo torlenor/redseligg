@@ -69,12 +69,12 @@ type Bot struct {
 	oauth2Handler *oauth2Handler
 }
 
-func (b Bot) apiCall(path string, method string, body string) (r []byte, e error) {
+func (b Bot) apiCall(path string, method string, body string) (r []byte, statusCode int, e error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(method, "https://discordapp.com/api"+path, strings.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	req.Header.Add("Authorization", "Bot "+b.token)
@@ -82,10 +82,12 @@ func (b Bot) apiCall(path string, method string, body string) (r []byte, e error
 
 	response, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return ioutil.ReadAll(response.Body)
+	responseBody, err := ioutil.ReadAll(response.Body)
+
+	return responseBody, response.StatusCode, err
 }
 
 func (b *Bot) startDiscordBot() {

@@ -30,6 +30,12 @@
     [bots.slack_dev.plugins.5]
       type = "version"
 
+    [bots.slack_dev.plugins.6]
+      type = "vote"
+      [bots.slack_dev.plugins.6.config]
+        mods = ["user1", "user2"]
+        onlymods = true
+
   [bots.mm_dev]
     type = "mattermost"
     [bots.mm_dev.config]

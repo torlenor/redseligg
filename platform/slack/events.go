@@ -183,3 +183,17 @@ type eventIMCreated struct {
 	} `json:"channel"`
 	EventTs string `json:"event_ts"`
 }
+
+type eventReactionAddedOrRemoved struct {
+	Type string `json:"type"`
+	User string `json:"user"`
+	Item struct {
+		Type    string `json:"type"`
+		Channel string `json:"channel"`
+		Ts      string `json:"ts"`
+	} `json:"item"`
+	Reaction string `json:"reaction"`
+	ItemUser string `json:"item_user"`
+	EventTs  string `json:"event_ts"`
+	Ts       string `json:"ts"`
+}
