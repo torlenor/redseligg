@@ -2,6 +2,7 @@ package voteplugin
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
@@ -261,6 +262,144 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 	api.Reset()
 	postToPlugin.Content = "!voteend " + voteText
 	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: Yes\n:two:: No - 1\nThis vote has ended, thanks for participating!"
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasUpdatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
+	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+}
+
+func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
+	assert := assert.New(t)
+
+	expectedChannel := "CHANNEL ID"
+	expectedMessageID := "SOME MESSAGE ID"
+	customOptions := []string{"red", "green", "blue"}
+	customOptionsStr := "[" + strings.Join(customOptions, ",") + "]"
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+
+	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
+
+	postToPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	voteText := "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText + " " + customOptionsStr
+	expectedPostFromPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	postToPlugin.Content = "!voteend " + voteText
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nThis vote has ended, thanks for participating!",
+		IsPrivate: false,
+	}
+	expectedMessageIDFromPlugin := model.MessageIdentifier{
+		ID:      expectedMessageID,
+		Channel: expectedChannel,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasUpdatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
+	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+}
+
+func TestVotePlugin_CustomVoteCounting(t *testing.T) {
+	assert := assert.New(t)
+
+	expectedChannel := "CHANNEL ID"
+	expectedMessageID := "SOME MESSAGE ID"
+	customOptions := []string{"red", "green", "blue"}
+	customOptionsStr := "[" + strings.Join(customOptions, ",") + "]"
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+
+	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
+
+	postToPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	voteText := "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText + " " + customOptionsStr
+	expectedPostFromPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	api.Reset()
+	expectedMessageIDFromPlugin := model.MessageIdentifier{
+		ID:      expectedMessageID,
+		Channel: expectedChannel,
+	}
+	reaction := model.Reaction{
+		Message:  expectedMessageIDFromPlugin,
+		Type:     "added",
+		Reaction: "one",
+		User:     model.User{Name: "USER 1"},
+	}
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + " - 1\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
+		IsPrivate: false,
+	}
+	p.OnReactionAdded(reaction)
+	assert.Equal(true, api.WasUpdatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
+	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+
+	api.Reset()
+	reaction.Reaction = "three"
+	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: " + customOptions[0] + " - 1\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + " - 1\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!"
+	p.OnReactionAdded(reaction)
+	assert.Equal(true, api.WasUpdatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
+	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+
+	api.Reset()
+	reaction.Type = "removed"
+	reaction.Reaction = "one"
+	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + " - 1\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!"
+	p.OnReactionRemoved(reaction)
+	assert.Equal(true, api.WasUpdatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
+	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+
+	api.Reset()
+	postToPlugin.Content = "!voteend " + voteText
+	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + " - 1\nThis vote has ended, thanks for participating!"
 	p.OnPost(postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)

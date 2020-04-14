@@ -1,6 +1,7 @@
 package voteplugin
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/torlenor/abylebotter/model"
@@ -45,18 +46,41 @@ func (p *VotePlugin) updatePost(vote *vote) {
 	}
 }
 
+func (p *VotePlugin) extractDescriptionAndOptions(fullText string) (string, []string) {
+	re := regexp.MustCompile(`!vote ([^\[\]]*)\s?(\[([^\[\]]*)])?`)
+	const captureGroupDescription = 1
+	const captureGroupOptions = 3
+
+	matches := re.FindAllStringSubmatch(fullText, -1)
+
+	if matches == nil || len(matches) < 1 {
+		return "", []string{}
+	} else if len(matches) > 1 {
+		p.API.LogWarn("VotePlugin: extractDescriptionAndOptions matched more than one occurrence")
+	}
+
+	var options []string
+	if len(matches[0]) > 3 && len(matches[0][captureGroupOptions]) > 0 {
+		options = strings.Split(matches[0][captureGroupOptions], ",")
+		for i := range options {
+			options[i] = strings.Trim(options[i], " ")
+			options[i] = strings.Trim(options[i], ",")
+		}
+	}
+
+	return strings.Trim(matches[0][captureGroupDescription], " "), options
+}
+
 // onCommandVoteStart starts a new vote with the settings extracted
 // from the received !vote command.
 // Note: The command requires a valid !vote command. This check
 // shall be performed at post retrieval.
 func (p *VotePlugin) onCommandVoteStart(post model.Post) {
-	cont := strings.Split(post.Content, " ")
-	args := cont[1:]
-
-	// TODO parse options
-	// if empty, add Yes/No defaults
-	description := strings.Join(args, " ")
-	options := []string{"Yes", "No"}
+	description, options := p.extractDescriptionAndOptions(post.Content)
+	if len(options) == 0 {
+		// if empty, add Yes/No defaults
+		options = []string{"Yes", "No"}
+	}
 
 	p.votesMutex.Lock()
 	defer p.votesMutex.Unlock()
