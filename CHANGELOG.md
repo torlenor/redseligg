@@ -12,6 +12,7 @@
 
 - Version Plugin: To the command *!version* the plugin will answer with the version of the Bot.
 - Giveaway Plugin: Lets you hold giveaways in your channel and let the bot pick a winner.
+- Vote Plugin: Initiate a vote in the channel about arbitrary topics.
 
 ## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/0.0.3) (2020-03-31)
 
