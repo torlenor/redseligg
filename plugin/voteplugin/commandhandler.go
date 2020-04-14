@@ -8,11 +8,16 @@ import (
 )
 
 const (
-	helpText = "Type '!vote What is the best color? [Red, Green, Blue]' to start a new giveaway.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
+	helpText        = "Type '!vote What is the best color? [Red, Green, Blue]' to start a new giveaway.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
+	voteEndHelpText = "To end a vote type !voteend description text of the vote."
 )
 
 func (p *VotePlugin) returnHelp(channelID string) {
 	p.returnMessage(channelID, helpText)
+}
+
+func (p *VotePlugin) returnVoteEndHelp(channelID string) {
+	p.returnMessage(channelID, voteEndHelpText)
 }
 
 func (p *VotePlugin) returnMessage(channelID, msg string) {

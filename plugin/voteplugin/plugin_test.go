@@ -139,12 +139,18 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 
 	api.Reset()
 	postToPlugin.Content = "!voteend"
+	expectedPostFromPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Content:   voteEndHelpText,
+		IsPrivate: false,
+	}
 	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!voteend something else"
-	expectedPostFromPlugin := model.Post{
+	expectedPostFromPlugin = model.Post{
 		ChannelID: expectedChannel,
 		Content:   "No vote running with that description in this channel. Use the !vote command to start a new one.",
 		IsPrivate: false,
@@ -167,8 +173,14 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 
 	api.Reset()
 	postToPlugin.Content = "!voteend"
+	expectedPostFromPlugin = model.Post{
+		ChannelID: expectedChannel,
+		Content:   voteEndHelpText,
+		IsPrivate: false,
+	}
 	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!voteend " + voteText

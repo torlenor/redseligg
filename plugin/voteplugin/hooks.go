@@ -22,6 +22,9 @@ func (p *VotePlugin) OnPost(post model.Post) {
 		} else if strings.HasPrefix(msg, "!voteend ") {
 			p.onCommandVoteEnd(post)
 			return
+		} else if msg == "!voteend" {
+			p.returnVoteEndHelp(post.ChannelID)
+			return
 		} else if msg == "!vote" || msg == "!votehelp" {
 			p.returnHelp(post.ChannelID)
 			return
