@@ -26,7 +26,7 @@ func getAbyleBotterEmojiFromDiscordEmoji(discordEmoji string) (string, error) {
 	case "9️⃣":
 		return "nine", nil
 	case "🔟":
-		return "ten", nil
+		return "keycap_ten", nil
 	default:
 		return discordEmoji, fmt.Errorf("Emoji not known")
 	}

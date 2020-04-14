@@ -1,6 +1,7 @@
 package voteplugin
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/torlenor/abylebotter/model"
@@ -8,7 +9,7 @@ import (
 
 // TODO: There has to be a mapping from that to the emojis and syntax used from the platform via an API call.
 func getDefaultReactions() []string {
-	return []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "then"}
+	return []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "keycap_ten"}
 }
 
 type runningVotes map[string]*vote // [Description]
@@ -37,10 +38,14 @@ type vote struct {
 	messageIdent model.MessageIdentifier
 }
 
-func newVote(voteSettings voteSettings) vote {
+func newVote(voteSettings voteSettings) (vote, error) {
 	options := []*voteOption{}
 
 	defaultReactions := getDefaultReactions()
+
+	if len(voteSettings.Options) > len(defaultReactions) {
+		return vote{}, fmt.Errorf("More than the allowed number of options specified. Please specify " + strconv.Itoa(len(defaultReactions)) + " or less options.")
+	}
 
 	for i, option := range voteSettings.Options {
 		options = append(options, &voteOption{Description: option, AssignedReaction: defaultReactions[i]})
@@ -49,7 +54,7 @@ func newVote(voteSettings voteSettings) vote {
 	return vote{
 		Settings: voteSettings,
 		Options:  options,
-	}
+	}, nil
 }
 
 // end ends a vote and posting the final results.

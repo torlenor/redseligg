@@ -2,6 +2,7 @@ package voteplugin
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -404,4 +405,50 @@ func TestVotePlugin_CustomVoteCounting(t *testing.T) {
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
+}
+
+func TestVotePlugin_CustomVoteOptionsLimit(t *testing.T) {
+	assert := assert.New(t)
+
+	optionsLimit := 10
+	overLimit := optionsLimit + 1
+	expectedChannel := "CHANNEL ID"
+	expectedMessageID := "SOME MESSAGE ID"
+	customOptionsText := "["
+	for i := 0; i < overLimit; i++ {
+		customOptionsText += strconv.Itoa(i)
+		if i < overLimit-1 {
+			customOptionsText += ","
+		}
+	}
+	customOptionsText += "]"
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	api := plugin.MockAPI{}
+	p.SetAPI(&api)
+
+	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
+	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
+
+	postToPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		IsPrivate: false,
+	}
+
+	api.Reset()
+	voteText := "hello this is a vote"
+	postToPlugin.Content = "!vote " + voteText + " " + customOptionsText
+	expectedPostFromPlugin := model.Post{
+		ChannelID: expectedChannel,
+		Content:   "More than the allowed number of options specified. Please specify " + strconv.Itoa(optionsLimit) + " or less options.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

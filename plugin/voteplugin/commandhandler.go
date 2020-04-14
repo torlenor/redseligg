@@ -84,11 +84,16 @@ func (p *VotePlugin) onCommandVoteStart(post model.Post) {
 
 	p.votesMutex.Lock()
 	defer p.votesMutex.Unlock()
-	nVote := newVote(voteSettings{
+	nVote, err := newVote(voteSettings{
 		ChannelID: post.ChannelID,
 		Text:      description,
 		Options:   options,
 	})
+
+	if err != nil {
+		p.returnMessage(post.ChannelID, err.Error())
+		return
+	}
 
 	p.postAndStartVote(&nVote)
 	p.runningVotes[nVote.Settings.Text] = &nVote
