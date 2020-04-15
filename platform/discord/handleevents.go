@@ -23,7 +23,7 @@ func (messageType messageType) String() string {
 	return messageTypes[messageType]
 }
 
-func (b Bot) getMessageType(mc messageCreate) messageType {
+func (b *Bot) getMessageType(mc messageCreate) messageType {
 	if val, ok := b.knownChannels[mc.ChannelID]; ok {
 		if len(val.Recipients) == 1 {
 			return WHISPER
@@ -50,7 +50,7 @@ func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
 func (b *Bot) handleMessageCreate(data map[string]interface{}) {
 	newMessageCreate, err := decodeMessageCreate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: MESSAGE_CREATE", err)
+		log.Errorln("UNHANDLED ERROR: MESSAGE_CREATE", err)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (b *Bot) handleMessageCreate(data map[string]interface{}) {
 func (b *Bot) handleReady(data map[string]interface{}) {
 	newReady, err := decodeReady(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: READY", err)
+		log.Errorln("UNHANDLED ERROR: READY", err)
 		return
 	}
 	b.ownSnowflakeID = newReady.User.ID
@@ -77,7 +77,7 @@ func (b *Bot) handleReady(data map[string]interface{}) {
 func (b *Bot) handleGuildCreate(data map[string]interface{}) {
 	newGuildCreate, err := decodeGuildCreate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: GUILD_CREATE", err)
+		log.Errorln("UNHANDLED ERROR: GUILD_CREATE", err)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (b *Bot) handleGuildCreate(data map[string]interface{}) {
 func (b *Bot) handlePresenceUpdate(data map[string]interface{}) {
 	newPresenceUpdate, err := decodePresenceUpdate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: PRESENCE_UPDATE", err)
+		log.Errorln("UNHANDLED ERROR: PRESENCE_UPDATE", err)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (b *Bot) handlePresenceReplace(data map[string]interface{}) {
 func (b *Bot) handleTypingStart(data map[string]interface{}) {
 	newTypingStart, err := decodeTypingStart(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: TYPING_START", err)
+		log.Errorln("UNHANDLED ERROR: TYPING_START", err)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (b *Bot) addKnownChannel(channel channelCreate) {
 func (b *Bot) handleChannelCreate(data map[string]interface{}) {
 	newChannelCreate, err := decodeChannelCreate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: CHANNEL_CREATE", err)
+		log.Errorln("UNHANDLED ERROR: CHANNEL_CREATE", err)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (b *Bot) handleChannelCreate(data map[string]interface{}) {
 func (b *Bot) handleMessageReactionAdd(data map[string]interface{}) {
 	newMessageReactionAdd, err := decodeMessageReactionAdd(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: MESSAGE_REACTION_ADD", err)
+		log.Errorln("UNHANDLED ERROR: MESSAGE_REACTION_ADD", err)
 		return
 	}
 
@@ -153,7 +153,7 @@ func (b *Bot) handleMessageReactionAdd(data map[string]interface{}) {
 func (b *Bot) handleMessageReactionRemove(data map[string]interface{}) {
 	newMessageReactionRemove, err := decodeMessageReactionRemove(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: MESSAGE_REACTION_REMOVE", err)
+		log.Errorln("UNHANDLED ERROR: MESSAGE_REACTION_REMOVE", err)
 		return
 	}
 
@@ -177,7 +177,7 @@ func (b *Bot) handleMessageReactionRemove(data map[string]interface{}) {
 func (b *Bot) handleMessageDelete(data map[string]interface{}) {
 	newMessageReactionDelete, err := decodeMessageDelete(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: MESSAGE_DELETE", err)
+		log.Errorln("UNHANDLED ERROR: MESSAGE_DELETE", err)
 		return
 	}
 
@@ -187,7 +187,7 @@ func (b *Bot) handleMessageDelete(data map[string]interface{}) {
 func (b *Bot) handleMessageUpdate(data map[string]interface{}) {
 	newMessageUpdate, err := decodeMessageUpdate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: MESSAGE_UPDATE", err)
+		log.Errorln("UNHANDLED ERROR: MESSAGE_UPDATE", err)
 		return
 	}
 
@@ -197,7 +197,7 @@ func (b *Bot) handleMessageUpdate(data map[string]interface{}) {
 func (b *Bot) handleChannelPinsUpdate(data map[string]interface{}) {
 	newChannelPinsUpdate, err := decodeChannelPinsUpdate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: CHANNEL_PINS_UPDATE", err)
+		log.Errorln("UNHANDLED ERROR: CHANNEL_PINS_UPDATE", err)
 		return
 	}
 
@@ -207,7 +207,7 @@ func (b *Bot) handleChannelPinsUpdate(data map[string]interface{}) {
 func (b *Bot) handleGuildMemberUpdate(data map[string]interface{}) {
 	newGuildMemberUpdate, err := decodeGuildMemberUpdate(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: GUILD_MEMBER_UPDATE", err)
+		log.Errorln("UNHANDLED ERROR: GUILD_MEMBER_UPDATE", err)
 		return
 	}
 
@@ -217,7 +217,7 @@ func (b *Bot) handleGuildMemberUpdate(data map[string]interface{}) {
 func (b *Bot) handlePresencesReplace(data map[string]interface{}) {
 	newPresencesReplace, err := decodePresencesReplace(data)
 	if err != nil {
-		log.Errorln("UNHANDELED ERROR: PRESENCES_REPLACE", err)
+		log.Errorln("UNHANDLED ERROR: PRESENCES_REPLACE", err)
 		return
 	}
 
