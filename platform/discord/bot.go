@@ -179,7 +179,7 @@ func (b *Bot) run() {
 			log.Errorln("Invalid Session received. Please try again...")
 			return
 		} else if data["op"].(float64) == 11 { // Heartbeat ACK
-			log.Debugln("Heartbeat ACKed from Gateway")
+			b.watchdog.Feed()
 		} else { // opcode which is not handled, yet
 			log.Errorf("data: %s", data)
 		}
