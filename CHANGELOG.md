@@ -24,6 +24,11 @@
 - Slack: Support for updating messages.
 - Slack: Support for receiving reactions to messages.
 
+**Closed issues:**
+- Discord: User.Name shall be User#1234 instead of just User
+- Discord: Bot should be able to recover in case of errors
+- Discord: Make Callback URL configurable
+
 ## [0.0.3](https://git.abyle.org/hps/abylebotter/-/tree/0.0.3) (2020-03-31)
 
 *Major rework of the whole project to a modern and more Go-like structure.*
