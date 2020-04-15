@@ -1,47 +1,16 @@
 package discord
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"strings"
+	"fmt"
 	"testing"
 
 	"github.com/gorilla/websocket"
 	"github.com/torlenor/abylebotter/ws"
 )
 
-var upgrader = websocket.Upgrader{}
-
-func echo(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		return
-	}
-	defer c.Close()
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			break
-		}
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			break
-		}
-	}
-}
-
-func TestSendIdent(t *testing.T) {
-	// TODO: Refactor that so we are using a mock and not real websocket connections
-	// Create test server with the echo handler.
-	s := httptest.NewServer(http.HandlerFunc(echo))
-	defer s.Close()
-
-	u := "ws" + strings.TrimPrefix(s.URL, "http")
-
-	// Connect to the server
-	ws := ws.NewClient()
+func Test_SendIdent(t *testing.T) {
+	ws := &ws.MockClient{}
 	defer ws.Stop()
-	ws.Dial(u)
 
 	testToken := "TESTTOKEN.12345"
 
@@ -54,15 +23,45 @@ func TestSendIdent(t *testing.T) {
 			}
 }`)
 
-	// Send message to server, read response and check to see if it's what we expect.
-	sendIdent(testToken, ws)
-
-	_, p, err := ws.ReadMessage()
+	err := sendIdent(testToken, ws)
 	if err != nil {
-		t.Fatalf("%v", err)
+		t.Fatalf("Sending Ident failed")
 	}
 
-	if string(p) != string(expectedIdent) {
-		t.Fatalf("bad message")
+	if string(ws.LastSendMessageData) != string(expectedIdent) {
+		t.Fatalf("Bad message was sent")
+	}
+	if ws.LastSendMessageType != websocket.TextMessage {
+		t.Fatalf("Bad message type was used")
+	}
+}
+
+func Test_SendIdentFail(t *testing.T) {
+	ws := &ws.MockClient{}
+	defer ws.Stop()
+
+	testToken := "TESTTOKEN.12345"
+
+	expectedIdent := []byte(`{"op": 2,
+			"d": {
+				"token": "` + testToken + `",
+				"properties": {},
+				"compress": false,
+				"large_threshold": 250
+			}
+}`)
+
+	ws.ReturnError = fmt.Errorf("Some error")
+
+	err := sendIdent(testToken, ws)
+	if err == nil {
+		t.Fatalf("Sending Ident did not fail")
+	}
+
+	if string(ws.LastSendMessageData) != string(expectedIdent) {
+		t.Fatalf("Bad message was sent")
+	}
+	if ws.LastSendMessageType != websocket.TextMessage {
+		t.Fatalf("Bad message type was used")
 	}
 }

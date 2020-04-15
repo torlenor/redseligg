@@ -1,10 +1,8 @@
 package discord
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"fmt"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -20,17 +18,9 @@ func (f *onFailMock) onFail() {
 }
 
 func TestDiscordHeartBeatSender(t *testing.T) {
-	// TODO: Refactor that so we are using a mock and not real WebSocket connections
-	// Create test server with the echo handler.
-	s := httptest.NewServer(http.HandlerFunc(echo))
-	defer s.Close()
-
-	u := "ws" + strings.TrimPrefix(s.URL, "http")
-
 	// Connect to the server
-	ws := ws.NewClient()
+	ws := &ws.MockClient{}
 	defer ws.Stop()
-	ws.Dial(u)
 
 	testSeqNumber := 1
 	expectedHeartbeat := []byte(`{"op":1,"d":` + strconv.Itoa(testSeqNumber) + `}`)
@@ -39,26 +29,23 @@ func TestDiscordHeartBeatSender(t *testing.T) {
 	dhbs.ws = ws
 	dhbs.sendHeartBeat(testSeqNumber)
 
-	_, p, err := ws.ReadMessage()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	if string(p) != string(expectedHeartbeat) {
+	if string(ws.LastSendMessageData) != string(expectedHeartbeat) {
 		t.Fatalf("bad message")
 	}
 }
 
 type mockHeartBeatSender struct {
 	lastHeartBeatSent string
+
+	ReturnError error
 }
 
 func (hbs *mockHeartBeatSender) sendHeartBeat(seqNumber int) error {
 	hbs.lastHeartBeatSent = `{"op":1,"d":` + strconv.Itoa(seqNumber) + `}`
-	return nil
+	return hbs.ReturnError
 }
 
-func TestHeartBeat(t *testing.T) {
+func Test_HeartBeat(t *testing.T) {
 	onFailHandler := onFailMock{}
 	mockSender := &mockHeartBeatSender{}
 
@@ -75,6 +62,39 @@ func TestHeartBeat(t *testing.T) {
 		if mockSender.lastHeartBeatSent != string(`{"op":1,"d":`+strconv.Itoa(i)+`}`) {
 			t.Fatalf("bad heartbeat message received for seqNumber %d", i)
 		}
+	}
+
+	if onFailHandler.OnFailCalled {
+		t.Fatalf("onFail was called")
+	}
+
+	close(stopHeartBeat)
+
+	time.Sleep(time.Millisecond * 20)
+}
+
+func Test_HeartBeatSendFail(t *testing.T) {
+	onFailHandler := onFailMock{}
+	mockSender := &mockHeartBeatSender{}
+
+	stopHeartBeat := make(chan bool)
+	seqNumberChan := make(chan int)
+
+	mockSender.ReturnError = fmt.Errorf("Some error")
+
+	// If anybody knows a better way in golang than using sleeps, please tell me
+
+	go heartBeat(10, mockSender, stopHeartBeat, seqNumberChan, onFailHandler.onFail)
+
+	i := 1
+	seqNumberChan <- i
+	time.Sleep(time.Millisecond * 20)
+	if mockSender.lastHeartBeatSent != string(`{"op":1,"d":`+strconv.Itoa(i)+`}`) {
+		t.Fatalf("bad heartbeat message received for seqNumber %d", i)
+	}
+
+	if !onFailHandler.OnFailCalled {
+		t.Fatalf("onFail was not called")
 	}
 
 	close(stopHeartBeat)
