@@ -2,6 +2,7 @@ package discord
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/gorilla/websocket"
 )
@@ -10,22 +11,22 @@ type gatewayResponse struct {
 	URL string `json:"url"`
 }
 
-func (b *Bot) getGateway() string {
-	log.Debugln("DiscordBot: Requesting the Discord gateway address")
+func (b *Bot) getGateway() (string, error) {
+	log.Traceln("DiscordBot: Requesting the Discord gateway address")
 	response, _, err := b.apiCall("/gateway", "GET", "")
 	if err != nil {
-		log.Fatalln("FATAL: Could not get the Discord gateway:", err)
+		return "", fmt.Errorf("Could not get the Discord gateway: %s", err.Error())
 	}
 
 	var dat map[string]interface{}
 
 	if err := json.Unmarshal(response, &dat); err != nil {
-		log.Fatalln("FATAL: Could not parse the response to our Discord gateway request:", err)
+		return "", fmt.Errorf("Could not parse the response to our Discord gateway request: %s", err.Error())
 	}
 
 	url := dat["url"].(string)
-	log.Debugf("Received Discord gateway address: %s", url)
-	return url
+	log.Tracef("Received Discord gateway address: %s", url)
+	return url, nil
 }
 
 func dialGateway(gatewayURL string) *websocket.Conn {

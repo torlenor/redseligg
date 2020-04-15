@@ -43,7 +43,7 @@ type Bot struct {
 
 	pingSenderStop chan bool
 
-	watchdog *watchdog
+	watchdog *utils.Watchdog
 
 	idProvider utils.IDProvider
 
@@ -64,7 +64,7 @@ func CreateSlackBot(cfg botconfig.SlackConfig, ws webSocketClient) (*Bot, error)
 		channels: newChannelManager(),
 		users:    newUserManager(),
 
-		watchdog: &watchdog{},
+		watchdog: &utils.Watchdog{},
 	}
 
 	if len(b.config.Token) == 0 {

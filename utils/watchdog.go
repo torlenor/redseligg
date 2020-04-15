@@ -1,4 +1,4 @@
-package slack
+package utils
 
 import (
 	"sync"
@@ -9,7 +9,8 @@ import (
 
 type failCallback func()
 
-type watchdog struct {
+// Watchdog is a generic dog that watches and barks if something fails (by calling a fail callback)
+type Watchdog struct {
 	failCallback failCallback
 
 	timer *time.Timer
@@ -22,14 +23,14 @@ type watchdog struct {
 }
 
 // SetFailCallback function to be called when watchdog times out
-func (w *watchdog) SetFailCallback(c failCallback) *watchdog {
+func (w *Watchdog) SetFailCallback(c failCallback) *Watchdog {
 	w.failCallback = c
 	return w
 }
 
 // Start the watchdog; in case it is not fed, it will keep
 // notifying until it is stopped.
-func (w *watchdog) Start(interval time.Duration) {
+func (w *Watchdog) Start(interval time.Duration) {
 	w.startStopMutex.Lock()
 	defer w.startStopMutex.Unlock()
 	w.isRunning = true
@@ -55,7 +56,7 @@ func (w *watchdog) Start(interval time.Duration) {
 				if w.failCallback != nil {
 					go w.failCallback()
 				} else {
-					logging.Get("Watchdog").Infof("Watchdog not fed in time. No callback set")
+					logging.Get("Watchdog").Infof("Watchdog not fed in time, but no callback set")
 				}
 			}
 		}
@@ -63,7 +64,7 @@ func (w *watchdog) Start(interval time.Duration) {
 }
 
 // Stop the watchdog
-func (w *watchdog) Stop() {
+func (w *Watchdog) Stop() {
 	w.startStopMutex.Lock()
 	defer w.startStopMutex.Unlock()
 
@@ -74,7 +75,7 @@ func (w *watchdog) Stop() {
 }
 
 // Feed the dog
-func (w *watchdog) Feed() {
+func (w *Watchdog) Feed() {
 	w.startStopMutex.Lock()
 	defer w.startStopMutex.Unlock()
 

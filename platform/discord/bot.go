@@ -4,9 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
+	"sync"
+	"time"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
@@ -16,18 +15,12 @@ import (
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/utils"
 )
 
 var (
 	log = logging.Get("DiscordBot")
 )
-
-type guild struct {
-	snowflakeID string
-	name        string
-	memberCount int
-	channel     []channel
-}
 
 type stats struct {
 	messagesSent int64
@@ -42,19 +35,34 @@ func (s stats) toString() string {
 		s.messagesSent, s.messagesReceived, s.whispersSent, s.whispersReceived)
 }
 
+type webSocketClient interface {
+	Dial(wsURL string) error
+	Stop()
+
+	ReadMessage() (int, []byte, error)
+
+	SendMessage(messageType int, data []byte) error
+	SendJSONMessage(v interface{}) error
+}
+
 // The Bot struct holds parameters related to the bot
 type Bot struct {
-	ws *websocket.Conn
+	gatewayURL string
+	ws         webSocketClient
 
 	knownChannels     map[string]channelCreate
 	token             string
 	ownSnowflakeID    string
 	currentSeqNumber  int
 	heartBeatSender   *discordHeartBeatSender
-	heartBeatStopChan chan struct{}
+	heartBeatStopChan chan bool
 	seqNumberChan     chan int
 
 	plugins []plugin.Hooks
+
+	wg sync.WaitGroup
+
+	watchdog *utils.Watchdog
 
 	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
@@ -64,35 +72,56 @@ type Bot struct {
 	discordOauthConfig *oauth2.Config
 }
 
-func (b Bot) apiCall(path string, method string, body string) (r []byte, statusCode int, e error) {
-	client := &http.Client{}
+// CreateDiscordBot creates a new instance of a DiscordBot
+func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+	log.Info("DiscordBot is CREATING itself")
 
-	req, err := http.NewRequest(method, "https://discordapp.com/api"+path, strings.NewReader(body))
-	if err != nil {
-		return nil, 0, err
+	b := Bot{
+		token: cfg.Token,
+		ws:    ws,
+
+		watchdog: &utils.Watchdog{},
 	}
 
-	req.Header.Add("Authorization", "Bot "+b.token)
-	req.Header.Add("Content-Type", "application/json")
-
-	response, err := client.Do(req)
+	url, err := b.getGateway()
 	if err != nil {
-		return nil, 0, err
+		return nil, fmt.Errorf("Error connecting to Discord servers: %s", err)
 	}
+	b.gatewayURL = url
 
-	responseBody, err := ioutil.ReadAll(response.Body)
+	b.knownChannels = make(map[string]channelCreate)
 
-	return responseBody, response.StatusCode, err
+	b.seqNumberChan = make(chan int)
+
+	b.guilds = make(map[string]guildCreate)
+	b.guildNameToID = make(map[string]string)
+
+	return &b, nil
 }
 
-func (b *Bot) startDiscordBot() {
+func (b *Bot) startHeartbeatSender(heartbeatInterval int) {
+	b.heartBeatStopChan = make(chan bool)
+
+	interval := time.Duration(heartbeatInterval) * time.Millisecond
+	b.heartBeatSender = &discordHeartBeatSender{ws: b.ws}
+	go func() {
+		b.wg.Add(1)
+		heartBeat(interval, b.heartBeatSender, b.heartBeatStopChan, b.seqNumberChan, b.onFail)
+		defer b.wg.Done()
+	}()
+	b.watchdog.SetFailCallback(b.onFail).Start(2 * interval)
+}
+
+func (b *Bot) run() {
+	var fail bool
 	for {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				log.Debugln("Connection closed normally: ", err)
 			} else {
-				log.Errorln("UNHANDELED ERROR: ", err)
+				log.Errorln("UNHANDLED ERROR: ", err)
+				fail = true
 			}
 			break
 		}
@@ -100,7 +129,7 @@ func (b *Bot) startDiscordBot() {
 		var data map[string]interface{}
 
 		if err := json.Unmarshal(message, &data); err != nil {
-			log.Errorln("UNHANDELED ERROR: ", err)
+			log.Errorln("UNHANDLED ERROR: ", err)
 			continue
 		}
 
@@ -108,8 +137,7 @@ func (b *Bot) startDiscordBot() {
 			log.Debugln("Received HELLO from gateway")
 			sendIdent(b.token, b.ws)
 			heartbeatInterval := int(data["d"].(map[string]interface{})["heartbeat_interval"].(float64))
-			b.heartBeatSender = &discordHeartBeatSender{ws: b.ws}
-			go heartBeat(heartbeatInterval, b.heartBeatSender, b.heartBeatStopChan, b.seqNumberChan)
+			b.startHeartbeatSender(heartbeatInterval)
 			log.Infoln("DiscordBot is READY")
 		} else if data["op"].(float64) == 0 { // Dispatch to event handlers
 			switch data["t"] {
@@ -151,45 +179,46 @@ func (b *Bot) startDiscordBot() {
 			log.Errorln("Invalid Session received. Please try again...")
 			return
 		} else if data["op"].(float64) == 11 { // Heartbeat ACK
-			log.Debugln("Heartbeat ACKed from Gateway")
+			b.watchdog.Feed()
 		} else { // opcode which is not handled, yet
 			log.Errorf("data: %s", data)
 		}
 	}
-}
 
-// CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
-	log.Info("DiscordBot is CREATING itself")
-
-	b := Bot{token: cfg.Token}
-	url := b.getGateway()
-	b.ws = dialGateway(url)
-
-	b.knownChannels = make(map[string]channelCreate)
-
-	b.heartBeatStopChan = make(chan struct{})
-	b.seqNumberChan = make(chan int)
-
-	b.guilds = make(map[string]guildCreate)
-	b.guildNameToID = make(map[string]string)
-
-	return &b, nil
+	if fail {
+		b.onFail()
+	}
 }
 
 // Start the Discord Bot
-func (b *Bot) Start() {
-	log.Infoln("DiscordBot is STARTING")
-	go b.startDiscordBot()
+func (b *Bot) Start() error {
+	log.Infof("DiscordBot is STARTING (have %d plugin(s))", len(b.plugins))
+
+	err := b.ws.Dial(b.gatewayURL)
+	if err != nil {
+		return fmt.Errorf("Could not dial Discord WebSocket, Discord Bot not operational: %s", err.Error())
+	}
+
+	go func() {
+		b.wg.Add(1)
+		b.run()
+		defer b.wg.Done()
+	}()
+
 	for _, plugin := range b.plugins {
 		plugin.OnRun()
 	}
 	log.Infoln("DiscordBot is RUNNING")
+
+	return nil
 }
 
 // Run the Discord Bot (blocking)
 func (b *Bot) Run(ctx context.Context) error {
-	b.Start()
+	err := b.Start()
+	if err != nil {
+		return err
+	}
 
 	<-ctx.Done()
 
@@ -202,15 +231,24 @@ func (b *Bot) Run(ctx context.Context) error {
 	return nil
 }
 
+func (b *Bot) stopHeartBeatWatchdog() {
+	b.watchdog.Stop()
+	b.heartBeatStopChan <- true
+}
+
 // Stop the Discord Bot
 func (b *Bot) Stop() {
 	log.Infoln("DiscordBot is SHUTING DOWN")
-	log.Infof("DiscordBot Stats:\n%s", b.stats.toString())
-	close(b.heartBeatStopChan)
-	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+
+	b.stopHeartBeatWatchdog()
+
+	err := b.closeWebSocket()
 	if err != nil {
-		log.Errorln("write close:", err)
+		log.Errorln("Error when writing close message to ws:", err)
 	}
+
+	b.wg.Wait()
+	b.ws.Stop()
 
 	log.Infoln("DiscordBot is SHUT DOWN")
 }
@@ -230,4 +268,43 @@ func (b *Bot) GetInfo() platform.BotInfo {
 		Healthy:  true,
 		Plugins:  []platform.PluginInfo{},
 	}
+}
+
+func (b *Bot) closeWebSocket() error {
+	return b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+}
+
+func (b *Bot) onFail() {
+	log.Warnf("Encountered an error, trying to restart the bot...")
+
+	b.stopHeartBeatWatchdog()
+
+	err := b.closeWebSocket()
+	if err != nil {
+		log.Errorf("Error when writing close message to ws: %s, still trying to recover", err)
+	}
+
+	b.wg.Wait()
+	b.ws.Stop()
+
+	url, err := b.getGateway()
+	if err != nil {
+		log.Errorf("Error connecting to Discord servers: %s", err)
+		return
+	}
+	b.gatewayURL = url
+
+	err = b.ws.Dial(b.gatewayURL)
+	if err != nil {
+		log.Errorln("Could not dial Discord WebSocket, Discord Bot not operational:", err)
+		return
+	}
+
+	go func() {
+		b.wg.Add(1)
+		b.run()
+		defer b.wg.Done()
+	}()
+
+	log.Info("Recovery attempt finished")
 }

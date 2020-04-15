@@ -8,10 +8,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/torlenor/abylebotter/ws"
 )
 
+type onFailMock struct {
+	OnFailCalled bool
+}
+
+func (f *onFailMock) onFail() {
+	f.OnFailCalled = true
+}
+
 func TestDiscordHeartBeatSender(t *testing.T) {
+	// TODO: Refactor that so we are using a mock and not real WebSocket connections
 	// Create test server with the echo handler.
 	s := httptest.NewServer(http.HandlerFunc(echo))
 	defer s.Close()
@@ -19,11 +28,9 @@ func TestDiscordHeartBeatSender(t *testing.T) {
 	u := "ws" + strings.TrimPrefix(s.URL, "http")
 
 	// Connect to the server
-	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	defer ws.Close()
+	ws := ws.NewClient()
+	defer ws.Stop()
+	ws.Dial(u)
 
 	testSeqNumber := 1
 	expectedHeartbeat := []byte(`{"op":1,"d":` + strconv.Itoa(testSeqNumber) + `}`)
@@ -52,14 +59,15 @@ func (hbs *mockHeartBeatSender) sendHeartBeat(seqNumber int) error {
 }
 
 func TestHeartBeat(t *testing.T) {
-	var mockSender = &mockHeartBeatSender{}
+	onFailHandler := onFailMock{}
+	mockSender := &mockHeartBeatSender{}
 
-	stopHeartBeat := make(chan struct{})
+	stopHeartBeat := make(chan bool)
 	seqNumberChan := make(chan int)
 
 	// If anybody knows a better way in golang than using sleeps, please tell me
 
-	go heartBeat(10, mockSender, stopHeartBeat, seqNumberChan)
+	go heartBeat(10, mockSender, stopHeartBeat, seqNumberChan, onFailHandler.onFail)
 
 	for i := 1; i <= 10; i++ {
 		seqNumberChan <- i

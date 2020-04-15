@@ -48,7 +48,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}
 
-		bot, err = discord.CreateDiscordBot(discordCfg)
+		bot, err = discord.CreateDiscordBot(discordCfg, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}
