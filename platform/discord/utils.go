@@ -9,3 +9,7 @@ func extractSenderSnowflakeID(data map[string]interface{}) string {
 	authorData := data["d"].(map[string]interface{})["author"].(map[string]interface{})
 	return authorData["id"].(string)
 }
+
+func combineUsernameAndDiscriminator(username, discriminator string) string {
+	return username + "#" + discriminator
+}

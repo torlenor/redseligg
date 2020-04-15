@@ -32,14 +32,14 @@ func (b *Bot) getMessageType(mc messageCreate) messageType {
 	return MESSAGE
 }
 
-func (b *Bot) dispatchMessage(newMessageCreate messageCreate) {
+func (b *Bot) dispatchMessage(msg messageCreate) {
 	var receiveMessage model.Post
-	if b.getMessageType(newMessageCreate) == MESSAGE {
+	receiveMessage = model.Post{User: model.User{ID: msg.Author.ID, Name: combineUsernameAndDiscriminator(msg.Author.Username, msg.Author.Discriminator)}, ChannelID: msg.ChannelID, Content: msg.Content}
+	if b.getMessageType(msg) == MESSAGE {
 		b.stats.messagesReceived++
-		receiveMessage = model.Post{User: model.User{ID: newMessageCreate.Author.ID, Name: newMessageCreate.Author.Username}, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
 	} else {
 		b.stats.whispersReceived++
-		receiveMessage = model.Post{IsPrivate: true, User: model.User{ID: newMessageCreate.Author.ID, Name: newMessageCreate.Author.Username}, ChannelID: newMessageCreate.ChannelID, Content: newMessageCreate.Content}
+		receiveMessage.IsPrivate = true
 	}
 
 	for _, plugin := range b.plugins {
