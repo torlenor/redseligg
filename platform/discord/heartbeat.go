@@ -15,9 +15,9 @@ type discordHeartBeatSender struct {
 	ws webSocketClient
 }
 
-func heartBeat(interval int, hbSender heartBeatSender, stop chan struct{}, seqNumber chan int) {
-	log.Debugf("Starting heartbeat with interval: %d ms", interval)
-	ticker := time.NewTicker(time.Duration(interval) * time.Millisecond)
+func heartBeat(interval time.Duration, hbSender heartBeatSender, stop chan bool, seqNumber chan int, onFail func()) {
+	log.Debugf("Starting heartbeat with interval: %d ms", interval.Milliseconds())
+	ticker := time.NewTicker(interval)
 
 	var currentSeqNumber int
 
@@ -28,7 +28,8 @@ func heartBeat(interval int, hbSender heartBeatSender, stop chan struct{}, seqNu
 			log.Debugf("Sending heartbeat (seq number = %d)", currentSeqNumber)
 			err := hbSender.sendHeartBeat(currentSeqNumber)
 			if err != nil {
-				log.Errorln("UNHANDELED ERROR in heartbeat:", err)
+				log.Errorln("UNHANDLED ERROR in heartbeat:", err)
+				go onFail()
 			}
 		case currentSeqNumber = <-seqNumber:
 		case <-stop:

@@ -11,6 +11,14 @@ import (
 	"github.com/torlenor/abylebotter/ws"
 )
 
+type onFailMock struct {
+	OnFailCalled bool
+}
+
+func (f *onFailMock) onFail() {
+	f.OnFailCalled = true
+}
+
 func TestDiscordHeartBeatSender(t *testing.T) {
 	// TODO: Refactor that so we are using a mock and not real WebSocket connections
 	// Create test server with the echo handler.
@@ -51,14 +59,15 @@ func (hbs *mockHeartBeatSender) sendHeartBeat(seqNumber int) error {
 }
 
 func TestHeartBeat(t *testing.T) {
-	var mockSender = &mockHeartBeatSender{}
+	onFailHandler := onFailMock{}
+	mockSender := &mockHeartBeatSender{}
 
-	stopHeartBeat := make(chan struct{})
+	stopHeartBeat := make(chan bool)
 	seqNumberChan := make(chan int)
 
 	// If anybody knows a better way in golang than using sleeps, please tell me
 
-	go heartBeat(10, mockSender, stopHeartBeat, seqNumberChan)
+	go heartBeat(10, mockSender, stopHeartBeat, seqNumberChan, onFailHandler.onFail)
 
 	for i := 1; i <= 10; i++ {
 		seqNumberChan <- i
