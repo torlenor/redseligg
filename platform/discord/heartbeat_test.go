@@ -8,10 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/torlenor/abylebotter/ws"
 )
 
 func TestDiscordHeartBeatSender(t *testing.T) {
+	// TODO: Refactor that so we are using a mock and not real WebSocket connections
 	// Create test server with the echo handler.
 	s := httptest.NewServer(http.HandlerFunc(echo))
 	defer s.Close()
@@ -19,11 +20,9 @@ func TestDiscordHeartBeatSender(t *testing.T) {
 	u := "ws" + strings.TrimPrefix(s.URL, "http")
 
 	// Connect to the server
-	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	defer ws.Close()
+	ws := ws.NewClient()
+	defer ws.Stop()
+	ws.Dial(u)
 
 	testSeqNumber := 1
 	expectedHeartbeat := []byte(`{"op":1,"d":` + strconv.Itoa(testSeqNumber) + `}`)

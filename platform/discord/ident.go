@@ -1,10 +1,12 @@
 package discord
 
 import (
+	"fmt"
+
 	"github.com/gorilla/websocket"
 )
 
-func sendIdent(token string, ws *websocket.Conn) {
+func sendIdent(token string, ws webSocketClient) error {
 	ident := []byte(`{"op": 2,
 			"d": {
 				"token": "` + token + `",
@@ -14,10 +16,12 @@ func sendIdent(token string, ws *websocket.Conn) {
 			}
 }`)
 
-	log.Println("DiscordBot: Sending IDENT to gateway")
+	log.Trace("Sending IDENT to gateway")
 
-	err := ws.WriteMessage(websocket.TextMessage, ident)
+	err := ws.SendMessage(websocket.TextMessage, ident)
 	if err != nil {
-		log.Fatal("DiscordBot: FATAL: Error sending IDENT to gateway:", err)
+		return fmt.Errorf("Error sending IDENT to gateway: %s", err)
 	}
+
+	return nil
 }

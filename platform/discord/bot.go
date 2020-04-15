@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
@@ -22,13 +23,6 @@ var (
 	log = logging.Get("DiscordBot")
 )
 
-type guild struct {
-	snowflakeID string
-	name        string
-	memberCount int
-	channel     []channel
-}
-
 type stats struct {
 	messagesSent int64
 	whispersSent int64
@@ -42,9 +36,20 @@ func (s stats) toString() string {
 		s.messagesSent, s.messagesReceived, s.whispersSent, s.whispersReceived)
 }
 
+type webSocketClient interface {
+	Dial(wsURL string) error
+	Stop()
+
+	ReadMessage() (int, []byte, error)
+
+	SendMessage(messageType int, data []byte) error
+	SendJSONMessage(v interface{}) error
+}
+
 // The Bot struct holds parameters related to the bot
 type Bot struct {
-	ws *websocket.Conn
+	gatewayURL string
+	ws         webSocketClient
 
 	knownChannels     map[string]channelCreate
 	token             string
@@ -55,6 +60,8 @@ type Bot struct {
 	seqNumberChan     chan int
 
 	plugins []plugin.Hooks
+
+	wg sync.WaitGroup
 
 	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
@@ -85,7 +92,7 @@ func (b Bot) apiCall(path string, method string, body string) (r []byte, statusC
 	return responseBody, response.StatusCode, err
 }
 
-func (b *Bot) startDiscordBot() {
+func (b *Bot) run() {
 	for {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
@@ -159,12 +166,19 @@ func (b *Bot) startDiscordBot() {
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
+func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
 	log.Info("DiscordBot is CREATING itself")
 
-	b := Bot{token: cfg.Token}
-	url := b.getGateway()
-	b.ws = dialGateway(url)
+	b := Bot{
+		token: cfg.Token,
+		ws:    ws,
+	}
+
+	url, err := b.getGateway()
+	if err != nil {
+		return nil, fmt.Errorf("Error connecting to Discord servers: %s", err)
+	}
+	b.gatewayURL = url
 
 	b.knownChannels = make(map[string]channelCreate)
 
@@ -178,18 +192,34 @@ func CreateDiscordBot(cfg botconfig.DiscordConfig) (*Bot, error) {
 }
 
 // Start the Discord Bot
-func (b *Bot) Start() {
-	log.Infoln("DiscordBot is STARTING")
-	go b.startDiscordBot()
+func (b *Bot) Start() error {
+	log.Infof("DiscordBot is STARTING (have %d plugin(s))", len(b.plugins))
+
+	err := b.ws.Dial(b.gatewayURL)
+	if err != nil {
+		return fmt.Errorf("Could not dial Discord WebSocket, Discord Bot not operational: %s", err.Error())
+	}
+
+	go func() {
+		b.wg.Add(1)
+		b.run()
+		defer b.wg.Done()
+	}()
+
 	for _, plugin := range b.plugins {
 		plugin.OnRun()
 	}
 	log.Infoln("DiscordBot is RUNNING")
+
+	return nil
 }
 
 // Run the Discord Bot (blocking)
 func (b *Bot) Run(ctx context.Context) error {
-	b.Start()
+	err := b.Start()
+	if err != nil {
+		return err
+	}
 
 	<-ctx.Done()
 
@@ -205,12 +235,16 @@ func (b *Bot) Run(ctx context.Context) error {
 // Stop the Discord Bot
 func (b *Bot) Stop() {
 	log.Infoln("DiscordBot is SHUTING DOWN")
-	log.Infof("DiscordBot Stats:\n%s", b.stats.toString())
+
 	close(b.heartBeatStopChan)
-	err := b.ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+
+	err := b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
-		log.Errorln("write close:", err)
+		log.Errorln("Error when writing close message to ws:", err)
 	}
+
+	b.wg.Wait()
+	b.ws.Stop()
 
 	log.Infoln("DiscordBot is SHUT DOWN")
 }
