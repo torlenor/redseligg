@@ -22,6 +22,11 @@ var (
 	log = logging.Get("DiscordBot")
 )
 
+// Used for injection in unit tests
+var newHeartbeatSender = func(ws webSocketClient) *discordHeartBeatSender {
+	return &discordHeartBeatSender{ws: ws}
+}
+
 type webSocketClient interface {
 	Dial(wsURL string) error
 	Stop()
@@ -47,7 +52,6 @@ type Bot struct {
 	token             string
 	ownSnowflakeID    string
 	currentSeqNumber  int
-	heartBeatSender   *discordHeartBeatSender
 	heartBeatStopChan chan bool
 	seqNumberChan     chan int
 
@@ -102,10 +106,9 @@ func (b *Bot) startHeartbeatSender(heartbeatInterval int) {
 	b.heartBeatStopChan = make(chan bool)
 
 	interval := time.Duration(heartbeatInterval) * time.Millisecond
-	b.heartBeatSender = &discordHeartBeatSender{ws: b.ws}
 	go func() {
 		b.wg.Add(1)
-		heartBeat(interval, b.heartBeatSender, b.heartBeatStopChan, b.seqNumberChan, b.onFail)
+		heartBeat(interval, newHeartbeatSender(b.ws), b.heartBeatStopChan, b.seqNumberChan, b.onFail)
 		defer b.wg.Done()
 	}()
 	b.watchdog.SetFailCallback(b.onFail).Start(2 * interval)
