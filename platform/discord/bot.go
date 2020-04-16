@@ -190,7 +190,7 @@ func (b *Bot) run() {
 }
 
 // Start the Discord Bot
-func (b *Bot) Start() error {
+func (b *Bot) start() error {
 	log.Infof("DiscordBot is STARTING (have %d plugin(s))", len(b.plugins))
 
 	err := b.ws.Dial(b.gatewayURL)
@@ -214,7 +214,7 @@ func (b *Bot) Start() error {
 
 // Run the Discord Bot (blocking)
 func (b *Bot) Run(ctx context.Context) error {
-	err := b.Start()
+	err := b.start()
 	if err != nil {
 		return err
 	}
@@ -225,7 +225,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		plugin.OnStop()
 	}
 
-	b.Stop()
+	b.stop()
 
 	return nil
 }
@@ -236,7 +236,7 @@ func (b *Bot) stopHeartBeatWatchdog() {
 }
 
 // Stop the Discord Bot
-func (b *Bot) Stop() {
+func (b *Bot) stop() {
 	log.Infoln("DiscordBot is SHUTING DOWN")
 
 	b.stopHeartBeatWatchdog()
