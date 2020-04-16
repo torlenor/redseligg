@@ -44,6 +44,8 @@ func (m *mockWSClient) WriteJSON(v interface{}) error {
 	return nil
 }
 
+func (m *mockWSClient) Close() error { return nil }
+
 type mockDialer struct {
 	wsClient wsClient
 
