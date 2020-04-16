@@ -41,16 +41,16 @@ type messageObject struct {
 }
 
 func (b *Bot) sendWhisper(snowflakeID string, content string) (messageObject, error) {
-	response, _, err := b.apiCall("/users/@me/channels", "POST", `{"recipient_id": "`+snowflakeID+`"}`)
+	response, err := b.api.Call("/users/@me/channels", "POST", `{"recipient_id": "`+snowflakeID+`"}`)
 	if err != nil {
 		return messageObject{}, errors.Wrap(err, "apiCall failed")
 	}
-	if checkRateLimit(response) > 0 {
+	if checkRateLimit(response.Body) > 0 {
 		return messageObject{}, errors.New("sending failed (create channel)")
 	}
 
 	var channelResponseData map[string]interface{}
-	if err := json.Unmarshal(response, &channelResponseData); err != nil {
+	if err := json.Unmarshal(response.Body, &channelResponseData); err != nil {
 		return messageObject{}, errors.Wrap(err, "json unmarshal failed")
 	}
 
@@ -61,12 +61,7 @@ func (b *Bot) sendWhisper(snowflakeID string, content string) (messageObject, er
 		return messageObject{}, errors.Wrap(err, "no valid channel id found")
 	}
 
-	mo, err := b.messageRunner(channelID, content)
-	if err == nil {
-		b.stats.whispersSent++
-	}
-
-	return mo, err
+	return b.messageRunner(channelID, content)
 }
 
 func (b *Bot) sendMessage(receiver string, content string) (messageObject, error) {
@@ -98,12 +93,7 @@ func (b *Bot) sendMessage(receiver string, content string) (messageObject, error
 		}
 	}
 
-	mo, err := b.messageRunner(channelID, content)
-	if err == nil {
-		b.stats.messagesSent++
-	}
-
-	return mo, err
+	return b.messageRunner(channelID, content)
 }
 
 func (b *Bot) updateMessage(messageIdent model.MessageIdentifier, content string) (messageObject, error) {
@@ -121,18 +111,18 @@ func (b *Bot) messageRunner(channelID string, content string) (messageObject, er
 			return messageObject{}, errors.New("Message sending still failing after 3 tries, giving up")
 		}
 
-		response, _, err := b.apiCall("/channels/"+channelID+"/messages", "POST", `{"content": "`+convertMessageFromAbyleBotter(content)+`"}`)
+		response, err := b.api.Call("/channels/"+channelID+"/messages", "POST", `{"content": "`+convertMessageFromAbyleBotter(content)+`"}`)
 		if err != nil {
 			return messageObject{}, errors.Wrap(err, "apiCall failed")
 		}
 		var retryAfter int
-		if retryAfter = checkRateLimit(response); retryAfter > 0 {
+		if retryAfter = checkRateLimit(response.Body); retryAfter > 0 {
 			log.Warn("Sending failed because we are rate limited. Trying to resend after: " + strconv.Itoa(retryAfter))
 			time.Sleep(time.Duration(retryAfter) * time.Millisecond)
 			continue
 		}
 		log.Debugf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
-		return getMessageObject(response)
+		return getMessageObject(response.Body)
 	}
 
 	return messageObject{}, nil
@@ -144,18 +134,18 @@ func (b *Bot) updateRunner(channelID, messageID, content string) (messageObject,
 			return messageObject{}, errors.New("Message update still failing after 3 tries, giving up")
 		}
 
-		response, _, err := b.apiCall("/channels/"+channelID+"/messages/"+messageID, "PATCH", `{"content": "`+convertMessageFromAbyleBotter(content)+`"}`)
+		response, err := b.api.Call("/channels/"+channelID+"/messages/"+messageID, "PATCH", `{"content": "`+convertMessageFromAbyleBotter(content)+`"}`)
 		if err != nil {
 			return messageObject{}, errors.Wrap(err, "apiCall failed")
 		}
 		var retryAfter int
-		if retryAfter = checkRateLimit(response); retryAfter > 0 {
+		if retryAfter = checkRateLimit(response.Body); retryAfter > 0 {
 			log.Warn("Sending failed because we are rate limited. Trying to resend after: " + strconv.Itoa(retryAfter))
 			time.Sleep(time.Duration(retryAfter) * time.Millisecond)
 			continue
 		}
 		log.Debugf("DiscordBot: Update MESSAGE in ChannelID = %s, MessageID = %s, Content = %s", channelID, messageID, content)
-		return getMessageObject(response)
+		return getMessageObject(response.Body)
 	}
 
 	return messageObject{}, nil
@@ -167,18 +157,18 @@ func (b *Bot) deleteRunner(channelID string, messageID string) error {
 			return errors.New("Message delete still failing after 3 tries, giving up")
 		}
 
-		response, statusCode, err := b.apiCall("/channels/"+channelID+"/messages/"+messageID, "DELETE", "")
+		response, err := b.api.Call("/channels/"+channelID+"/messages/"+messageID, "DELETE", "")
 		if err != nil {
 			return errors.Wrap(err, "apiCall failed")
 		}
 		var retryAfter int
-		if retryAfter = checkRateLimit(response); retryAfter > 0 {
+		if retryAfter = checkRateLimit(response.Body); retryAfter > 0 {
 			log.Warn("Deleting failed because we are rate limited. Trying to resend after: " + strconv.Itoa(retryAfter))
 			time.Sleep(time.Duration(retryAfter) * time.Millisecond)
 			continue
 		}
 		log.Debugf("DiscordBot: Deleted MESSAGE from ChannelID = %s, MessageID = %s", channelID, messageID)
-		if statusCode != 204 {
+		if response.StatusCode != 204 {
 			return errors.Wrap(err, "error deleting message")
 		}
 		return nil

@@ -10,30 +10,17 @@ import (
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
 	"github.com/gorilla/websocket"
-	"golang.org/x/oauth2"
 
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
 	"github.com/torlenor/abylebotter/utils"
+	"github.com/torlenor/abylebotter/webclient"
 )
 
 var (
 	log = logging.Get("DiscordBot")
 )
-
-type stats struct {
-	messagesSent int64
-	whispersSent int64
-
-	messagesReceived int64
-	whispersReceived int64
-}
-
-func (s stats) toString() string {
-	return fmt.Sprintf("Messages Sent: %d\nMessages Received: %d\nWhispers Sent: %d\nWhispers Received: %d",
-		s.messagesSent, s.messagesReceived, s.whispersSent, s.whispersReceived)
-}
 
 type webSocketClient interface {
 	Dial(wsURL string) error
@@ -45,8 +32,14 @@ type webSocketClient interface {
 	SendJSONMessage(v interface{}) error
 }
 
+type api interface {
+	Call(path string, method string, body string) (webclient.APIResponse, error)
+}
+
 // The Bot struct holds parameters related to the bot
 type Bot struct {
+	api api
+
 	gatewayURL string
 	ws         webSocketClient
 
@@ -66,17 +59,16 @@ type Bot struct {
 
 	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
-
-	stats stats
-
-	discordOauthConfig *oauth2.Config
 }
 
-// CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+// CreateDiscordBotWithAPI creates a new instance of a DiscordBot with the
+// provided api
+func CreateDiscordBotWithAPI(api api, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
 	log.Info("DiscordBot is CREATING itself")
 
 	b := Bot{
+		api: api,
+
 		token: cfg.Token,
 		ws:    ws,
 
@@ -97,6 +89,13 @@ func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, er
 	b.guildNameToID = make(map[string]string)
 
 	return &b, nil
+}
+
+// CreateDiscordBot creates a new instance of a DiscordBot
+func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+	api := webclient.New("https://discordapp.com/api", "Bot "+cfg.Token, "application/json")
+
+	return CreateDiscordBotWithAPI(api, cfg, ws)
 }
 
 func (b *Bot) startHeartbeatSender(heartbeatInterval int) {
