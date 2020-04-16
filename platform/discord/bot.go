@@ -116,11 +116,7 @@ func (b *Bot) startHeartbeatSender(heartbeatInterval int) {
 	b.watchdog.SetFailCallback(b.onFail).Start(2 * interval)
 }
 
-func (b *Bot) reconnectWebSocket() error {
-	err := b.ws.Close()
-	if err != nil {
-		log.Warnf("Error closing the WebSocket: %s", err)
-	}
+func (b *Bot) reconnectWebSocketAfterClose() error {
 	return b.ws.Dial(b.gatewayURL)
 }
 
@@ -134,7 +130,7 @@ func (b *Bot) run() {
 				break
 			} else if websocket.IsCloseError(err, websocket.CloseGoingAway) {
 				log.Infof("Received GoingAway from WebSocket, reconnecting")
-				err := b.reconnectWebSocket()
+				err := b.reconnectWebSocketAfterClose()
 				if err != nil {
 					log.Errorf("Could not dial Discord WebSocket, Discord Bot not operational: %s", err.Error())
 					break
