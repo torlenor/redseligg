@@ -31,6 +31,8 @@ type webSocketClient interface {
 	Dial(wsURL string) error
 	Stop()
 
+	Close() error
+
 	ReadMessage() (int, []byte, error)
 
 	SendMessage(messageType int, data []byte) error
@@ -114,6 +116,14 @@ func (b *Bot) startHeartbeatSender(heartbeatInterval int) {
 	b.watchdog.SetFailCallback(b.onFail).Start(2 * interval)
 }
 
+func (b *Bot) reconnectWebSocket() error {
+	err := b.ws.Close()
+	if err != nil {
+		log.Warnf("Error closing the WebSocket: %s", err)
+	}
+	return b.ws.Dial(b.gatewayURL)
+}
+
 func (b *Bot) run() {
 	var fail bool
 	for {
@@ -121,11 +131,20 @@ func (b *Bot) run() {
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				log.Debugln("Connection closed normally: ", err)
+				break
+			} else if websocket.IsCloseError(err, websocket.CloseGoingAway) {
+				log.Infof("Received GoingAway from WebSocket, reconnecting")
+				err := b.reconnectWebSocket()
+				if err != nil {
+					log.Errorf("Could not dial Discord WebSocket, Discord Bot not operational: %s", err.Error())
+					break
+				}
+				continue
 			} else {
 				log.Errorln("UNHANDLED ERROR: ", err)
 				fail = true
+				break
 			}
-			break
 		}
 
 		var data map[string]interface{}

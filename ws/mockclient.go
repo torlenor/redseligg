@@ -37,6 +37,9 @@ func (c *MockClient) Stop() {
 	c.WasStopCalled = true
 }
 
+// Close the websocket
+func (c *MockClient) Close() error { return nil }
+
 // ReadMessage can be used to read the next message from WebSocket.
 // it blocks until somehing is received or the ws is closed.
 func (c *MockClient) ReadMessage() (int, []byte, error) {

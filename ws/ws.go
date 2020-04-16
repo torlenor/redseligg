@@ -14,6 +14,8 @@ type wsClient interface {
 
 	WriteMessage(messageType int, data []byte) error
 	WriteJSON(v interface{}) error
+
+	Close() error
 }
 
 // Client is an abstraction of a WebSocket client
@@ -81,6 +83,13 @@ func (c *Client) Stop() {
 	c.stopWorkers = nil
 
 	c.startStopMutex.Unlock()
+}
+
+// Close the websocket without sending a message to the server.
+// It stops the websocket sender first
+func (c *Client) Close() error {
+	c.Stop()
+	return c.ws.Close()
 }
 
 // ReadMessage can be used to read the next message from WebSocket.
