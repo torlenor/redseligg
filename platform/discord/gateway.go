@@ -3,8 +3,6 @@ package discord
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/gorilla/websocket"
 )
 
 type gatewayResponse struct {
@@ -27,14 +25,4 @@ func (b *Bot) getGateway() (string, error) {
 	url := dat["url"].(string)
 	log.Tracef("Received Discord gateway address: %s", url)
 	return url, nil
-}
-
-func dialGateway(gatewayURL string) *websocket.Conn {
-	log.Debugln("Dialing the Discord gateway")
-	c, _, err := websocket.DefaultDialer.Dial(gatewayURL, nil)
-	if err != nil {
-		log.Fatalln("FATAL: Could not dial the Discord gateway:", err)
-	}
-
-	return c
 }
