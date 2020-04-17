@@ -159,7 +159,7 @@ func (b *Bot) run() {
 	defer func() {
 		if e != nil {
 			log.Error(e)
-			b.onFail()
+			go b.onFail()
 		}
 	}()
 
@@ -179,6 +179,7 @@ func (b *Bot) run() {
 				break
 			} else if websocket.IsCloseError(err, websocket.CloseGoingAway) {
 				log.Infof("Received GoingAway from Discord Gateway, attempting a reconnect")
+				b.stopHeartBeatWatchdog()
 				b.ws.Close()
 				err := b.openGatewayConnection()
 				if err != nil {
@@ -200,6 +201,7 @@ func (b *Bot) run() {
 
 		if data.Op == 7 { // Reconnect: You must reconnect with a new session immediately.
 			log.Info("Received request to reconnect")
+			b.stopHeartBeatWatchdog()
 			b.ws.Close()
 			e = b.openGatewayConnection()
 		} else if data.Op == 9 { // Invalid Session: The session has been invalidated. You should reconnect and identify/resume accordingly.
@@ -210,6 +212,7 @@ func (b *Bot) run() {
 				// It does not want us to resume, so we are resetting our sessionID
 				b.sessionID = ""
 			}
+			b.stopHeartBeatWatchdog()
 			b.ws.Close()
 			e = b.openGatewayConnection()
 		} else if data.Op == 11 { // Heartbeat ACK
@@ -358,19 +361,24 @@ func (b *Bot) sendCloseRestartToWebsocket() error {
 }
 
 func (b *Bot) onFail() {
-	log.Warnf("Encountered an error, trying to restart the bot...")
+	log.Warn("Encountered an error, trying to restart the bot")
 
+	log.Debug("Stopping heartbeat watchdog")
 	b.stopHeartBeatWatchdog()
 
+	log.Debug("Sending close to websocket")
 	err := b.sendCloseToWebsocket()
 	if err != nil {
 		log.Errorf("Error when writing close message to ws: %s, still trying to recover", err)
 	}
 
+	log.Debug("Waiting for waitgroup to be done")
 	b.wg.Wait()
 
+	log.Debug("Closing websocket")
 	b.ws.Close()
 
+	log.Debug("Get new gateway address")
 	url, err := b.getGateway()
 	if err != nil {
 		log.Errorf("Error connecting to Discord servers: %s", err)
@@ -378,12 +386,14 @@ func (b *Bot) onFail() {
 	}
 	b.gatewayURL = url
 
+	log.Debugf("Dialing gateway at %s", b.gatewayURL)
 	err = b.ws.Dial(b.gatewayURL)
 	if err != nil {
 		log.Errorln("Could not dial Discord WebSocket, Discord Bot not operational:", err)
 		return
 	}
 
+	log.Debug("Launching run goroutine")
 	go func() {
 		b.wg.Add(1)
 		b.run()
