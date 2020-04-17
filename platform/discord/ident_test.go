@@ -17,7 +17,11 @@ func Test_SendIdent(t *testing.T) {
 	expectedIdent := []byte(`{"op": 2,
 			"d": {
 				"token": "` + testToken + `",
-				"properties": {},
+				"properties": {
+					"$os": "linux",
+					"$browser": "abylebotter",
+					"$device": "abylebotter"
+				  },
 				"compress": false,
 				"large_threshold": 250
 			}
@@ -45,7 +49,11 @@ func Test_SendIdentFail(t *testing.T) {
 	expectedIdent := []byte(`{"op": 2,
 			"d": {
 				"token": "` + testToken + `",
-				"properties": {},
+				"properties": {
+					"$os": "linux",
+					"$browser": "abylebotter",
+					"$device": "abylebotter"
+				  },
 				"compress": false,
 				"large_threshold": 250
 			}

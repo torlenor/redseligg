@@ -33,8 +33,9 @@ func (c *MockClient) Dial(wsURL string) error {
 }
 
 // Stop sending data to the WebSocket
-func (c *MockClient) Stop() {
+func (c *MockClient) Stop() error {
 	c.WasStopCalled = true
+	return nil
 }
 
 // Close the websocket

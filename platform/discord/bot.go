@@ -29,8 +29,6 @@ var newHeartbeatSender = func(ws webSocketClient) *discordHeartBeatSender {
 
 type webSocketClient interface {
 	Dial(wsURL string) error
-	Stop()
-
 	Close() error
 
 	ReadMessage() (int, []byte, error)
@@ -65,6 +63,8 @@ type Bot struct {
 
 	guilds        map[string]guildCreate // map[ID]
 	guildNameToID map[string]string
+
+	sessionID string
 }
 
 // CreateDiscordBotWithAPI creates a new instance of a DiscordBot with the
@@ -104,106 +104,161 @@ func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, er
 	return CreateDiscordBotWithAPI(api, cfg, ws)
 }
 
-func (b *Bot) startHeartbeatSender(heartbeatInterval int) {
+func (b *Bot) startHeartbeatSender(heartbeatInterval time.Duration) {
 	b.heartBeatStopChan = make(chan bool)
 
-	interval := time.Duration(heartbeatInterval) * time.Millisecond
 	go func() {
 		b.wg.Add(1)
-		heartBeat(interval, newHeartbeatSender(b.ws), b.heartBeatStopChan, b.seqNumberChan, b.onFail)
+		heartBeat(heartbeatInterval, newHeartbeatSender(b.ws), b.heartBeatStopChan, b.seqNumberChan, b.onFail)
 		defer b.wg.Done()
 	}()
-	b.watchdog.SetFailCallback(b.onFail).Start(2 * interval)
+	b.watchdog.SetFailCallback(b.onFail).Start(2 * heartbeatInterval)
 }
 
-func (b *Bot) reconnectWebSocketAfterClose() error {
-	return b.ws.Dial(b.gatewayURL)
+func (b *Bot) openGatewayConnection() error {
+	b.ws.Dial(b.gatewayURL)
+
+	// WS: 1 - 10 HELLO
+	_, message, err := b.ws.ReadMessage()
+	if err != nil {
+		return fmt.Errorf("Error occurred during initial communication with Discord Gateway: %s", err)
+	}
+
+	var data event
+	if err := json.Unmarshal(message, &data); err != nil {
+		return fmt.Errorf("Error occurred during initial communication with Discord Gateway: Could not unmarshal event: %s", err)
+	}
+
+	if data.Op != 10 { // If not Hello from Discord Gateway
+		return fmt.Errorf("Error occurred during initial communication with Discord Gateway: Did not receive a HELLO, but OP Code %d", data.Op)
+	}
+
+	// Perform IDENT/RESUME
+	if b.sessionID == "" {
+		err = sendIdent(b.token, b.ws)
+	} else {
+		err = sendResume(b.token, b.sessionID, b.currentSeqNumber, b.ws)
+	}
+	if err != nil {
+		return fmt.Errorf("Error occurred during initial communication with Discord Gateway: Could not send IDENT/RESUME: %s", err)
+	}
+
+	var helloEvent hello
+	if err := json.Unmarshal(data.RawData, &helloEvent); err != nil {
+		return fmt.Errorf("Error occurred during initial communication with Discord Gateway: Could not unmarshal HELLO event: %s", err)
+	}
+
+	// Start sending Heartbeats
+	b.startHeartbeatSender(time.Duration(helloEvent.HeartbeatInterval) * time.Millisecond)
+
+	return nil
 }
 
 func (b *Bot) run() {
-	var fail bool
+	var e error
+	defer func() {
+		if e != nil {
+			log.Error(e)
+			b.onFail()
+		}
+	}()
+
+	e = b.openGatewayConnection()
+	if e != nil {
+		return
+	}
+
+	log.Info("DiscordBot is READY")
+
+	// Go into event handling
 	for {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-				log.Debugln("Connection closed normally: ", err)
+				log.Debugln("Connection to Discord Gateway closed normally: ", err)
 				break
 			} else if websocket.IsCloseError(err, websocket.CloseGoingAway) {
-				log.Infof("Received GoingAway from WebSocket, reconnecting")
-				err := b.reconnectWebSocketAfterClose()
+				log.Infof("Received GoingAway from Discord Gateway, attempting a reconnect")
+				b.ws.Close()
+				err := b.openGatewayConnection()
 				if err != nil {
-					log.Errorf("Could not dial Discord WebSocket, Discord Bot not operational: %s", err.Error())
+					e = fmt.Errorf("Could not reconnect to Discord Gateway: %s", err.Error())
 					break
 				}
 				continue
 			} else {
-				log.Errorln("UNHANDLED ERROR: ", err)
-				fail = true
+				e = fmt.Errorf("Unhandled error in Discord Gateway communication logic: %s", err)
 				break
 			}
 		}
 
-		var data map[string]interface{}
-
+		var data event
 		if err := json.Unmarshal(message, &data); err != nil {
-			log.Errorln("UNHANDLED ERROR: ", err)
+			log.Warnf("Could not unmarshal event from Discord Gateway: %s", err)
 			continue
 		}
 
-		if data["op"].(float64) == 10 { // Hello from Discord Gateway
-			log.Debugln("Received HELLO from gateway")
-			sendIdent(b.token, b.ws)
-			heartbeatInterval := int(data["d"].(map[string]interface{})["heartbeat_interval"].(float64))
-			b.startHeartbeatSender(heartbeatInterval)
-			log.Infoln("DiscordBot is READY")
-		} else if data["op"].(float64) == 0 { // Dispatch to event handlers
-			switch data["t"] {
-			case "MESSAGE_CREATE":
-				b.handleMessageCreate(data)
-			case "READY":
-				b.handleReady(data)
-			case "GUILD_CREATE":
-				b.handleGuildCreate(data)
-			case "PRESENCE_UPDATE":
-				b.handlePresenceUpdate(data)
-			case "PRESENCE_REPLACE":
-				b.handlePresenceReplace(data)
-			case "TYPING_START":
-				b.handleTypingStart(data)
-			case "CHANNEL_CREATE":
-				b.handleChannelCreate(data)
-			case "MESSAGE_REACTION_ADD":
-				b.handleMessageReactionAdd(data)
-			case "MESSAGE_REACTION_REMOVE":
-				b.handleMessageReactionRemove(data)
-			case "MESSAGE_DELETE":
-				b.handleMessageDelete(data)
-			case "MESSAGE_UPDATE":
-				b.handleMessageUpdate(data)
-			case "CHANNEL_PINS_UPDATE":
-				b.handleChannelPinsUpdate(data)
-			case "GUILD_MEMBER_UPDATE":
-				b.handleGuildMemberUpdate(data)
-			case "PRESENCES_REPLACE":
-				b.handlePresencesReplace(data)
-			default:
-				log.Errorln("Unhandled message:", string(message))
-				b.handleUnknown(data)
+		if data.Op == 7 { // Reconnect: You must reconnect with a new session immediately.
+			log.Info("Received request to reconnect")
+			b.ws.Close()
+			e = b.openGatewayConnection()
+		} else if data.Op == 9 { // Invalid Session: The session has been invalidated. You should reconnect and identify/resume accordingly.
+			log.Warn("Invalid Session received")
+			var invalidSessionData invalidSession
+			json.Unmarshal(message, &invalidSessionData)
+			if !invalidSessionData.D {
+				// It does not want us to resume, so we are resetting our sessionID
+				b.sessionID = ""
 			}
-			b.currentSeqNumber = int(data["s"].(float64))
-			b.seqNumberChan <- b.currentSeqNumber
-		} else if data["op"].(float64) == 9 { // Invalid Session
-			log.Errorln("Invalid Session received. Please try again...")
-			return
-		} else if data["op"].(float64) == 11 { // Heartbeat ACK
+			b.ws.Close()
+			e = b.openGatewayConnection()
+		} else if data.Op == 11 { // Heartbeat ACK
 			b.watchdog.Feed()
-		} else { // opcode which is not handled, yet
-			log.Errorf("data: %s", data)
+		} else if data.Op == 0 { // Regular events to dispatch to event handlers
+			switch data.Type {
+			// Events managing communication with Discord API
+			case "READY":
+				b.handleReady(data.RawData)
+			case "RESUMED":
+				// Not needed for now
+			case "RECONNECT":
+				b.ws.Close()
+				e = b.openGatewayConnection()
+			// Real events
+			case "MESSAGE_CREATE":
+				b.handleMessageCreate(data.RawData)
+			case "GUILD_CREATE":
+				b.handleGuildCreate(data.RawData)
+			case "PRESENCE_UPDATE":
+				b.handlePresenceUpdate(data.RawData)
+			case "PRESENCE_REPLACE":
+				b.handlePresenceReplace(data.RawData)
+			case "TYPING_START":
+				b.handleTypingStart(data.RawData)
+			case "CHANNEL_CREATE":
+				b.handleChannelCreate(data.RawData)
+			case "MESSAGE_REACTION_ADD":
+				b.handleMessageReactionAdd(data.RawData)
+			case "MESSAGE_REACTION_REMOVE":
+				b.handleMessageReactionRemove(data.RawData)
+			case "MESSAGE_DELETE":
+				b.handleMessageDelete(data.RawData)
+			case "MESSAGE_UPDATE":
+				b.handleMessageUpdate(data.RawData)
+			case "CHANNEL_PINS_UPDATE":
+				b.handleChannelPinsUpdate(data.RawData)
+			case "GUILD_MEMBER_UPDATE":
+				b.handleGuildMemberUpdate(data.RawData)
+			case "PRESENCES_REPLACE":
+				b.handlePresencesReplace(data.RawData)
+			default:
+				log.Warnln("Unhandled message:", string(message))
+			}
+			b.currentSeqNumber = int(data.Seq)
+			b.seqNumberChan <- b.currentSeqNumber
+		} else {
+			log.Warnf("Unknown Op Code %d received, data: %v", data.Op, data)
 		}
-	}
-
-	if fail {
-		b.onFail()
 	}
 }
 
@@ -259,13 +314,14 @@ func (b *Bot) stop() {
 
 	b.stopHeartBeatWatchdog()
 
-	err := b.closeWebSocket()
+	err := b.sendCloseToWebsocket()
 	if err != nil {
 		log.Errorln("Error when writing close message to ws:", err)
 	}
 
 	b.wg.Wait()
-	b.ws.Stop()
+
+	b.ws.Close()
 
 	log.Infoln("DiscordBot is SHUT DOWN")
 }
@@ -287,8 +343,18 @@ func (b *Bot) GetInfo() platform.BotInfo {
 	}
 }
 
-func (b *Bot) closeWebSocket() error {
-	return b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+func (b *Bot) sendCloseToWebsocket() error {
+	if b.ws != nil {
+		return b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	}
+	return nil
+}
+
+func (b *Bot) sendCloseRestartToWebsocket() error {
+	if b.ws != nil {
+		return b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseServiceRestart, ""))
+	}
+	return nil
 }
 
 func (b *Bot) onFail() {
@@ -296,13 +362,14 @@ func (b *Bot) onFail() {
 
 	b.stopHeartBeatWatchdog()
 
-	err := b.closeWebSocket()
+	err := b.sendCloseToWebsocket()
 	if err != nil {
 		log.Errorf("Error when writing close message to ws: %s, still trying to recover", err)
 	}
 
 	b.wg.Wait()
-	b.ws.Stop()
+
+	b.ws.Close()
 
 	url, err := b.getGateway()
 	if err != nil {

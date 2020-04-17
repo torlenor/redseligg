@@ -2,18 +2,27 @@ package discord
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
-
-	"github.com/mitchellh/mapstructure"
 )
 
+type event struct {
+	Op      int             `json:"op"`
+	Seq     int64           `json:"s"`
+	Type    string          `json:"t"`
+	RawData json.RawMessage `json:"d"`
+}
+
+type hello struct {
+	HeartbeatInterval int64 `json:"heartbeat_interval"`
+}
+
+type invalidSession struct {
+	Op int  `json:"op"`
+	D  bool `json:"d"`
+}
+
 type typingStart struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	UserID    string `json:"user_id"`
 	Timestamp int    `json:"timestamp"`
 	Member    struct {
@@ -30,40 +39,6 @@ type typingStart struct {
 	} `json:"member"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeTypingStart(data map[string]interface{}) (typingStart, error) {
-	var newTypingStart typingStart
-	err := mapstructure.Decode(data["d"], &newTypingStart)
-	if err != nil {
-		log.Debugln("Error automatically decoding typingStart, ignoring it")
-	}
-
-	// FIXME: Workaround for GuildID not decoded correctly
-	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
-		newTypingStart.UserID = str
-	}
-	// FIXME: Workaround for GuildID not decoded correctly
-	if str, ok := data["d"].(map[string]interface{})["guild_id"].(string); ok {
-		newTypingStart.GuildID = str
-	}
-	// FIXME: Workaround for ChannelID not decoded correctly
-	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
-		newTypingStart.ChannelID = str
-	}
-	// FIXME: Workaround for JoinedAt not decoded correctly
-	if val, ok := data["d"].(map[string]interface{})["member"]; ok {
-		if str, ok := val.(map[string]interface{})["join_at"].(string); ok {
-			t, err := time.Parse(time.RFC3339, str)
-			if err != nil {
-				log.Errorln("UNHANDELED ERROR: decodeTypingStart:", err)
-			}
-			newTypingStart.Member.JoinedAt = t
-		}
-	}
-
-	return newTypingStart, nil
 }
 
 func (t typingStart) toString() string {
@@ -75,10 +50,6 @@ func (t typingStart) toString() string {
 }
 
 type presenceUpdate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	User struct {
 		ID string `json:"id"`
 	} `json:"user"`
@@ -90,20 +61,6 @@ type presenceUpdate struct {
 		Type int    `json:"type"`
 		Name string `json:"name"`
 	} `json:"game"`
-	// } `json:"d"`
-}
-
-func decodePresenceUpdate(data map[string]interface{}) (presenceUpdate, error) {
-	var newPresenceUpdate presenceUpdate
-	err := mapstructure.Decode(data["d"], &newPresenceUpdate)
-	if err != nil {
-		log.Debugln("Error automatically decoding presenceUpdate, ignoring it")
-	}
-
-	// FIXME: Workaround for GuildID not decoded correctly
-	newPresenceUpdate.GuildID = data["d"].(map[string]interface{})["guild_id"].(string)
-
-	return newPresenceUpdate, nil
 }
 
 func (p presenceUpdate) toString() string {
@@ -115,10 +72,6 @@ func (p presenceUpdate) toString() string {
 }
 
 type messageCreate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	Type            int           `json:"type"`
 	Tts             bool          `json:"tts"`
 	Timestamp       time.Time     `json:"timestamp"`
@@ -147,29 +100,6 @@ type messageCreate struct {
 	} `json:"author"`
 	Attachments []interface{} `json:"attachments"`
 	GuildID     string        `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeMessageCreate(data map[string]interface{}) (messageCreate, error) {
-	var newMessageCreate messageCreate
-	err := mapstructure.Decode(data["d"], &newMessageCreate)
-	if err != nil {
-		log.Debugln("Error automatically decoding messageCreate, ignoring it")
-	}
-
-	// FIXME: Workaround for ChannelID not decoded correctly
-	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
-		newMessageCreate.ChannelID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["timestamp"].(string); ok {
-		t, err := time.Parse(time.RFC3339, str)
-		if err != nil {
-			return messageCreate{}, errors.New("decodeMessageCreate:" + err.Error())
-		}
-		newMessageCreate.Timestamp = t
-	}
-
-	return newMessageCreate, nil
 }
 
 func (mc messageCreate) toString() string {
@@ -195,10 +125,6 @@ type channel struct {
 }
 
 type guildCreate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	VoiceStates       []interface{} `json:"voice_states"`
 	VerificationLevel int           `json:"verification_level"`
 	Unavailable       bool          `json:"unavailable"`
@@ -252,17 +178,6 @@ type guildCreate struct {
 	ApplicationID               interface{}   `json:"application_id"`
 	AfkTimeout                  int           `json:"afk_timeout"`
 	AfkChannelID                interface{}   `json:"afk_channel_id"`
-	// } `json:"d"`
-}
-
-func decodeGuildCreate(data map[string]interface{}) (guildCreate, error) {
-	var newGuildCreate guildCreate
-	err := mapstructure.Decode(data["d"], &newGuildCreate)
-	if err != nil {
-		return guildCreate{}, errors.New("decodeGuildCreate" + err.Error())
-	}
-
-	return newGuildCreate, nil
 }
 
 func (gc guildCreate) toString() string {
@@ -274,10 +189,6 @@ func (gc guildCreate) toString() string {
 }
 
 type ready struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	V            int `json:"v"`
 	UserSettings struct {
 	} `json:"user_settings"`
@@ -300,17 +211,6 @@ type ready struct {
 		ID          string `json:"id"`
 	} `json:"guilds"`
 	Trace []string `json:"_trace"`
-	// } `json:"d"`
-}
-
-func decodeReady(data map[string]interface{}) (ready, error) {
-	var newReady ready
-	err := mapstructure.Decode(data["d"], &newReady)
-	if err != nil {
-		return ready{}, errors.New("decodeReady" + err.Error())
-	}
-
-	return newReady, nil
 }
 
 func (r ready) toString() string {
@@ -322,10 +222,6 @@ func (r ready) toString() string {
 }
 
 type channelCreate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	Type       int `json:"type"`
 	Recipients []struct {
 		Username      string `json:"username"`
@@ -335,17 +231,6 @@ type channelCreate struct {
 	} `json:"recipients"`
 	LastMessageID string `json:"last_message_id"`
 	ID            string `json:"id"`
-	// } `json:"d"`
-}
-
-func decodeChannelCreate(data map[string]interface{}) (channelCreate, error) {
-	var newChannelCreate channelCreate
-	err := mapstructure.Decode(data["d"], &newChannelCreate)
-	if err != nil {
-		return channelCreate{}, errors.New("decodeChannelCreate: " + err.Error())
-	}
-
-	return newChannelCreate, nil
 }
 
 func (cc channelCreate) toString() string {
@@ -357,24 +242,9 @@ func (cc channelCreate) toString() string {
 }
 
 type messageDelete struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	ID        string `json:"id"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeMessageDelete(data map[string]interface{}) (messageDelete, error) {
-	var newMessageDelete messageDelete
-	err := mapstructure.Decode(data["d"], &newMessageDelete)
-	if err != nil {
-		return messageDelete{}, errors.New("decodeMessageDelete: " + err.Error())
-	}
-
-	return newMessageDelete, nil
 }
 
 func (md messageDelete) toString() string {
@@ -386,10 +256,6 @@ func (md messageDelete) toString() string {
 }
 
 type messageReactionAdd struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	UserID    string `json:"user_id"`
 	MessageID string `json:"message_id"`
 	Member    struct {
@@ -411,31 +277,6 @@ type messageReactionAdd struct {
 	} `json:"emoji"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeMessageReactionAdd(data map[string]interface{}) (messageReactionAdd, error) {
-	var newMessageReactionAdd messageReactionAdd
-	err := mapstructure.Decode(data["d"], &newMessageReactionAdd)
-	if err != nil {
-		return messageReactionAdd{}, errors.New("decodeMessageReactionAdd: " + err.Error())
-	}
-
-	// FIXME: Workaround things not decoded correctly
-	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
-		newMessageReactionAdd.UserID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
-		newMessageReactionAdd.ChannelID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["message_id"].(string); ok {
-		newMessageReactionAdd.MessageID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["guild_id"].(string); ok {
-		newMessageReactionAdd.GuildID = str
-	}
-
-	return newMessageReactionAdd, nil
 }
 
 func (mra messageReactionAdd) toString() string {
@@ -447,10 +288,6 @@ func (mra messageReactionAdd) toString() string {
 }
 
 type messageReactionRemove struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	UserID    string `json:"user_id"`
 	MessageID string `json:"message_id"`
 	Emoji     struct {
@@ -460,31 +297,6 @@ type messageReactionRemove struct {
 	} `json:"emoji"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeMessageReactionRemove(data map[string]interface{}) (messageReactionRemove, error) {
-	var newMessageReactionRemove messageReactionRemove
-	err := mapstructure.Decode(data["d"], &newMessageReactionRemove)
-	if err != nil {
-		return messageReactionRemove{}, errors.New("decodeMessageReactionRemove: " + err.Error())
-	}
-
-	// FIXME: Workaround things not decoded correctly
-	if str, ok := data["d"].(map[string]interface{})["user_id"].(string); ok {
-		newMessageReactionRemove.UserID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["channel_id"].(string); ok {
-		newMessageReactionRemove.ChannelID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["message_id"].(string); ok {
-		newMessageReactionRemove.MessageID = str
-	}
-	if str, ok := data["d"].(map[string]interface{})["guild_id"].(string); ok {
-		newMessageReactionRemove.GuildID = str
-	}
-
-	return newMessageReactionRemove, nil
 }
 
 func (mrr messageReactionRemove) toString() string {
@@ -496,10 +308,6 @@ func (mrr messageReactionRemove) toString() string {
 }
 
 type messageUpdate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	Type            int           `json:"type"`
 	Tts             bool          `json:"tts"`
 	Timestamp       time.Time     `json:"timestamp"`
@@ -521,17 +329,6 @@ type messageUpdate struct {
 	} `json:"author"`
 	Attachments []interface{} `json:"attachments"`
 	GuildID     string        `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeMessageUpdate(data map[string]interface{}) (messageUpdate, error) {
-	var newMessageUpdate messageUpdate
-	err := mapstructure.Decode(data["d"], &newMessageUpdate)
-	if err != nil {
-		return messageUpdate{}, errors.New("decodeMessageUpdate: " + err.Error())
-	}
-
-	return newMessageUpdate, nil
 }
 
 func (mu messageUpdate) toString() string {
@@ -543,24 +340,9 @@ func (mu messageUpdate) toString() string {
 }
 
 type channelPinsUpdate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	LastPinTimestamp time.Time `json:"last_pin_timestamp"`
 	ChannelID        string    `json:"channel_id"`
 	GuildID          string    `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeChannelPinsUpdate(data map[string]interface{}) (channelPinsUpdate, error) {
-	var newChannelPinsUpdate channelPinsUpdate
-	err := mapstructure.Decode(data["d"], &newChannelPinsUpdate)
-	if err != nil {
-		return channelPinsUpdate{}, errors.New("decodeChannelPinsUpdate: " + err.Error())
-	}
-
-	return newChannelPinsUpdate, nil
 }
 
 func (cpu channelPinsUpdate) toString() string {
@@ -572,10 +354,6 @@ func (cpu channelPinsUpdate) toString() string {
 }
 
 type guildMemberUpdate struct {
-	// T  string `json:"t"`
-	// S  int    `json:"s"`
-	// Op int    `json:"op"`
-	// D  struct {
 	User struct {
 		Username      string      `json:"username"`
 		ID            string      `json:"id"`
@@ -586,17 +364,6 @@ type guildMemberUpdate struct {
 	Roles   []string    `json:"roles"`
 	Nick    interface{} `json:"nick"`
 	GuildID string      `json:"guild_id"`
-	// } `json:"d"`
-}
-
-func decodeGuildMemberUpdate(data map[string]interface{}) (guildMemberUpdate, error) {
-	var newGuildMemberUpdate guildMemberUpdate
-	err := mapstructure.Decode(data["d"], &newGuildMemberUpdate)
-	if err != nil {
-		return guildMemberUpdate{}, errors.New("decodeGuildMemberUpdate: " + err.Error())
-	}
-
-	return newGuildMemberUpdate, nil
 }
 
 func (gmu guildMemberUpdate) toString() string {
@@ -609,20 +376,7 @@ func (gmu guildMemberUpdate) toString() string {
 }
 
 type presencesReplace struct {
-	// T  string        `json:"t"`
-	// S  int           `json:"s"`
-	// Op int           `json:"op"`
 	D []interface{} `json:"d"`
-}
-
-func decodePresencesReplace(data map[string]interface{}) (presencesReplace, error) {
-	var newPresencesReplace presencesReplace
-	err := mapstructure.Decode(data["d"], &newPresencesReplace)
-	if err != nil {
-		return presencesReplace{}, errors.New("decodePresencesReplace: " + err.Error())
-	}
-
-	return newPresencesReplace, nil
 }
 
 func (pr presencesReplace) toString() string {

@@ -18,7 +18,7 @@ import (
 
 type webSocketClient interface {
 	Dial(wsURL string) error
-	Stop()
+	Close() error
 
 	ReadMessage() (int, []byte, error)
 
@@ -158,7 +158,8 @@ func (b *Bot) Stop() {
 	}
 
 	b.wg.Wait()
-	b.ws.Stop()
+
+	b.ws.Close()
 
 	b.log.Infoln("SlackBot is SHUT DOWN")
 }

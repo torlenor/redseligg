@@ -84,11 +84,11 @@ func Test_HeartBeatSendFail(t *testing.T) {
 
 	// If anybody knows a better way in golang than using sleeps, please tell me
 
-	go heartBeat(10, mockSender, stopHeartBeat, seqNumberChan, onFailHandler.onFail)
+	go heartBeat(100, mockSender, stopHeartBeat, seqNumberChan, onFailHandler.onFail)
 
 	i := 1
 	seqNumberChan <- i
-	time.Sleep(time.Millisecond * 20)
+	time.Sleep(time.Millisecond * 200)
 	if mockSender.lastHeartBeatSent != string(`{"op":1,"d":`+strconv.Itoa(i)+`}`) {
 		t.Fatalf("bad heartbeat message received for seqNumber %d", i)
 	}
@@ -99,5 +99,5 @@ func Test_HeartBeatSendFail(t *testing.T) {
 
 	close(stopHeartBeat)
 
-	time.Sleep(time.Millisecond * 20)
+	time.Sleep(time.Millisecond * 200)
 }

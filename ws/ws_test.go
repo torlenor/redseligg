@@ -101,7 +101,7 @@ func TestClient_Dial(t *testing.T) {
 		assert.NotNil(client.ws)
 		assert.NotNil(client.stopWorkers)
 
-		assert.NotPanics(func() { client.Stop() })
+		assert.NotPanics(func() { client.Close() })
 
 		assert.Nil(client.ws)
 		assert.Nil(client.stopWorkers)
@@ -129,7 +129,7 @@ func TestClient_Dial(t *testing.T) {
 		assert.Nil(client.ws)
 		assert.Nil(client.stopWorkers)
 
-		assert.NotPanics(func() { client.Stop() })
+		assert.NotPanics(func() { client.Close() })
 	}
 
 }
@@ -157,7 +157,7 @@ func TestClient_ReadMessage(t *testing.T) {
 	_, _, err = client.ReadMessage()
 	assert.Error(err)
 
-	assert.NotPanics(func() { client.Stop() })
+	assert.NotPanics(func() { client.Close() })
 }
 
 func TestClient_SendMessage(t *testing.T) {
@@ -186,7 +186,7 @@ func TestClient_SendMessage(t *testing.T) {
 	assert.Equal(5, mockWsClient.lastMessageType)
 	assert.Equal([]byte("OTHER MESSAGE"), mockWsClient.lastData)
 
-	assert.NotPanics(func() { client.Stop() })
+	assert.NotPanics(func() { client.Close() })
 }
 
 func TestClient_SendJSONMessage(t *testing.T) {
@@ -213,5 +213,5 @@ func TestClient_SendJSONMessage(t *testing.T) {
 	assert.Error(err)
 	assert.Equal([]byte("OTHER MESSAGE"), mockWsClient.lastJSON)
 
-	assert.NotPanics(func() { client.Stop() })
+	assert.NotPanics(func() { client.Close() })
 }

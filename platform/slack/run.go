@@ -72,7 +72,8 @@ func (b *Bot) onFail() {
 		b.log.Warnln("Error when writing close message to ws:", err)
 	}
 	b.wg.Wait()
-	b.ws.Stop()
+
+	b.ws.Close()
 
 	rtmConnectResponse, err := b.RtmConnect()
 	if err != nil {

@@ -70,8 +70,9 @@ func (c *Client) Dial(wsURL string) error {
 	return nil
 }
 
-// Stop sending data to the WebSocket
-func (c *Client) Stop() {
+// Close the websocket without sending a message to the server.
+// It stops the websocket sender first.
+func (c *Client) Close() error {
 	c.startStopMutex.Lock()
 
 	if c.stopWorkers != nil {
@@ -79,17 +80,17 @@ func (c *Client) Stop() {
 		c.workersWG.Wait()
 	}
 
-	c.ws = nil
+	var err error
+	if c.ws != nil {
+		err = c.ws.Close()
+		c.ws = nil
+	}
+
 	c.stopWorkers = nil
 
 	c.startStopMutex.Unlock()
-}
 
-// Close the websocket without sending a message to the server.
-// It stops the websocket sender first
-func (c *Client) Close() error {
-	c.Stop()
-	return c.ws.Close()
+	return err
 }
 
 // ReadMessage can be used to read the next message from WebSocket.

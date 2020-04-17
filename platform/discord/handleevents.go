@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"encoding/json"
+
 	"github.com/torlenor/abylebotter/model"
 )
 
@@ -44,14 +46,15 @@ func (b *Bot) dispatchMessage(msg messageCreate) {
 	}
 }
 
-func (b *Bot) handleMessageCreate(data map[string]interface{}) {
-	newMessageCreate, err := decodeMessageCreate(data)
+func (b *Bot) handleMessageCreate(data json.RawMessage) {
+	var newMessageCreate messageCreate
+	err := json.Unmarshal(data, &newMessageCreate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: MESSAGE_CREATE", err)
 		return
 	}
 
-	log.Debugf("Received: MESSAGE_CREATE from User = %s, Content = %s, Timestamp = %s, ChannelID = %s", newMessageCreate.Author.Username, newMessageCreate.Content, newMessageCreate.Timestamp, newMessageCreate.ChannelID)
+	log.Tracef("Received: MESSAGE_CREATE from User = %s, Content = %s, Timestamp = %s, ChannelID = %s", newMessageCreate.Author.Username, newMessageCreate.Content, newMessageCreate.Timestamp, newMessageCreate.ChannelID)
 
 	snowflakeID := newMessageCreate.Author.ID
 
@@ -60,19 +63,22 @@ func (b *Bot) handleMessageCreate(data map[string]interface{}) {
 	}
 }
 
-func (b *Bot) handleReady(data map[string]interface{}) {
-	newReady, err := decodeReady(data)
+func (b *Bot) handleReady(data json.RawMessage) {
+	var newReady ready
+	err := json.Unmarshal(data, &newReady)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: READY", err)
 		return
 	}
 	b.ownSnowflakeID = newReady.User.ID
+	b.sessionID = newReady.SessionID
 
-	log.Debugf("Received: READY for Bot User = %s, UserID = %s, SnowflakeID = %s", newReady.User.Username, newReady.User.ID, b.ownSnowflakeID)
+	log.Tracef("Received: READY for Bot User = %s, UserID = %s, SnowflakeID = %s", newReady.User.Username, newReady.User.ID, b.ownSnowflakeID)
 }
 
-func (b *Bot) handleGuildCreate(data map[string]interface{}) {
-	newGuildCreate, err := decodeGuildCreate(data)
+func (b *Bot) handleGuildCreate(data json.RawMessage) {
+	var newGuildCreate guildCreate
+	err := json.Unmarshal(data, &newGuildCreate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: GUILD_CREATE", err)
 		return
@@ -81,50 +87,55 @@ func (b *Bot) handleGuildCreate(data map[string]interface{}) {
 	b.guilds[newGuildCreate.ID] = newGuildCreate
 	b.guildNameToID[newGuildCreate.Name] = newGuildCreate.ID
 
-	log.Debugln("GUILD_CREATE: Added new Guild:", newGuildCreate.Name)
+	log.Traceln("GUILD_CREATE: Added new Guild:", newGuildCreate.Name)
 }
 
-func (b *Bot) handlePresenceUpdate(data map[string]interface{}) {
-	newPresenceUpdate, err := decodePresenceUpdate(data)
+func (b *Bot) handlePresenceUpdate(data json.RawMessage) {
+	var newPresenceUpdate presenceUpdate
+	err := json.Unmarshal(data, &newPresenceUpdate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: PRESENCE_UPDATE", err)
 		return
 	}
 
-	log.Debugf("Received: PRESENCE_UPDATE for UserID = %s", newPresenceUpdate.User.ID)
+	log.Tracef("Received: PRESENCE_UPDATE for UserID = %s", newPresenceUpdate.User.ID)
 }
 
-func (b *Bot) handlePresenceReplace(data map[string]interface{}) {
-	log.Warnf("NOT_IMPLEMENTED: PRESENCE_REPLACE: data['t']: %s, data['d']: %s", data["t"], data["d"])
+func (b *Bot) handlePresenceReplace(data json.RawMessage) {
+	log.Warnf("NOT_IMPLEMENTED: PRESENCE_REPLACE")
 }
 
-func (b *Bot) handleTypingStart(data map[string]interface{}) {
-	newTypingStart, err := decodeTypingStart(data)
+func (b *Bot) handleTypingStart(data json.RawMessage) {
+	var newTypingStart typingStart
+	err := json.Unmarshal(data, &newTypingStart)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: TYPING_START", err)
 		return
 	}
 
-	log.Debugf("Received: TYPING_START User = %s", newTypingStart.Member.User.Username)
+	log.Tracef("Received: TYPING_START User = %s", newTypingStart.Member.User.Username)
 }
 
 func (b *Bot) addKnownChannel(channel channelCreate) {
 	b.knownChannels[channel.ID] = channel
 }
 
-func (b *Bot) handleChannelCreate(data map[string]interface{}) {
-	newChannelCreate, err := decodeChannelCreate(data)
+func (b *Bot) handleChannelCreate(data json.RawMessage) {
+	var newChannelCreate channelCreate
+	err := json.Unmarshal(data, &newChannelCreate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: CHANNEL_CREATE", err)
 		return
 	}
 
-	log.Debugf("Received: CHANNEL_CREATE with ID = %s", newChannelCreate.ID)
+	log.Tracef("Received: CHANNEL_CREATE with ID = %s", newChannelCreate.ID)
+
 	b.addKnownChannel(newChannelCreate)
 }
 
-func (b *Bot) handleMessageReactionAdd(data map[string]interface{}) {
-	newMessageReactionAdd, err := decodeMessageReactionAdd(data)
+func (b *Bot) handleMessageReactionAdd(data json.RawMessage) {
+	var newMessageReactionAdd messageReactionAdd
+	err := json.Unmarshal(data, &newMessageReactionAdd)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: MESSAGE_REACTION_ADD", err)
 		return
@@ -145,10 +156,13 @@ func (b *Bot) handleMessageReactionAdd(data map[string]interface{}) {
 	for _, plugin := range b.plugins {
 		plugin.OnReactionAdded(reaction)
 	}
+
+	log.Traceln("Received: MESSAGE_REACTION_ADD", newMessageReactionAdd)
 }
 
-func (b *Bot) handleMessageReactionRemove(data map[string]interface{}) {
-	newMessageReactionRemove, err := decodeMessageReactionRemove(data)
+func (b *Bot) handleMessageReactionRemove(data json.RawMessage) {
+	var newMessageReactionRemove messageReactionRemove
+	err := json.Unmarshal(data, &newMessageReactionRemove)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: MESSAGE_REACTION_REMOVE", err)
 		return
@@ -169,58 +183,61 @@ func (b *Bot) handleMessageReactionRemove(data map[string]interface{}) {
 	for _, plugin := range b.plugins {
 		plugin.OnReactionRemoved(reaction)
 	}
+
+	log.Traceln("Received: MESSAGE_REACTION_REMOVE", newMessageReactionRemove)
 }
 
-func (b *Bot) handleMessageDelete(data map[string]interface{}) {
-	newMessageReactionDelete, err := decodeMessageDelete(data)
+func (b *Bot) handleMessageDelete(data json.RawMessage) {
+	var newMessageDelete messageDelete
+	err := json.Unmarshal(data, &newMessageDelete)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: MESSAGE_DELETE", err)
 		return
 	}
 
-	log.Debugln("Received: MESSAGE_DELETE", newMessageReactionDelete)
+	log.Traceln("Received: MESSAGE_DELETE", newMessageDelete)
 }
 
-func (b *Bot) handleMessageUpdate(data map[string]interface{}) {
-	newMessageUpdate, err := decodeMessageUpdate(data)
+func (b *Bot) handleMessageUpdate(data json.RawMessage) {
+	var newMessageUpdate messageUpdate
+	err := json.Unmarshal(data, &newMessageUpdate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: MESSAGE_UPDATE", err)
 		return
 	}
 
-	log.Debugln("Received: MESSAGE_UPDATE", newMessageUpdate)
+	log.Traceln("Received: MESSAGE_UPDATE", newMessageUpdate)
 }
 
-func (b *Bot) handleChannelPinsUpdate(data map[string]interface{}) {
-	newChannelPinsUpdate, err := decodeChannelPinsUpdate(data)
+func (b *Bot) handleChannelPinsUpdate(data json.RawMessage) {
+	var newChannelPinsUpdate channelPinsUpdate
+	err := json.Unmarshal(data, &newChannelPinsUpdate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: CHANNEL_PINS_UPDATE", err)
 		return
 	}
 
-	log.Debugln("Received: CHANNEL_PINS_UPDATE", newChannelPinsUpdate)
+	log.Traceln("Received: CHANNEL_PINS_UPDATE", newChannelPinsUpdate)
 }
 
-func (b *Bot) handleGuildMemberUpdate(data map[string]interface{}) {
-	newGuildMemberUpdate, err := decodeGuildMemberUpdate(data)
+func (b *Bot) handleGuildMemberUpdate(data json.RawMessage) {
+	var newGuildMemberUpdate guildMemberUpdate
+	err := json.Unmarshal(data, &newGuildMemberUpdate)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: GUILD_MEMBER_UPDATE", err)
 		return
 	}
 
-	log.Debugln("Received: GUILD_MEMBER_UPDATE", newGuildMemberUpdate)
+	log.Traceln("Received: GUILD_MEMBER_UPDATE", newGuildMemberUpdate)
 }
 
-func (b *Bot) handlePresencesReplace(data map[string]interface{}) {
-	newPresencesReplace, err := decodePresencesReplace(data)
+func (b *Bot) handlePresencesReplace(data json.RawMessage) {
+	var newPresencesReplace presenceUpdate
+	err := json.Unmarshal(data, &newPresencesReplace)
 	if err != nil {
 		log.Errorln("UNHANDLED ERROR: PRESENCES_REPLACE", err)
 		return
 	}
 
-	log.Debugln("Received: PRESENCES_REPLACE", newPresencesReplace)
-}
-
-func (b *Bot) handleUnknown(data map[string]interface{}) {
-	log.Debugf("TODO HANDLE UNKNOWN EVENT: %s", data["t"])
+	log.Traceln("Received: PRESENCES_REPLACE", newPresencesReplace)
 }

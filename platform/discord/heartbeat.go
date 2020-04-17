@@ -28,7 +28,7 @@ func heartBeat(interval time.Duration, hbSender heartBeatSender, stop chan bool,
 			log.Debugf("Sending heartbeat (seq number = %d)", currentSeqNumber)
 			err := hbSender.sendHeartBeat(currentSeqNumber)
 			if err != nil {
-				log.Errorln("UNHANDLED ERROR in heartbeat:", err)
+				log.Errorln("Error sending heartbeat:", err)
 				go onFail()
 			}
 		case currentSeqNumber = <-seqNumber:

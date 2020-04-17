@@ -172,17 +172,19 @@ func (b *BotPool) restartSingle(id string) {
 
 // checkBots continuously monitors the bots and tries to restart them if they are not healthy
 func (b *BotPool) checkBots(interval time.Duration, stop chan bool) {
+	b.log.Debugf("Bot monitoring started")
 	ticker := time.NewTicker(interval)
 	for {
 		select {
 		case <-stop:
 			ticker.Stop()
+			b.log.Debugf("Bot monitoring stopped")
 			return
 		case <-ticker.C:
-			b.log.Debugf("Running bots check")
+			b.log.Tracef("Running bots check")
 			b.mutex.Lock()
 			for id, bot := range b.bots {
-				b.log.Debugf("Checking bot with ID %s", id)
+				b.log.Tracef("Checking bot with ID %s", id)
 				if !bot.GetInfo().Healthy {
 					b.log.Warnf("Bot %s unhealthy. Restarting it", id)
 					b.restartSingle(id)
