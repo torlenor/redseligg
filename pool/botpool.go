@@ -53,11 +53,13 @@ func NewBotPool(controlAPI *api.API, botProvider *providers.BotProvider) (*BotPo
 		botProvider: botProvider,
 	}
 
-	controlAPI.AttachModuleGet("/bots", b.getBotsEndpoint)
-	controlAPI.AttachModulePost("/bots", b.postBotsEndpoint)
+	if controlAPI != nil {
+		controlAPI.AttachModuleGet("/bots", b.getBotsEndpoint)
+		controlAPI.AttachModulePost("/bots", b.postBotsEndpoint)
 
-	controlAPI.AttachModuleGet("/bots/{botId}", b.getBotEndPoint)
-	controlAPI.AttachModuleDelete("/bots/{botId}", b.deleteBotEndpoint)
+		controlAPI.AttachModuleGet("/bots/{botId}", b.getBotEndPoint)
+		controlAPI.AttachModuleDelete("/bots/{botId}", b.deleteBotEndpoint)
+	}
 
 	return b, nil
 }

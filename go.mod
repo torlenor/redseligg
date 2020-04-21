@@ -3,7 +3,7 @@ module github.com/torlenor/abylebotter
 go 1.14
 
 require (
-	git.abyle.org/redseligg/botorchestrator v0.0.0-20200321164203-1308eb5c4efb
+	git.abyle.org/redseligg/botorchestrator v0.0.0-20200328084912-36419c2977bc
 	github.com/BurntSushi/toml v0.3.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4

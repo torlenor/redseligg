@@ -31,3 +31,7 @@ func (m *mockConfigProvider) GetBotConfig(id string) (botconfig.BotConfig, error
 		return botconfig.BotConfig{}, fmt.Errorf("Unknown bot id %s", id)
 	}
 }
+
+func (m *mockConfigProvider) GetAllEnabledBotIDs() []string {
+	return []string{}
+}

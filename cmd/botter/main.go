@@ -3,8 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,9 +15,7 @@ import (
 )
 
 const (
-	defaultLoggingLevel  = "info"
-	defaultPort          = "9081"
-	defaultListenAddress = "0.0.0.0"
+	defaultLoggingLevel = "info"
 )
 
 /**
@@ -37,21 +33,13 @@ func setupLogging(loggingLevel string) {
 	log = logging.Get("main")
 }
 
-func statusEndpoint(w http.ResponseWriter, r *http.Request) {
-	status := fmt.Sprintf(`{"status":"OK", "version":"%s"}`, version)
-
-	io.WriteString(w, string(status))
-}
-
 func main() {
 
-	fmt.Printf("BotterInstance Version %s (%s)\n\n", version, compTime)
+	fmt.Printf("Botter Version %s (%s)\n\n", version, compTime)
 
 	var (
-		loggingLevel  = flag.String("l", defaultLoggingLevel, "Logging level (panic, fatal, error, warn/warning, info or debug)")
-		port          = flag.String("p", defaultPort, "Port for the Control API")
-		listenAddress = flag.String("c", defaultListenAddress, "Listen address for the Control API")
-		v             = flag.Bool("v", false, "prints current version and exits")
+		loggingLevel = flag.String("l", defaultLoggingLevel, "Logging level (panic, fatal, error, warn/warning, info or debug)")
+		v            = flag.Bool("v", false, "prints current version and exits")
 	)
 
 	flag.Parse()
@@ -64,9 +52,7 @@ func main() {
 	setupLogging(*loggingLevel)
 
 	controlAPIConfig := config.API{
-		Enabled: true,
-		Port:    *port,
-		IP:      *listenAddress,
+		Enabled: false,
 	}
 
 	utils.Version().Set(version)

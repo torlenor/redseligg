@@ -8,6 +8,7 @@
 - Added OnRun() hook from Bot to Plugin which is called when the Bot is ready to serve the plugins.
 - Added OnStop() hook from Bot to Plugin which is called when the Bot is shutting down.
 - Added OnReactionAdded, OnReactionRemoved hooks from Bot to Plugin.
+- Add a standalone binary which automatically starts all enabled bots from the provided config file / MongoDB.
 
 **New plugins:**
 

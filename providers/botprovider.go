@@ -11,7 +11,13 @@ import (
 	"github.com/torlenor/abylebotter/platform"
 )
 
+type botConfigEnablesProvider interface {
+	GetAllEnabledBotIDs() []string
+}
+
 type configProvider interface {
+	botConfigEnablesProvider
+
 	GetBotConfig(id string) (botconfig.BotConfig, error)
 }
 
@@ -86,4 +92,9 @@ func (b *BotProvider) GetBot(id string) (platform.Bot, error) {
 	}
 
 	return bot, nil
+}
+
+// GetAllEnabledBotIDs returns the bot IDs of all enabled bots from config
+func (b *BotProvider) GetAllEnabledBotIDs() []string {
+	return b.botConfigs.GetAllEnabledBotIDs()
 }
