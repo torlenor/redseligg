@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (TBD)
+## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (2020-04-21)
 
 **Implemented enhancements:**
 
