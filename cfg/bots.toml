@@ -6,6 +6,7 @@
 
   [bots.slack_dev]
     type = "slack"
+    enabled = false
     [bots.slack_dev.config]
       workspace = "something"
 	    token = "token_goes_here"
@@ -38,6 +39,7 @@
 
   [bots.mm_dev]
     type = "mattermost"
+    enabled = false
     [bots.mm_dev.config]
 			server = "https://server.com"
 			username = "username_goes_here"
