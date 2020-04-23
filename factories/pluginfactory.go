@@ -9,6 +9,7 @@ import (
 	"github.com/torlenor/abylebotter/plugin/echoplugin"
 	"github.com/torlenor/abylebotter/plugin/giveawayplugin"
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
+	"github.com/torlenor/abylebotter/plugin/quotesplugin"
 	"github.com/torlenor/abylebotter/plugin/rollplugin"
 	"github.com/torlenor/abylebotter/plugin/versionplugin"
 	"github.com/torlenor/abylebotter/plugin/voteplugin"
@@ -39,6 +40,12 @@ func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.Plugi
 		p = &rp
 	case "httpping":
 		p = &httppingplugin.HTTPPingPlugin{}
+	case "quotes":
+		rp, err := quotesplugin.New(pluginConfig)
+		if err != nil {
+			return nil, err
+		}
+		p = rp
 	case "version":
 		p = &versionplugin.VersionPlugin{}
 	case "vote":

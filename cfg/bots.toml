@@ -37,6 +37,12 @@
         mods = ["user1", "user2"]
         onlymods = true
 
+    [bots.slack_dev.plugins.7]
+      type = "quotes"
+      [bots.slack_dev.plugins.7.config]
+        mods = ["user1", "user2"]
+        onlymods = true
+
   [bots.mm_dev]
     type = "mattermost"
     enabled = false

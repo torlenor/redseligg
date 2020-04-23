@@ -10,6 +10,10 @@
 
 - Storage backend memory added.
 
+**New plugins:**
+
+- Quotes Plugin: Lets users/viewers or mods add quotes and randomly fetch one.
+
 ## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (2020-04-21)
 
 **Implemented enhancements:**
