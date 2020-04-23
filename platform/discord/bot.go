@@ -43,6 +43,8 @@ type api interface {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
+	storage plugin.StorageAPI
+
 	api api
 
 	gatewayURL string
@@ -69,11 +71,12 @@ type Bot struct {
 
 // CreateDiscordBotWithAPI creates a new instance of a DiscordBot with the
 // provided api
-func CreateDiscordBotWithAPI(api api, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+func CreateDiscordBotWithAPI(api api, storage plugin.StorageAPI, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
 	log.Info("DiscordBot is CREATING itself")
 
 	b := Bot{
-		api: api,
+		api:     api,
+		storage: storage,
 
 		token: cfg.Token,
 		ws:    ws,
@@ -98,10 +101,10 @@ func CreateDiscordBotWithAPI(api api, cfg botconfig.DiscordConfig, ws webSocketC
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+func CreateDiscordBot(cfg botconfig.DiscordConfig, storage plugin.StorageAPI, ws webSocketClient) (*Bot, error) {
 	api := webclient.New("https://discordapp.com/api", "Bot "+cfg.Token, "application/json")
 
-	return CreateDiscordBotWithAPI(api, cfg, ws)
+	return CreateDiscordBotWithAPI(api, storage, cfg, ws)
 }
 
 func (b *Bot) startHeartbeatSender(heartbeatInterval time.Duration) {
@@ -332,7 +335,7 @@ func (b *Bot) stop() {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b, nil)
+	plugin.SetAPI(b, b.storage)
 	b.plugins = append(b.plugins, plugin)
 }
 

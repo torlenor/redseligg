@@ -5,7 +5,13 @@ import (
 	"github.com/torlenor/abylebotter/plugin"
 )
 
-type MockPlugin struct{}
+type MockPlugin struct {
+	PluginID string
+}
+
+func (m *MockPlugin) SetPluginID(pluginID string) {
+	m.PluginID = pluginID
+}
 
 func (m *MockPlugin) SetAPI(api plugin.API, storageAPI plugin.StorageAPI) {}
 

@@ -10,6 +10,8 @@ import (
 	"github.com/torlenor/abylebotter/platform/matrix"
 	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
+	"github.com/torlenor/abylebotter/storage"
+	"github.com/torlenor/abylebotter/storage/memorybackend"
 	"github.com/torlenor/abylebotter/ws"
 )
 
@@ -20,6 +22,8 @@ type BotFactory struct {
 // CreateBot creates a new bot for the given platform with the provided configuration
 func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.Bot, error) {
 	var bot platform.Bot
+
+	storage := storage.New(memorybackend.New(), p)
 
 	switch p {
 	case "slack":
@@ -48,7 +52,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}
 
-		bot, err = discord.CreateDiscordBot(discordCfg, ws.NewClient())
+		bot, err = discord.CreateDiscordBot(discordCfg, storage, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}

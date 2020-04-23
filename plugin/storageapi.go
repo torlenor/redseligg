@@ -2,7 +2,7 @@ package plugin
 
 // The StorageAPI can be used to store and get data from storage.
 //
-// A valid Bot has to provide a storage implmenetation with all the defined functions below.
+// A valid Bot has to provide a storage implementation with all the defined functions below.
 //
 // Plugins obtain access to this by embedding AbyleBotterPlugin.
 type StorageAPI interface {

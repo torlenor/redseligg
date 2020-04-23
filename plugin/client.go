@@ -7,12 +7,19 @@ type AbyleBotterPlugin struct {
 	// API exposes the plugin API of the bot.
 	API     API
 	Storage StorageAPI
+
+	PluginID string
 }
 
 // SetAPI gives the API interface to the plugin.
 func (p *AbyleBotterPlugin) SetAPI(api API, storageAPI StorageAPI) {
 	p.API = api
 	p.Storage = storageAPI
+}
+
+// SetPluginID sets the plugin ID to the given value
+func (p *AbyleBotterPlugin) SetPluginID(pluginID string) {
+	p.PluginID = pluginID
 }
 
 // Default hook implementations (see hooks.go)

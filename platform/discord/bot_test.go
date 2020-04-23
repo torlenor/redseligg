@@ -5,12 +5,14 @@ import (
 	"testing"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/plugin"
 	"github.com/torlenor/abylebotter/webclient"
 	"github.com/torlenor/abylebotter/ws"
 )
 
 func Test_CreateDiscordBot(t *testing.T) {
 	ws := &ws.MockClient{}
+	storage := plugin.MockStorageAPI{}
 	api := webclient.NewMock()
 
 	expectedAPICallPath := "/gateway"
@@ -24,7 +26,7 @@ func Test_CreateDiscordBot(t *testing.T) {
 
 	cfg := botconfig.DiscordConfig{}
 
-	bot, err := CreateDiscordBotWithAPI(api, cfg, ws)
+	bot, err := CreateDiscordBotWithAPI(api, &storage, cfg, ws)
 	if err != nil {
 		t.Fatalf("Creating the bot should not have failed")
 	}
@@ -46,7 +48,7 @@ func Test_CreateDiscordBot(t *testing.T) {
 
 	api.Reset()
 	api.ReturnOnCallError = fmt.Errorf("Some error")
-	bot, err = CreateDiscordBotWithAPI(api, cfg, ws)
+	bot, err = CreateDiscordBotWithAPI(api, &storage, cfg, ws)
 	if err == nil {
 		t.Fatalf("Creating the bot should have failed")
 	}

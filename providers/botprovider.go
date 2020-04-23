@@ -26,7 +26,7 @@ type botFactory interface {
 }
 
 type pluginFactory interface {
-	CreatePlugin(plugin string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error)
+	CreatePlugin(pluginID string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error)
 }
 
 // BotProvider creates configured bots ready to run
@@ -56,8 +56,8 @@ func NewBotProvider(botConfigProvider configProvider, botFactory botFactory, plu
 func (b *BotProvider) createPlatformPlugins(plugins map[string]botconfig.PluginConfig, bot platform.Bot) error {
 	var lastError error
 
-	for _, plugin := range plugins {
-		p, err := b.pluginFactory.CreatePlugin(plugin.Type, plugin)
+	for pluginID, pluginCfg := range plugins {
+		p, err := b.pluginFactory.CreatePlugin(pluginID, pluginCfg)
 		if err != nil {
 			lastError = err
 			continue
