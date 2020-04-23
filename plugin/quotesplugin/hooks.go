@@ -15,7 +15,10 @@ func (p *QuotesPlugin) OnPost(post model.Post) {
 
 	msg := strings.Trim(post.Content, " ")
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!quoteadd ") {
+		if strings.HasPrefix(msg, "!quote ") || msg == "!quote" {
+			p.onCommandQuote(post)
+			return
+		} else if strings.HasPrefix(msg, "!quoteadd ") {
 			p.onCommandQuoteAdd(post)
 			return
 		} else if strings.HasPrefix(msg, "!quoteremove ") {
