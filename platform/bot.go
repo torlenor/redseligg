@@ -19,7 +19,7 @@ type Bot interface {
 // BotPlugin is needed to connect a Plugin to a Bot
 type BotPlugin interface {
 	plugin.Hooks
-	SetAPI(api plugin.API)
+	SetAPI(api plugin.API, storageAPI plugin.StorageAPI)
 }
 
 // PluginInfo contains info about one plugin

@@ -5,12 +5,14 @@ import "github.com/torlenor/abylebotter/model"
 // AbyleBotterPlugin should be embedded in the Plugin to get access to the bot API
 type AbyleBotterPlugin struct {
 	// API exposes the plugin API of the bot.
-	API API
+	API     API
+	Storage StorageAPI
 }
 
 // SetAPI gives the API interface to the plugin.
-func (p *AbyleBotterPlugin) SetAPI(api API) {
+func (p *AbyleBotterPlugin) SetAPI(api API, storageAPI StorageAPI) {
 	p.API = api
+	p.Storage = storageAPI
 }
 
 // Default hook implementations (see hooks.go)

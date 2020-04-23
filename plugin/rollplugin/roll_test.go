@@ -23,7 +23,8 @@ func TestCreateRollPlugin(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 }
 
 func TestRollPlugin_OnPost(t *testing.T) {
@@ -35,7 +36,8 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",

@@ -7,7 +7,8 @@ import (
 
 type MockPlugin struct{}
 
-func (m *MockPlugin) SetAPI(api plugin.API)            {}
+func (m *MockPlugin) SetAPI(api plugin.API, storageAPI plugin.StorageAPI) {}
+
 func (m *MockPlugin) OnPost(model.Post)                {}
 func (m *MockPlugin) OnRun()                           {}
 func (m *MockPlugin) OnStop()                          {}

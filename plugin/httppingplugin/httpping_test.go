@@ -43,7 +43,8 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",

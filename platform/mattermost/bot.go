@@ -164,7 +164,7 @@ func (b *Bot) Stop() {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b)
+	plugin.SetAPI(b, nil)
 	b.plugins = append(b.plugins, plugin)
 }
 

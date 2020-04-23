@@ -2,6 +2,14 @@
 
 ## [0.0.5](https://git.abyle.org/hps/abylebotter/-/tree/0.0.5) (TBD)
 
+**Implemented enhancements:**
+
+- Added storage system to Plugin API.
+
+**New storage support:**
+
+- Storage backend memory added.
+
 ## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (2020-04-21)
 
 **Implemented enhancements:**

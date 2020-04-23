@@ -38,7 +38,8 @@ func TestCreateGiveawayPlugin(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 }
 
 func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
@@ -49,7 +50,8 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -139,7 +141,8 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -243,7 +246,8 @@ func TestGiveawayPluginCreateAndAutomaticEndGiveaway(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 	p.OnRun()
 
 	postToPlugin := model.Post{
@@ -312,7 +316,8 @@ func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -382,7 +387,8 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -464,7 +470,8 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -523,7 +530,8 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",

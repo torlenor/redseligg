@@ -17,7 +17,8 @@ func TestEchoPlugin_OnPost(t *testing.T) {
 	assert.Equal(false, p.onlyOnWhisper)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	storage := plugin.MockStorageAPI{}
+	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
