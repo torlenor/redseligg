@@ -36,7 +36,7 @@ func (b *Bot) getMessageType(mc messageCreate) messageType {
 
 func (b *Bot) dispatchMessage(msg messageCreate) {
 	var receiveMessage model.Post
-	receiveMessage = model.Post{User: model.User{ID: msg.Author.ID, Name: combineUsernameAndDiscriminator(msg.Author.Username, msg.Author.Discriminator)}, ChannelID: msg.ChannelID, Content: msg.Content}
+	receiveMessage = model.Post{ServerID: msg.GuildID, User: model.User{ID: msg.Author.ID, Name: combineUsernameAndDiscriminator(msg.Author.Username, msg.Author.Discriminator)}, ChannelID: msg.ChannelID, Content: msg.Content}
 	if b.getMessageType(msg) == WHISPER {
 		receiveMessage.IsPrivate = true
 	}

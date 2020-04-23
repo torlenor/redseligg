@@ -65,7 +65,7 @@ func (b *Bot) handleEventMessage(data []byte) {
 		if err != nil {
 			b.log.Warnf("Was not able to determine User from message. User ID %s, error: %s", message.User, err)
 		}
-		receiveMessage := model.Post{User: model.User{ID: message.User, Name: user.Name}, ChannelID: message.Channel, Content: cleanupMessage(message.Text)}
+		receiveMessage := model.Post{ServerID: message.Team, User: model.User{ID: message.User, Name: user.Name}, ChannelID: message.Channel, Content: cleanupMessage(message.Text)}
 		for _, plugin := range b.plugins {
 			plugin.OnPost(receiveMessage)
 		}
