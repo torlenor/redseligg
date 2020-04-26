@@ -4,60 +4,70 @@
 
 [bots]
 
-  [bots.slack_dev]
+  [bots.slack]
     type = "slack"
     enabled = false
-    [bots.slack_dev.config]
+    [bots.slack.storage]
+      storage = "mongo"
+      [bots.slack.storage.config]
+        URL = "mongodb://user1:test@localhost/testdb" # URL to connect to
+        Database = "testdb" # Database to use
+    [bots.slack.config]
       workspace = "something"
 	    token = "token_goes_here"
 
-    [bots.slack_dev.plugins.1]
+    [bots.slack.plugins.1]
       type = "echo"
-      [bots.slack_dev.plugins.1.config]
+      [bots.slack.plugins.1.config]
         onlywhispers = false
 
-    [bots.slack_dev.plugins.2]
+    [bots.slack.plugins.2]
       type = "giveaway"
-      [bots.slack_dev.plugins.2.config]
+      [bots.slack.plugins.2.config]
         mods = ["user1", "user2"]
         onlymods = true
 
-    [bots.slack_dev.plugins.3]
+    [bots.slack.plugins.3]
       type = "httpping"
 
-    [bots.slack_dev.plugins.4]
+    [bots.slack.plugins.4]
       type = "roll"
 
-    [bots.slack_dev.plugins.5]
+    [bots.slack.plugins.5]
       type = "version"
 
-    [bots.slack_dev.plugins.6]
+    [bots.slack.plugins.6]
       type = "vote"
-      [bots.slack_dev.plugins.6.config]
+      [bots.slack.plugins.6.config]
         mods = ["user1", "user2"]
         onlymods = true
 
-    [bots.slack_dev.plugins.7]
+    [bots.slack.plugins.7]
       type = "quotes"
-      [bots.slack_dev.plugins.7.config]
+      [bots.slack.plugins.7.config]
         mods = ["user1", "user2"]
         onlymods = true
 
-  [bots.mm_dev]
+  [bots.mm]
     type = "mattermost"
     enabled = false
-    [bots.mm_dev.config]
+    [bots.mm.storage]
+      storage = "memory"
+      [bots.mm.storage.config]
+        URL = "mongodb://user1:test@localhost/testdb" # URL to connect to
+        Database = "testdb" # Database to use
+    [bots.mm.config]
 			server = "https://server.com"
 			username = "username_goes_here"
 			password = "password_goes_here"
 
-    [bots.mm_dev.plugins.1]
+    [bots.mm.plugins.1]
       type = "echo"
-      [bots.mm_dev.plugins.1.config]
+      [bots.mm.plugins.1.config]
         onlywhispers = false
 
-    [bots.mm_dev.plugins.2]
+    [bots.mm.plugins.2]
       type = "httpping"
 
-    [bots.mm_dev.plugins.3]
+    [bots.mm.plugins.3]
       type = "roll"

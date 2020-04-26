@@ -20,7 +20,7 @@ type PluginFactory struct {
 }
 
 // CreatePlugin creates a new plugin with the provided configuration
-func (b *PluginFactory) CreatePlugin(pluginID string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
+func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {
@@ -58,7 +58,7 @@ func (b *PluginFactory) CreatePlugin(pluginID string, pluginConfig botconfig.Plu
 		return nil, fmt.Errorf("Unknown plugin type %s", pluginConfig.Type)
 	}
 
-	p.SetPluginID(pluginID)
+	p.SetBotPluginID(botID, pluginID)
 
 	return p, nil
 }

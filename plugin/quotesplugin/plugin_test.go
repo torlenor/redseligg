@@ -1,14 +1,13 @@
 package quotesplugin
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storagemodels"
 )
 
 func TestCreateQuotesPlugin(t *testing.T) {
@@ -23,7 +22,7 @@ func TestCreateQuotesPlugin(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := MockStorage{}
 	p.SetAPI(&api, &storage)
 }
 
@@ -35,7 +34,7 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -93,7 +92,12 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 	assert := assert.New(t)
 
 	pluginID := "SOME_PLUGIN_ID"
-	quote := "some quote"
+	quote := storagemodels.QuotesPluginQuote{
+		Author:    "USER 1",
+		AuthorID:  "SOME USER ID",
+		ChannelID: "CHANNEL ID",
+		Text:      "some quote",
+	}
 
 	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
 	assert.NoError(err)
@@ -102,7 +106,7 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 	p.PluginID = pluginID
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -113,25 +117,23 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 		IsPrivate: false,
 	}
 
-	postToPlugin.Content = "!quoteadd " + quote
+	postToPlugin.Content = "!quoteadd " + quote.Text
 	p.OnPost(postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
-	if !assert.Equal(2, len(storage.Stored)) {
+	if !assert.Equal(1, len(storage.StoredQuotes)) {
+		t.FailNow()
+	}
+	if !assert.Equal(1, len(storage.StoredQuotesList)) {
 		t.FailNow()
 	}
 
-	actualData := storage.Stored[0]
+	actualData := storage.StoredQuotes[0]
 	assert.Equal(pluginID, actualData.PluginID)
 	assert.Greater(len(actualData.Identifier), 0)
 	assert.Equal(quote, actualData.Data)
 
-	actualList := storage.Stored[1]
+	actualList := storage.StoredQuotesList[0]
 	assert.Equal(pluginID, actualList.PluginID)
 	assert.Equal(LIST_IDENTIFIER, actualList.Identifier)
-	fmt.Printf("%s", reflect.TypeOf(actualList.Data))
-	if list, ok := actualList.Data.(quotesList); ok {
-		assert.Equal(1, len(list))
-	} else {
-		assert.FailNow("Stored list not a quotesList")
-	}
+	assert.Equal(1, len(actualList.Data.UUIDs))
 }

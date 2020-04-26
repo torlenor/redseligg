@@ -5,14 +5,15 @@ import (
 	"testing"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
-	"github.com/torlenor/abylebotter/plugin"
+
+	"github.com/torlenor/abylebotter/storage"
 	"github.com/torlenor/abylebotter/webclient"
 	"github.com/torlenor/abylebotter/ws"
 )
 
 func Test_CreateDiscordBot(t *testing.T) {
 	ws := &ws.MockClient{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	api := webclient.NewMock()
 
 	expectedAPICallPath := "/gateway"

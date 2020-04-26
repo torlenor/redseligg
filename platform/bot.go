@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storage"
 )
 
 // Bot type interface which every Bot has to implement
@@ -20,9 +21,9 @@ type Bot interface {
 type BotPlugin interface {
 	plugin.Hooks
 
-	SetPluginID(pluginID string)
+	SetBotPluginID(botID string, pluginID string)
 
-	SetAPI(api plugin.API, storageAPI plugin.StorageAPI)
+	SetAPI(api plugin.API, storageAPI storage.Storage)
 }
 
 // PluginInfo contains info about one plugin

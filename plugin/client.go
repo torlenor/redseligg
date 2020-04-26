@@ -1,24 +1,29 @@
 package plugin
 
-import "github.com/torlenor/abylebotter/model"
+import (
+	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/storage"
+)
 
 // AbyleBotterPlugin should be embedded in the Plugin to get access to the bot API
 type AbyleBotterPlugin struct {
 	// API exposes the plugin API of the bot.
 	API     API
-	Storage StorageAPI
+	Storage storage.Storage
 
+	BotID    string
 	PluginID string
 }
 
 // SetAPI gives the API interface to the plugin.
-func (p *AbyleBotterPlugin) SetAPI(api API, storageAPI StorageAPI) {
+func (p *AbyleBotterPlugin) SetAPI(api API, storage storage.Storage) {
 	p.API = api
-	p.Storage = storageAPI
+	p.Storage = storage
 }
 
-// SetPluginID sets the plugin ID to the given value
-func (p *AbyleBotterPlugin) SetPluginID(pluginID string) {
+// SetBotPluginID sets the plugin ID to the given value
+func (p *AbyleBotterPlugin) SetBotPluginID(botID string, pluginID string) {
+	p.BotID = botID
 	p.PluginID = pluginID
 }
 

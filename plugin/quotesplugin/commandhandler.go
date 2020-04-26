@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/storagemodels"
 )
 
 const (
@@ -52,65 +53,59 @@ func generateIdentifier() string {
 	return uuid.New().String()
 }
 
-type quotesList []string
-
 func (p *QuotesPlugin) addQuoteIdentifierToList(identifier string) error {
-	var currentList quotesList
-
-	var data interface{}
-	var err error
-	if data, err = p.Get(LIST_IDENTIFIER); err != nil {
-		p.API.LogInfo("QuotesPlugin: No stored Quotes list found, creating a new one")
-	} else {
-		var ok bool
-		if currentList, ok = data.(quotesList); !ok {
-			currentList = quotesList{}
-		}
+	currentList := p.getQuotesList()
+	currentList.UUIDs = append(currentList.UUIDs, identifier)
+	s := p.getStorage()
+	if s == nil {
+		return fmt.Errorf("Not valid storage set")
 	}
-
-	currentList = append(currentList, identifier)
-
-	return p.Store(LIST_IDENTIFIER, currentList)
+	return s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, LIST_IDENTIFIER, currentList)
 }
 
-func (p *QuotesPlugin) getQuotesList() quotesList {
-	var currentList quotesList
+func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
+	var currentList storagemodels.QuotesPluginQuotesList
 
-	var data interface{}
-	var err error
-	if data, err = p.Get(LIST_IDENTIFIER); err != nil {
-		return quotesList{}
+	s := p.getStorage()
+	if s == nil {
+		p.API.LogError("Not valid storage set")
+		return currentList
 	}
-
-	var ok bool
-	if currentList, ok = data.(quotesList); !ok {
-		return quotesList{}
+	var err error
+	currentList, err = s.GetQuotesPluginQuotesList(p.BotID, p.PluginID, LIST_IDENTIFIER)
+	if err != nil {
+		p.API.LogError(fmt.Sprintf("Could not get QuotesList: %s", err))
 	}
 
 	return currentList
 }
 
-func (p *QuotesPlugin) getQuote(identifier string) (string, error) {
-	var quoteText string
-
-	var data interface{}
-	var err error
-	if data, err = p.Get(identifier); err != nil {
-		return "", fmt.Errorf("Error receiving quote with id '%s': %s", identifier, err)
+func (p *QuotesPlugin) getQuote(identifier string) (storagemodels.QuotesPluginQuote, error) {
+	s := p.getStorage()
+	if s == nil {
+		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("Not valid storage set")
 	}
 
-	var ok bool
-	if quoteText, ok = data.(string); !ok {
-		return "", fmt.Errorf("Error receiving quote with id '%s': Not a quote", identifier)
-	}
-
-	return quoteText, nil
+	return s.GetQuotesPluginQuote(p.BotID, p.PluginID, identifier)
 }
 
-func (p *QuotesPlugin) storeQuote(author model.User, channel string, channelID string, quote string) {
+func (p *QuotesPlugin) storeQuote(author model.User, channel string, channelID string, text string) {
 	id := generateIdentifier()
 
-	if err := p.Store(id, quote); err == nil {
+	quote := storagemodels.QuotesPluginQuote{
+		Author:    author.Name,
+		AuthorID:  author.ID,
+		ChannelID: channelID,
+		Text:      text,
+	}
+
+	s := p.getStorage()
+	if s == nil {
+		p.API.LogError("Not valid storage set")
+		return
+	}
+
+	if err := s.StoreQuotesPluginQuote(p.BotID, p.PluginID, id, quote); err == nil {
 		if err := p.addQuoteIdentifierToList(id); err != nil {
 			p.API.LogError(fmt.Sprintf("Error storing quotes list: %s", err))
 		}
@@ -138,15 +133,15 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 
 func (p *QuotesPlugin) onCommandQuote(post model.Post) {
 	currentList := p.getQuotesList()
-	if len(currentList) == 0 {
+	if len(currentList.UUIDs) == 0 {
 		p.returnMessage(post.ChannelID, "No quotes found. Use the command `!quoteadd <your quote>` to add a new one.")
 		return
 	}
 
-	id := p.randomizer.Intn(len(currentList))
+	id := p.randomizer.Intn(len(currentList.UUIDs))
 
-	if quote, err := p.getQuote(currentList[id]); err == nil {
-		p.returnMessage(post.ChannelID, quote)
+	if quote, err := p.getQuote(currentList.UUIDs[id]); err == nil {
+		p.returnMessage(post.ChannelID, quote.Text)
 	}
 
 }

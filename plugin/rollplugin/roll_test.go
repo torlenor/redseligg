@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storage"
 )
 
 type mockRandomizer struct{}
@@ -23,7 +24,7 @@ func TestCreateRollPlugin(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 }
 
@@ -36,7 +37,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{

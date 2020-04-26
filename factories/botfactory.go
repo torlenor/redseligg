@@ -5,25 +5,33 @@ import (
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
+	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/platform/discord"
 	"github.com/torlenor/abylebotter/platform/matrix"
 	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
-	"github.com/torlenor/abylebotter/storage"
-	"github.com/torlenor/abylebotter/storage/memorybackend"
 	"github.com/torlenor/abylebotter/ws"
 )
 
+var (
+	logBotFactory = logging.Get("BotFactory")
+)
+
 // BotFactory can be used to generate bots for specific platforms
-type BotFactory struct {
-}
+type BotFactory struct{}
 
 // CreateBot creates a new bot for the given platform with the provided configuration
 func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.Bot, error) {
 	var bot platform.Bot
 
-	storage := storage.New(memorybackend.New(), p)
+	storageFactory := StorageFactory{}
+
+	logBotFactory.Tracef("Creating storage backend for botID %s", p)
+	storage, err := storageFactory.CreateBackend(config.StorageConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating storage backend for botID %s: %s", p, err)
+	}
 
 	switch p {
 	case "slack":

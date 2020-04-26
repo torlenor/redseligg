@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storage"
 )
 
 type mockRandomizer struct {
@@ -38,7 +39,7 @@ func TestCreateGiveawayPlugin(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 }
 
@@ -50,7 +51,7 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -141,7 +142,7 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -246,7 +247,7 @@ func TestGiveawayPluginCreateAndAutomaticEndGiveaway(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 	p.OnRun()
 
@@ -316,7 +317,7 @@ func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -387,7 +388,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -470,7 +471,7 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{
@@ -530,7 +531,7 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	p.randomizer = randomizer
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{

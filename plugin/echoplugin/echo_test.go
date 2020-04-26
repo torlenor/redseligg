@@ -5,6 +5,7 @@ import (
 
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storage"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func TestEchoPlugin_OnPost(t *testing.T) {
 	assert.Equal(false, p.onlyOnWhisper)
 
 	api := plugin.MockAPI{}
-	storage := plugin.MockStorageAPI{}
+	storage := storage.MockStorage{}
 	p.SetAPI(&api, &storage)
 
 	postToPlugin := model.Post{

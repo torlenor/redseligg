@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storagemodels"
 )
 
 const (
@@ -14,6 +16,21 @@ const (
 
 type randomizer interface {
 	Intn(max int) int
+}
+
+type quotesPluginWriter interface {
+	StoreQuotesPluginQuote(botID, pluginID, identifier string, data storagemodels.QuotesPluginQuote) error
+	StoreQuotesPluginQuotesList(botID, pluginID, identifier string, data storagemodels.QuotesPluginQuotesList) error
+}
+
+type quotesPluginReader interface {
+	GetQuotesPluginQuote(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuote, error)
+	GetQuotesPluginQuotesList(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuotesList, error)
+}
+
+type quotesPluginReaderWriter interface {
+	quotesPluginReader
+	quotesPluginWriter
 }
 
 // QuotesPlugin is a plugin that allows viewers or mods to add quotes and randomly fetch one.
@@ -38,4 +55,13 @@ func New(pluginConfig botconfig.PluginConfig) (*QuotesPlugin, error) {
 	}
 
 	return &ep, nil
+}
+
+// getStorage returns the correct storage if it supports the necessary
+// functions.
+func (p *QuotesPlugin) getStorage() quotesPluginReaderWriter {
+	if s, ok := p.Storage.(quotesPluginReaderWriter); ok {
+		return s
+	}
+	return nil
 }

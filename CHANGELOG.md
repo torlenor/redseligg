@@ -8,7 +8,8 @@
 
 **New storage support:**
 
-- Storage backend memory added.
+- Storage memory added.
+- Storage mongo added.
 
 **New plugins:**
 
