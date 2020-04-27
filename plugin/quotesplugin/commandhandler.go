@@ -3,6 +3,7 @@ package quotesplugin
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -137,7 +138,7 @@ func (p *QuotesPlugin) onCommandQuoteAdd(post model.Post) {
 	}
 }
 
-// onCommandAddQuote adds a new quote.
+// onCommandQuoteRemove removes a quote.
 func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 	removeID := p.extractRemoveID(post.Content)
 	if len(removeID) == 0 {
@@ -149,13 +150,26 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 }
 
 func (p *QuotesPlugin) onCommandQuote(post model.Post) {
+	cont := strings.Split(post.Content, " ")
+
 	currentList := p.getQuotesList()
 	if len(currentList.UUIDs) == 0 {
 		p.returnMessage(post.ChannelID, "No quotes found. Use the command `!quoteadd <your quote>` to add a new one.")
 		return
 	}
 
-	n := p.randomizer.Intn(len(currentList.UUIDs))
+	n := 0
+	if len(cont) == 2 {
+		var err error
+		n, err = strconv.Atoi(cont[1])
+		if err == nil && n <= len(currentList.UUIDs) {
+			n = n - 1
+		} else {
+			n = p.randomizer.Intn(len(currentList.UUIDs))
+		}
+	} else {
+		n = p.randomizer.Intn(len(currentList.UUIDs))
+	}
 
 	if quote, err := p.getQuote(currentList.UUIDs[n]); err == nil {
 		p.returnMessage(post.ChannelID, fmt.Sprintf("%d. %s", n+1, quote))
