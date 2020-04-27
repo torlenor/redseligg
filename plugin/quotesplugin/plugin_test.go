@@ -314,3 +314,72 @@ func TestQuotesPlugin_GetQuote_Number(t *testing.T) {
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
+
+func TestQuotesPlugin_RemoveQuote(t *testing.T) {
+	assert := assert.New(t)
+
+	// Inject a new time.Now()
+	now = func() time.Time {
+		layout := "2006-01-02T15:04:05.000Z"
+		str := "2018-12-22T13:00:00.000Z"
+		t, _ := time.Parse(layout, str)
+		return t
+	}
+
+	pluginID := "SOME_PLUGIN_ID"
+	quote := storagemodels.QuotesPluginQuote{
+		Author:    "USER 1",
+		Added:     now(),
+		AuthorID:  "SOME USER ID",
+		ChannelID: "CHANNEL ID",
+		Text:      "some quote",
+	}
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	p.PluginID = pluginID
+
+	api := plugin.MockAPI{}
+	storage := MockStorage{}
+	storage.QuoteDataToReturn = quote
+	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
+		UUIDs: []string{"some identifier", "some other identifier"},
+	}
+	p.SetAPI(&api, &storage)
+
+	postToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		Content:   "!quoteremove 2",
+		IsPrivate: false,
+	}
+
+	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Successfully removed quote #2",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	// if !assert.Equal(1, len(storage.StoredQuotes)) {
+	// 	t.FailNow()
+	// }
+	if !assert.Equal(1, len(storage.StoredQuotesList)) {
+		t.FailNow()
+	}
+
+	// actualData := storage.StoredQuotes[0]
+	// assert.Equal(pluginID, actualData.PluginID)
+	// assert.Greater(len(actualData.Identifier), 0)
+	// assert.Equal(quote, actualData.Data)
+
+	actualList := storage.StoredQuotesList[0]
+	assert.Equal(pluginID, actualList.PluginID)
+	assert.Equal(identFieldList, actualList.Identifier)
+	assert.Equal(1, len(actualList.Data.UUIDs))
+}

@@ -39,7 +39,7 @@ func (p *QuotesPlugin) returnMessage(channelID, msg string) {
 }
 
 func (p *QuotesPlugin) extractRemoveID(fullText string) string {
-	re := regexp.MustCompile(`!quoteremove (\(.*\))?`)
+	re := regexp.MustCompile(`!quoteremove (.*)?`)
 	const captureGroup = 1
 
 	matches := re.FindAllStringSubmatch(fullText, -1)
@@ -66,6 +66,23 @@ func (p *QuotesPlugin) addQuoteIdentifierToList(identifier string) (int, error) 
 	}
 
 	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, currentList)
+	return len(currentList.UUIDs), err
+}
+
+func (p *QuotesPlugin) removeQuoteIdentifierToList(identifier string) (int, error) {
+	currentList := p.getQuotesList()
+	newList := storagemodels.QuotesPluginQuotesList{}
+	for _, id := range currentList.UUIDs {
+		if id != identifier {
+			newList.UUIDs = append(newList.UUIDs, id)
+		}
+	}
+	s := p.getStorage()
+	if s == nil {
+		return 0, fmt.Errorf("Not valid storage set")
+	}
+
+	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, newList)
 	return len(currentList.UUIDs), err
 }
 
@@ -146,7 +163,25 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 		return
 	}
 
-	// TODO
+	n, err := strconv.Atoi(removeID)
+	if err != nil {
+		p.returnHelpRemove(post.ChannelID)
+		return
+	}
+
+	currentList := p.getQuotesList()
+
+	if n <= len(currentList.UUIDs) {
+		n = n - 1
+	} else {
+		p.returnMessage(post.ChannelID, "Quote #"+removeID+" not found")
+		return
+	}
+
+	p.removeQuoteIdentifierToList(currentList.UUIDs[n])
+	// TODO remove quote
+
+	p.returnMessage(post.ChannelID, "Successfully removed quote #"+removeID)
 }
 
 func (p *QuotesPlugin) onCommandQuote(post model.Post) {
