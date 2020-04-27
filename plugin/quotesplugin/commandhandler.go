@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -11,8 +12,10 @@ import (
 	"github.com/torlenor/abylebotter/storagemodels"
 )
 
+var now = time.Now
+
 const (
-	LIST_IDENTIFIER = "list"
+	identFieldList = "list"
 
 	helpText       = "Type !quoteadd <your quote> to add a new quote."
 	helpTextRemove = "Type `!quoteremove <your quote>` or !quoteremove (ID) to remove a quote."
@@ -53,14 +56,16 @@ func generateIdentifier() string {
 	return uuid.New().String()
 }
 
-func (p *QuotesPlugin) addQuoteIdentifierToList(identifier string) error {
+func (p *QuotesPlugin) addQuoteIdentifierToList(identifier string) (int, error) {
 	currentList := p.getQuotesList()
 	currentList.UUIDs = append(currentList.UUIDs, identifier)
 	s := p.getStorage()
 	if s == nil {
-		return fmt.Errorf("Not valid storage set")
+		return 0, fmt.Errorf("Not valid storage set")
 	}
-	return s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, LIST_IDENTIFIER, currentList)
+
+	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, currentList)
+	return len(currentList.UUIDs), err
 }
 
 func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
@@ -72,7 +77,7 @@ func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
 		return currentList
 	}
 	var err error
-	currentList, err = s.GetQuotesPluginQuotesList(p.BotID, p.PluginID, LIST_IDENTIFIER)
+	currentList, err = s.GetQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList)
 	if err != nil {
 		p.API.LogError(fmt.Sprintf("Could not get QuotesList: %s", err))
 	}
@@ -89,29 +94,26 @@ func (p *QuotesPlugin) getQuote(identifier string) (storagemodels.QuotesPluginQu
 	return s.GetQuotesPluginQuote(p.BotID, p.PluginID, identifier)
 }
 
-func (p *QuotesPlugin) storeQuote(author model.User, channel string, channelID string, text string) {
+func (p *QuotesPlugin) storeQuote(quote storagemodels.QuotesPluginQuote) int {
 	id := generateIdentifier()
-
-	quote := storagemodels.QuotesPluginQuote{
-		Author:    author.Name,
-		AuthorID:  author.ID,
-		ChannelID: channelID,
-		Text:      text,
-	}
 
 	s := p.getStorage()
 	if s == nil {
 		p.API.LogError("Not valid storage set")
-		return
+		return 0
 	}
 
 	if err := s.StoreQuotesPluginQuote(p.BotID, p.PluginID, id, quote); err == nil {
-		if err := p.addQuoteIdentifierToList(id); err != nil {
+		if num, err := p.addQuoteIdentifierToList(id); err != nil {
 			p.API.LogError(fmt.Sprintf("Error storing quotes list: %s", err))
+		} else {
+			return num
 		}
 	} else {
 		p.API.LogError(fmt.Sprintf("Error storing quote: %s", err))
 	}
+
+	return 0
 }
 
 // onCommandAddQuote adds a new quote.
@@ -119,7 +121,20 @@ func (p *QuotesPlugin) onCommandQuoteAdd(post model.Post) {
 	cont := strings.Split(post.Content, " ")
 	quoteText := strings.Join(cont[1:], " ")
 
-	p.storeQuote(post.User, post.Channel, post.ChannelID, quoteText)
+	quote := storagemodels.QuotesPluginQuote{
+		Author:    post.User.Name,
+		Added:     now(),
+		AuthorID:  post.User.ID,
+		ChannelID: post.ChannelID,
+		Text:      quoteText,
+	}
+
+	num := p.storeQuote(quote)
+	if num > 0 {
+		p.returnMessage(post.ChannelID, fmt.Sprintf("Successfully added quote #%d", num))
+	} else {
+		p.returnMessage(post.ChannelID, "Error storing quote. Try again later!")
+	}
 }
 
 // onCommandAddQuote adds a new quote.
@@ -129,6 +144,8 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 		p.returnHelpRemove(post.ChannelID)
 		return
 	}
+
+	// TODO
 }
 
 func (p *QuotesPlugin) onCommandQuote(post model.Post) {
@@ -138,10 +155,12 @@ func (p *QuotesPlugin) onCommandQuote(post model.Post) {
 		return
 	}
 
-	id := p.randomizer.Intn(len(currentList.UUIDs))
+	n := p.randomizer.Intn(len(currentList.UUIDs))
 
-	if quote, err := p.getQuote(currentList.UUIDs[id]); err == nil {
-		p.returnMessage(post.ChannelID, quote.Text)
+	if quote, err := p.getQuote(currentList.UUIDs[n]); err == nil {
+		p.returnMessage(post.ChannelID, fmt.Sprintf("%d. %s", n+1, quote))
+	} else {
+		p.API.LogError(fmt.Sprintf("Could not receive quote with id %s: %s", currentList.UUIDs[n], err))
 	}
 
 }
