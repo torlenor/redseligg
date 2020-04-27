@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"reflect"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/sirupsen/logrus"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
 	"github.com/torlenor/abylebotter/logging"
 )
@@ -22,7 +23,7 @@ var fieldBotID = "bot_id"
 var fieldPluginID = "plugin_id"
 var fieldIdentifier = "identifier"
 
-// MongoStorage is a MongoDB implementation of a storage backend.
+// MongoStorage is a MongoDB implementation of a storage.
 type MongoStorage struct {
 	log    *logrus.Entry
 	dbName string
@@ -33,7 +34,7 @@ type MongoStorage struct {
 	connected bool
 }
 
-// New creates a new Mongo Backend
+// New creates a new MongoStorage
 func New(storageConfig botconfig.StorageConfig) (*MongoStorage, error) {
 	cfg, err := parseConfig(storageConfig)
 	if err != nil {
@@ -60,7 +61,7 @@ func New(storageConfig botconfig.StorageConfig) (*MongoStorage, error) {
 	return b, nil
 }
 
-// Connect initializes the MongoDBBackend Client by using the appropriate Mongo functions.
+// Connect initializes the MongoStorage by using the appropriate Mongo functions.
 // In addition it checks its collections and creates indices if necessary.
 // This method must be called before the Mongo Backend can be used.
 func (b *MongoStorage) Connect() error {

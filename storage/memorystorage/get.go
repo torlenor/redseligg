@@ -10,7 +10,7 @@ import (
 // ErrNotFound is returned when no data could be found
 var ErrNotFound = errors.New("MemoryStorage: Could not find requested data")
 
-// GetQuotesPluginQuote to implement QuotesPluginReader
+// GetQuotesPluginQuote returns a QuotesPluginQuote.
 func (b *MemoryStorage) GetQuotesPluginQuote(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuote, error) {
 	if q, ok := b.storage[botID][pluginID][identifier]; ok {
 		if val, ok := q.(storagemodels.QuotesPluginQuote); ok {
@@ -21,7 +21,7 @@ func (b *MemoryStorage) GetQuotesPluginQuote(botID, pluginID, identifier string)
 	return storagemodels.QuotesPluginQuote{}, ErrNotFound
 }
 
-// GetQuotesPluginQuotesList to implement QuotesPluginReader
+// GetQuotesPluginQuotesList returns a QuotesPluginQuotesList.
 func (b *MemoryStorage) GetQuotesPluginQuotesList(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuotesList, error) {
 	if q, ok := b.storage[botID][pluginID][identifier]; ok {
 		if val, ok := q.(storagemodels.QuotesPluginQuotesList); ok {

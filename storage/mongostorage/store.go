@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// StoreQuotesPluginQuote takes a QuotesPluginQuote and stores it.
 func (b *MongoStorage) StoreQuotesPluginQuote(botID, pluginID, identifier string, data storagemodels.QuotesPluginQuote) error {
 	c := b.db.Collection(collectionPluginStorage)
 	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}
@@ -19,6 +20,7 @@ func (b *MongoStorage) StoreQuotesPluginQuote(botID, pluginID, identifier string
 	return nil
 }
 
+// StoreQuotesPluginQuotesList takes a QuotesPluginQuotesList and stores it.
 func (b *MongoStorage) StoreQuotesPluginQuotesList(botID, pluginID, identifier string, data storagemodels.QuotesPluginQuotesList) error {
 	c := b.db.Collection(collectionPluginStorage)
 	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}

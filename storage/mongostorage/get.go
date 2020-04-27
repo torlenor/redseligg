@@ -13,7 +13,7 @@ import (
 // ErrNotFound is returned when no data could be found
 var ErrNotFound = errors.New("MongoStorage: Could not find requested data")
 
-// GetQuotesPluginQuote to implement QuotesPluginReader
+// GetQuotesPluginQuote returns a QuotesPluginQuote.
 func (b *MongoStorage) GetQuotesPluginQuote(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuote, error) {
 	if !b.IsConnected() {
 		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("Not connected to MongoDB")
@@ -33,7 +33,7 @@ func (b *MongoStorage) GetQuotesPluginQuote(botID, pluginID, identifier string) 
 	return data.Data, nil
 }
 
-// GetQuotesPluginQuotesList to implement QuotesPluginReader
+// GetQuotesPluginQuotesList returns a QuotesPluginQuotesList.
 func (b *MongoStorage) GetQuotesPluginQuotesList(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuotesList, error) {
 	if !b.IsConnected() {
 		return storagemodels.QuotesPluginQuotesList{}, fmt.Errorf("Not connected to MongoDB")

@@ -22,7 +22,7 @@ func (b *MongoStorage) createIndex(collection string, indexModel mongo.IndexMode
 	return nil
 }
 
-// checkMatches checks the matches collection and sets the correct indices
+// checkPluginStorage checks the PluginStorage collection and sets the correct indices
 func (b *MongoStorage) checkPluginStorage() error {
 	err := b.createIndex(collectionPluginStorage, mongo.IndexModel{
 		Keys: bsonx.Doc{
