@@ -62,7 +62,7 @@ func (p *QuotesPlugin) addQuoteIdentifierToList(identifier string) (int, error) 
 	currentList.UUIDs = append(currentList.UUIDs, identifier)
 	s := p.getStorage()
 	if s == nil {
-		return 0, fmt.Errorf("Not valid storage set")
+		return 0, fmt.Errorf("No valid storage set")
 	}
 
 	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, currentList)
@@ -79,11 +79,19 @@ func (p *QuotesPlugin) removeQuoteIdentifierToList(identifier string) (int, erro
 	}
 	s := p.getStorage()
 	if s == nil {
-		return 0, fmt.Errorf("Not valid storage set")
+		return 0, fmt.Errorf("No valid storage set")
 	}
 
 	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, newList)
 	return len(currentList.UUIDs), err
+}
+
+func (p *QuotesPlugin) removeQuote(identifier string) error {
+	s := p.getStorage()
+	if s == nil {
+		return fmt.Errorf("No valid storage set")
+	}
+	return s.DeleteQuotesPluginQuote(p.BotID, p.PluginID, identifier)
 }
 
 func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
@@ -91,7 +99,7 @@ func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
 
 	s := p.getStorage()
 	if s == nil {
-		p.API.LogError("Not valid storage set")
+		p.API.LogError("No valid storage set")
 		return currentList
 	}
 	var err error
@@ -106,7 +114,7 @@ func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
 func (p *QuotesPlugin) getQuote(identifier string) (storagemodels.QuotesPluginQuote, error) {
 	s := p.getStorage()
 	if s == nil {
-		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("Not valid storage set")
+		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("No valid storage set")
 	}
 
 	return s.GetQuotesPluginQuote(p.BotID, p.PluginID, identifier)
@@ -117,7 +125,7 @@ func (p *QuotesPlugin) storeQuote(quote storagemodels.QuotesPluginQuote) int {
 
 	s := p.getStorage()
 	if s == nil {
-		p.API.LogError("Not valid storage set")
+		p.API.LogError("No valid storage set")
 		return 0
 	}
 
@@ -179,7 +187,7 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 	}
 
 	p.removeQuoteIdentifierToList(currentList.UUIDs[n])
-	// TODO remove quote
+	p.removeQuote(currentList.UUIDs[n])
 
 	p.returnMessage(post.ChannelID, "Successfully removed quote #"+removeID)
 }

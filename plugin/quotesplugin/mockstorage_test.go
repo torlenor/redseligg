@@ -28,6 +28,7 @@ type MockStorage struct {
 	StoredQuotesList []storedQuotesListData
 
 	LastRetrieved retrievedData
+	LastDeleted   retrievedData
 
 	QuoteDataToReturn      storagemodels.QuotesPluginQuote
 	QuotesListDataToReturn storagemodels.QuotesPluginQuotesList
@@ -69,4 +70,12 @@ func (b *MockStorage) GetQuotesPluginQuotesList(botID, pluginID, identifier stri
 	b.LastRetrieved.Identifier = identifier
 
 	return b.QuotesListDataToReturn, b.ErrorToReturn
+}
+
+func (b *MockStorage) DeleteQuotesPluginQuote(botID, pluginID, identifier string) error {
+	b.LastDeleted.BotID = botID
+	b.LastDeleted.PluginID = pluginID
+	b.LastDeleted.Identifier = identifier
+
+	return b.ErrorToReturn
 }

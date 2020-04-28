@@ -27,10 +27,14 @@ type quotesPluginReader interface {
 	GetQuotesPluginQuote(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuote, error)
 	GetQuotesPluginQuotesList(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuotesList, error)
 }
+type quotesPluginDeleter interface {
+	DeleteQuotesPluginQuote(botID, pluginID, identifier string) error
+}
 
 type quotesPluginReaderWriter interface {
 	quotesPluginReader
 	quotesPluginWriter
+	quotesPluginDeleter
 }
 
 // QuotesPlugin is a plugin that allows viewers or mods to add quotes and randomly fetch one.

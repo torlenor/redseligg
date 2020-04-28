@@ -327,6 +327,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 	}
 
 	pluginID := "SOME_PLUGIN_ID"
+	botID := "SOME BOT ID"
 	quote := storagemodels.QuotesPluginQuote{
 		Author:    "USER 1",
 		Added:     now(),
@@ -340,6 +341,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	p.PluginID = pluginID
+	p.BotID = botID
 
 	api := plugin.MockAPI{}
 	storage := MockStorage{}
@@ -366,20 +368,11 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	// if !assert.Equal(1, len(storage.StoredQuotes)) {
-	// 	t.FailNow()
-	// }
 	if !assert.Equal(1, len(storage.StoredQuotesList)) {
 		t.FailNow()
 	}
 
-	// actualData := storage.StoredQuotes[0]
-	// assert.Equal(pluginID, actualData.PluginID)
-	// assert.Greater(len(actualData.Identifier), 0)
-	// assert.Equal(quote, actualData.Data)
-
-	actualList := storage.StoredQuotesList[0]
-	assert.Equal(pluginID, actualList.PluginID)
-	assert.Equal(identFieldList, actualList.Identifier)
-	assert.Equal(1, len(actualList.Data.UUIDs))
+	assert.Equal(botID, storage.LastDeleted.BotID)
+	assert.Equal(pluginID, storage.LastDeleted.PluginID)
+	assert.Equal("some other identifier", storage.LastDeleted.Identifier)
 }
