@@ -14,18 +14,21 @@ func (p *QuotesPlugin) OnPost(post model.Post) {
 	}
 
 	msg := strings.Trim(post.Content, " ")
+
+	if strings.HasPrefix(msg, "!quote ") || msg == "!quote" {
+		p.onCommandQuote(post)
+		return
+	} else if strings.HasPrefix(msg, "!quoteadd ") {
+		p.onCommandQuoteAdd(post)
+		return
+	} else if msg == "!quoteadd" || msg == "!quotehelp" {
+		p.returnHelp(post.ChannelID)
+		return
+	}
+
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!quote ") || msg == "!quote" {
-			p.onCommandQuote(post)
-			return
-		} else if strings.HasPrefix(msg, "!quoteadd ") {
-			p.onCommandQuoteAdd(post)
-			return
-		} else if strings.HasPrefix(msg, "!quoteremove ") {
+		if strings.HasPrefix(msg, "!quoteremove ") {
 			p.onCommandQuoteRemove(post)
-			return
-		} else if msg == "!quoteadd" || msg == "!quotehelp" {
-			p.returnHelp(post.ChannelID)
 			return
 		} else if msg == "!quoteremove" {
 			p.returnHelpRemove(post.ChannelID)
