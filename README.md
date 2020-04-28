@@ -234,7 +234,6 @@ This is a classic "Roll/Random" plugin which sends back a random number in the r
 
 The VersionPlugin answers to `!version` with the version of the bot.
 
-
 ### Vote Plugin
 
 Initiate a vote in the channel about arbitrary topics.
@@ -272,4 +271,65 @@ Type '!voteend message' to end a vote. No additional choices will be counted. Fo
 ```
 
 #### Deleting a vote
+
 Just delete the vote message.
+
+## Quotes Plugin
+
+Lets users/viewers or mods add quotes and randomly fetch one.
+
+### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "quotes"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to perform certain actions. Per default everybody is allowed.
+
+### Adding a quote
+
+To add a quote type
+
+```
+!quoteadd <your quote>
+```
+
+Example:
+```
+!quoteadd This is awesome!
+```
+
+### Getting a quote
+
+```
+!quote
+```
+will return a random quote.
+
+```
+!quote 2
+```
+will return the 2nd quote in the list.
+
+The output will be similar to
+
+```
+123. "This is awesome!" - 2020-4-22, added by SomeBody
+```
+
+### Removing a quote
+
+Use 
+
+```
+!quoteremove ID
+```
+
+, e.g., !quoteremove 123, to remove a quote.
+
+**Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
