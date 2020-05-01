@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	git.abyle.org/redseligg/botorchestrator v0.0.0-20200426200640-6a0f7a3af6b8
-	github.com/BurntSushi/toml v0.3.1
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
