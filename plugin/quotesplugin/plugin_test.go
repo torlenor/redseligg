@@ -147,15 +147,19 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
 		Content:   "MESSAGE CONTENT",
-		IsPrivate: false,
+		IsPrivate: true,
 	}
 
 	postToPlugin.Content = "!quoteadd " + quote.Text
+	p.OnPost(postToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Successfully added quote #1",
 		IsPrivate: false,
 	}
+	postToPlugin.IsPrivate = false
 	p.OnPost(postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
@@ -256,10 +260,6 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 
 	storage := &MockStorage{}
 	api := plugin.MockAPI{Storage: storage}
-	storage.QuoteDataToReturn = quote
-	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
-		UUIDs: []string{"some identifier"},
-	}
 
 	p.SetAPI(&api)
 
@@ -271,8 +271,22 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 		IsPrivate: false,
 	}
 
-	year, month, day := now().Date()
 	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "No quotes found. Use the command `!quoteadd <your quote>` to add a new one.",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	storage.QuoteDataToReturn = quote
+	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
+		UUIDs: []string{"some identifier"},
+	}
+
+	year, month, day := now().Date()
+	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   fmt.Sprintf(`1. "%s" - %d-%d-%d, added by %s`, quote.Text, year, month, day, postToPlugin.User.Name),
 		IsPrivate: false,
@@ -337,6 +351,77 @@ func TestQuotesPlugin_GetQuote_Number(t *testing.T) {
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
 
+func TestQuotesPlugin_RemoveQuote_OnlyMods(t *testing.T) {
+	assert := assert.New(t)
+
+	userName := "SOME USER NAME"
+
+	// Inject a new time.Now()
+	now = func() time.Time {
+		layout := "2006-01-02T15:04:05.000Z"
+		str := "2018-12-22T13:00:00.000Z"
+		t, _ := time.Parse(layout, str)
+		return t
+	}
+
+	pluginID := "SOME_PLUGIN_ID"
+	botID := "SOME BOT ID"
+	quote := storagemodels.QuotesPluginQuote{
+		Author:    "USER 1",
+		Added:     now(),
+		AuthorID:  "SOME USER ID",
+		ChannelID: "CHANNEL ID",
+		Text:      "some quote",
+	}
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	p.PluginID = pluginID
+	p.BotID = botID
+
+	p.cfg.OnlyMods = true
+	p.cfg.Mods = append(p.cfg.Mods, userName)
+
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
+	storage.QuoteDataToReturn = quote
+	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
+		UUIDs: []string{"some identifier", "some other identifier"},
+	}
+	p.SetAPI(&api)
+
+	postToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "SOME OTHER USER NAME"},
+		Content:   "!quoteremove 2",
+		IsPrivate: false,
+	}
+
+	p.OnPost(postToPlugin)
+	assert.Equal(false, api.WasCreatePostCalled)
+
+	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Successfully removed quote #2",
+		IsPrivate: false,
+	}
+	postToPlugin.User.Name = userName
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	if !assert.Equal(1, len(storage.StoredQuotesList)) {
+		t.FailNow()
+	}
+
+	assert.Equal(botID, storage.LastDeleted.BotID)
+	assert.Equal(pluginID, storage.LastDeleted.PluginID)
+	assert.Equal("some other identifier", storage.LastDeleted.Identifier)
+}
+
 func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 	assert := assert.New(t)
 
@@ -367,21 +452,31 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 
 	storage := &MockStorage{}
 	api := plugin.MockAPI{Storage: storage}
-	storage.QuoteDataToReturn = quote
-	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
-		UUIDs: []string{"some identifier", "some other identifier"},
-	}
 	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
-		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		User:      model.User{ID: "SOME OTHER USER ID", Name: "USER 1"},
 		Content:   "!quoteremove 2",
 		IsPrivate: false,
 	}
 
 	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   "Quote #2 not found",
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	storage.QuoteDataToReturn = quote
+	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
+		UUIDs: []string{"some identifier", "some other identifier"},
+	}
+
+	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Successfully removed quote #2",
 		IsPrivate: false,
