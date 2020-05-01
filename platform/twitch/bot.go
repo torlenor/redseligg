@@ -157,14 +157,30 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 
 	<-ctx.Done()
+	log.Infoln("TwitchBot is SHUTING DOWN")
 
 	for _, plugin := range b.plugins {
 		plugin.OnStop()
 	}
 
-	// STOP SOMETHING
+	err := b.sendCloseToWebsocket()
+	if err != nil {
+		log.Errorln("Error when writing close message to ws:", err)
+	}
+
+	b.wg.Wait()
+
 	b.ws.Close()
 
+	log.Infoln("TwitchBot is SHUT DOWN")
+
+	return nil
+}
+
+func (b *Bot) sendCloseToWebsocket() error {
+	if b.ws != nil {
+		return b.ws.SendMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	}
 	return nil
 }
 
