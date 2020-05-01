@@ -62,7 +62,7 @@ func (p *QuotesPlugin) addQuoteIdentifierToList(identifier string) (int, error) 
 	currentList.UUIDs = append(currentList.UUIDs, identifier)
 	s := p.getStorage()
 	if s == nil {
-		return 0, fmt.Errorf("No valid storage set")
+		return 0, ErrNoValidStorage
 	}
 
 	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, currentList)
@@ -79,7 +79,7 @@ func (p *QuotesPlugin) removeQuoteIdentifierToList(identifier string) (int, erro
 	}
 	s := p.getStorage()
 	if s == nil {
-		return 0, fmt.Errorf("No valid storage set")
+		return 0, ErrNoValidStorage
 	}
 
 	err := s.StoreQuotesPluginQuotesList(p.BotID, p.PluginID, identFieldList, newList)
@@ -89,7 +89,7 @@ func (p *QuotesPlugin) removeQuoteIdentifierToList(identifier string) (int, erro
 func (p *QuotesPlugin) removeQuote(identifier string) error {
 	s := p.getStorage()
 	if s == nil {
-		return fmt.Errorf("No valid storage set")
+		return ErrNoValidStorage
 	}
 	return s.DeleteQuotesPluginQuote(p.BotID, p.PluginID, identifier)
 }
@@ -99,7 +99,7 @@ func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
 
 	s := p.getStorage()
 	if s == nil {
-		p.API.LogError("No valid storage set")
+		p.API.LogError(ErrNoValidStorage.Error())
 		return currentList
 	}
 	var err error
@@ -114,7 +114,7 @@ func (p *QuotesPlugin) getQuotesList() storagemodels.QuotesPluginQuotesList {
 func (p *QuotesPlugin) getQuote(identifier string) (storagemodels.QuotesPluginQuote, error) {
 	s := p.getStorage()
 	if s == nil {
-		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("No valid storage set")
+		return storagemodels.QuotesPluginQuote{}, ErrNoValidStorage
 	}
 
 	return s.GetQuotesPluginQuote(p.BotID, p.PluginID, identifier)
@@ -125,7 +125,7 @@ func (p *QuotesPlugin) storeQuote(quote storagemodels.QuotesPluginQuote) int {
 
 	s := p.getStorage()
 	if s == nil {
-		p.API.LogError("No valid storage set")
+		p.API.LogError(ErrNoValidStorage.Error())
 		return 0
 	}
 
