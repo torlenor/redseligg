@@ -172,7 +172,7 @@ func (b *Bot) run() {
 		return
 	}
 
-	log.Info("DiscordBot is READY")
+	log.Info("DiscordBot is RUNNING")
 
 	// Go into event handling
 	for {

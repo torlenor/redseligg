@@ -1,5 +1,7 @@
 git.abyle.org/redseligg/botorchestrator v0.0.0-20200426200640-6a0f7a3af6b8 h1:WAnAEQS57U3OVzuJJboKsdRVcK01cyM8IJkdL3keHN4=
 git.abyle.org/redseligg/botorchestrator v0.0.0-20200426200640-6a0f7a3af6b8/go.mod h1:UGF3+he+X5jXIp24QEktZrfVgkK4EZPt+FMiLXPCKaE=
+git.abyle.org/redseligg/botorchestrator v0.0.0-20200501150505-b146d40e8562 h1:tp0hhRcr/VK8arJs0WEI/81c08105NMD+1wjr9vAuxw=
+git.abyle.org/redseligg/botorchestrator v0.0.0-20200501150505-b146d40e8562/go.mod h1:UGF3+he+X5jXIp24QEktZrfVgkK4EZPt+FMiLXPCKaE=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
