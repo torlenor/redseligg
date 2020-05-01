@@ -1,6 +1,7 @@
 package quotesplugin
 
 import (
+	"errors"
 	"math/rand"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 const (
 	PLUGIN_TYPE = "quotes"
 )
+
+var ErrNoValidStorage = errors.New("No valid storage set")
 
 type randomizer interface {
 	Intn(max int) int
@@ -44,6 +47,8 @@ type QuotesPlugin struct {
 	cfg config
 
 	randomizer randomizer
+
+	storage quotesPluginReaderWriter
 }
 
 // New returns a new QuotesPlugin

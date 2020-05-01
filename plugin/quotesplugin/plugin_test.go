@@ -28,6 +28,28 @@ func TestCreateQuotesPlugin(t *testing.T) {
 	p.SetAPI(&api)
 }
 
+func TestQuotesPlugin_OnRun(t *testing.T) {
+	assert := assert.New(t)
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: nil}
+	p.SetAPI(&api)
+
+	assert.Equal("", api.LastLoggedError)
+	p.OnRun()
+
+	assert.Equal(ErrNoValidStorage.Error(), api.LastLoggedError)
+
+	api.Reset()
+	api.Storage = storage
+	p.OnRun()
+	assert.Equal("", api.LastLoggedError)
+}
+
 func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert := assert.New(t)
 

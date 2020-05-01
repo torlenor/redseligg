@@ -7,6 +7,14 @@ import (
 	"github.com/torlenor/abylebotter/utils"
 )
 
+// OnRun is called when the platform is ready
+func (p *QuotesPlugin) OnRun() {
+	p.storage = p.getStorage()
+	if p.storage == nil {
+		p.API.LogError(ErrNoValidStorage.Error())
+	}
+}
+
 // OnPost implements the hook from the Bot
 func (p *QuotesPlugin) OnPost(post model.Post) {
 	if post.IsPrivate {
