@@ -319,7 +319,7 @@ will return the 2nd quote in the list.
 The output will be similar to
 
 ```
-123. "This is awesome!" - 2020-4-22, added by SomeBody
+123. "This is awesome!" - 2020-4-22, added by Somebody
 ```
 
 ### Removing a quote
