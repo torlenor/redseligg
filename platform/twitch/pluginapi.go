@@ -3,6 +3,9 @@ package twitch
 import (
 	"fmt"
 
+	"github.com/gorilla/websocket"
+	"gopkg.in/irc.v3"
+
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/storage"
 	"github.com/torlenor/abylebotter/utils"
@@ -36,10 +39,13 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 
 // CreatePost creates a post.
 func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
-	if post.IsPrivate {
-
-	} else {
-
+	ircMessage := irc.Message{
+		Command: "PRIVMSG",
+		Params:  []string{post.ChannelID, post.Content},
+	}
+	err := b.ws.SendMessage(websocket.TextMessage, []byte(ircMessage.String()))
+	if err != nil {
+		return model.PostResponse{}, fmt.Errorf("Could not send message: %s", err)
 	}
 
 	return model.PostResponse{}, nil

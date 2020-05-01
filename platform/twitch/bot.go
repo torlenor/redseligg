@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"sync"
 
+	"gopkg.in/irc.v3"
+
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
 	"github.com/gorilla/websocket"
 	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
 	"github.com/torlenor/abylebotter/storage"
@@ -107,7 +110,34 @@ func (b *Bot) messageLoop() {
 			}
 		}
 
-		log.Infof("Received message from Twitch chat: %s", message)
+		ircMessage, err := irc.ParseMessage(string(message))
+		if err != nil {
+			log.Errorf("Error parsing irc message: %s", err)
+			continue
+		}
+
+		switch ircMessage.Command {
+		case "PING":
+			ircMessage.Command = "PONG"
+			b.ws.SendMessage(websocket.TextMessage, []byte(ircMessage.String()))
+		case "PRIVMSG":
+			if len(ircMessage.Params) > 1 {
+				post := model.Post{
+					ChannelID: ircMessage.Params[0],
+					User:      model.User{Name: ircMessage.User, ID: ircMessage.User},
+					Content:   ircMessage.Params[1],
+				}
+				for _, plugin := range b.plugins {
+					plugin.OnPost(post)
+				}
+			} else {
+				log.Warnf("Params not long enough")
+			}
+		case "USERSTATE":
+			// Not needed
+		default:
+			log.Warnf("Unhandled IRC command from server: %s, full message: %s", ircMessage.Command, ircMessage)
+		}
 	}
 }
 
