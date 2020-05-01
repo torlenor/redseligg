@@ -59,7 +59,7 @@ func CreateMatrixBot(cfg botconfig.MatrixConfig) (*Bot, error) {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b, nil)
+	plugin.SetAPI(b)
 	b.plugins = append(b.plugins, plugin)
 }
 

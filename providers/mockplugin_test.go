@@ -3,7 +3,6 @@ package providers
 import (
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storage"
 )
 
 type MockPlugin struct {
@@ -16,7 +15,7 @@ func (m *MockPlugin) SetBotPluginID(botID, pluginID string) {
 	m.PluginID = pluginID
 }
 
-func (m *MockPlugin) SetAPI(api plugin.API, storage storage.Storage) {}
+func (m *MockPlugin) SetAPI(api plugin.API) {}
 
 func (m *MockPlugin) OnPost(model.Post)                {}
 func (m *MockPlugin) OnRun()                           {}

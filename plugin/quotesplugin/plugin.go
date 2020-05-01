@@ -64,7 +64,7 @@ func New(pluginConfig botconfig.PluginConfig) (*QuotesPlugin, error) {
 // getStorage returns the correct storage if it supports the necessary
 // functions.
 func (p *QuotesPlugin) getStorage() quotesPluginReaderWriter {
-	if s, ok := p.Storage.(quotesPluginReaderWriter); ok {
+	if s, ok := p.API.GetStorage().(quotesPluginReaderWriter); ok {
 		return s
 	}
 	return nil

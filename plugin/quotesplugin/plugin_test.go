@@ -23,9 +23,9 @@ func TestCreateQuotesPlugin(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
-	p.SetAPI(&api, &storage)
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
+	p.SetAPI(&api)
 }
 
 func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
@@ -35,9 +35,9 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
-	p.SetAPI(&api, &storage)
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -116,9 +116,9 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 
 	p.PluginID = pluginID
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
-	p.SetAPI(&api, &storage)
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -182,10 +182,10 @@ func TestQuotesPlugin_AddQuoteFail(t *testing.T) {
 
 	p.PluginID = pluginID
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
 	storage.ErrorToReturn = fmt.Errorf("Some error")
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -232,14 +232,14 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 
 	p.PluginID = pluginID
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
 	storage.QuoteDataToReturn = quote
 	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
 		UUIDs: []string{"some identifier"},
 	}
 
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -287,14 +287,14 @@ func TestQuotesPlugin_GetQuote_Number(t *testing.T) {
 
 	p.PluginID = pluginID
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
 	storage.QuoteDataToReturn = quote2
 	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
 		UUIDs: []string{"some identifier", "some other identifier"},
 	}
 
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -343,13 +343,13 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 	p.PluginID = pluginID
 	p.BotID = botID
 
-	api := plugin.MockAPI{}
-	storage := MockStorage{}
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
 	storage.QuoteDataToReturn = quote
 	storage.QuotesListDataToReturn = storagemodels.QuotesPluginQuotesList{
 		UUIDs: []string{"some identifier", "some other identifier"},
 	}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",

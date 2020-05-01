@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storage"
 )
 
 func TestCreateVotePlugin(t *testing.T) {
@@ -25,8 +24,7 @@ func TestCreateVotePlugin(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 }
 
 func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
@@ -37,8 +35,7 @@ func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -91,8 +88,7 @@ func TestVotePlugin_FailOnPost(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 	api.ErrorToReturn = fmt.Errorf("Some error")
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
@@ -129,8 +125,7 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -215,8 +210,7 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -300,8 +294,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -398,8 +391,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -485,8 +477,7 @@ func TestVotePlugin_CustomVoteCounting(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -578,8 +569,7 @@ func TestVotePlugin_CustomVoteOptionsLimit(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID

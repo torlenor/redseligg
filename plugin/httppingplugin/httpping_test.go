@@ -7,7 +7,6 @@ import (
 
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storage"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -44,8 +43,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	storage := storage.MockStorage{}
-	p.SetAPI(&api, &storage)
+	p.SetAPI(&api)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
