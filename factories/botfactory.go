@@ -81,7 +81,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}
 
-		bot, err = twitch.CreateTwitchBot(twitchCfg, storage)
+		bot, err = twitch.CreateTwitchBot(twitchCfg, storage, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}

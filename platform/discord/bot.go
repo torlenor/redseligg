@@ -172,8 +172,6 @@ func (b *Bot) run() {
 		return
 	}
 
-	log.Info("DiscordBot is RUNNING")
-
 	// Go into event handling
 	for {
 		_, message, err := b.ws.ReadMessage()
@@ -287,7 +285,7 @@ func (b *Bot) start() error {
 	for _, plugin := range b.plugins {
 		plugin.OnRun()
 	}
-	log.Infoln("DiscordBot is RUNNING")
+	log.Info("DiscordBot is RUNNING")
 
 	return nil
 }
