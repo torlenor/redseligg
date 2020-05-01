@@ -82,7 +82,7 @@ func (b *Bot) messageLoop() {
 	defer func() {
 		if e != nil {
 			log.Error(e)
-			// go b.onFail()
+			go b.onFail()
 		}
 	}()
 
@@ -93,17 +93,14 @@ func (b *Bot) messageLoop() {
 				log.Debugln("Connection to Twitch Chat closed normally: ", err)
 				break
 			} else if websocket.IsCloseError(err, websocket.CloseGoingAway) {
-				// log.Infof("Received GoingAway from Twitch Chat, attempting a reconnect")
-				// b.stopHeartBeatWatchdog()
-				// b.ws.Close()
-				// err := b.openGatewayConnection()
-				// if err != nil {
-				// 	e = fmt.Errorf("Could not reconnect to Twitch Gateway: %s", err.Error())
-				// 	break
-				// }
-				// continue
-
-				break
+				log.Infof("Received GoingAway from Twitch Chat, attempting a reconnect")
+				b.ws.Close()
+				err := b.openWebSocketConnection()
+				if err != nil {
+					e = fmt.Errorf("Could not reconnect to Twitch Chat WebSocket: %s", err.Error())
+					break
+				}
+				continue
 			} else {
 				e = fmt.Errorf("Unhandled error in Twitch Chat communication logic: %s", err)
 				break
@@ -199,4 +196,31 @@ func (b *Bot) GetInfo() platform.BotInfo {
 		Healthy:  true,
 		Plugins:  []platform.PluginInfo{},
 	}
+}
+
+func (b *Bot) onFail() {
+	log.Warn("Encountered an error, trying to restart the bot")
+
+	err := b.sendCloseToWebsocket()
+	if err != nil {
+		log.Errorf("Error when writing close message to ws: %s, still trying to recover", err)
+	}
+
+	b.wg.Wait()
+
+	b.ws.Close()
+
+	err = b.openWebSocketConnection()
+	if err != nil {
+		log.Errorln("Could not open Twitch Chat WebSocket, Twitch Bot not operational:", err)
+		return
+	}
+
+	go func() {
+		b.wg.Add(1)
+		b.messageLoop()
+		defer b.wg.Done()
+	}()
+
+	log.Info("Recovery attempt finished")
 }
