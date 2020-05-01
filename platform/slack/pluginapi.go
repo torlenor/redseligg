@@ -11,7 +11,7 @@ import (
 var version string
 
 // GetStorage returns the storage or nil if none is provided by the platform
-func (b *Bot) GetStorage() storage.Storage { return nil }
+func (b *Bot) GetStorage() storage.Storage { return b.storage }
 
 // RegisterCommand registers a custom slash or ! command, depending on what the bot supports.
 func (b *Bot) RegisterCommand(command string) error { return nil }

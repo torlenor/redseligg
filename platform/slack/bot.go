@@ -13,6 +13,7 @@ import (
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storage"
 	"github.com/torlenor/abylebotter/utils"
 )
 
@@ -30,6 +31,8 @@ type webSocketClient interface {
 type Bot struct {
 	config botconfig.SlackConfig
 	log    *logrus.Entry
+
+	storage storage.Storage
 
 	rtmURL string
 	ws     webSocketClient
@@ -51,13 +54,15 @@ type Bot struct {
 }
 
 // CreateSlackBot creates a new instance of a SlackBot
-func CreateSlackBot(cfg botconfig.SlackConfig, ws webSocketClient) (*Bot, error) {
+func CreateSlackBot(cfg botconfig.SlackConfig, storage storage.Storage, ws webSocketClient) (*Bot, error) {
 	log := logging.Get("SlackBot")
 	log.Printf("SlackBot is CREATING itself")
 
 	b := Bot{
 		config: cfg,
 		log:    log,
+
+		storage: storage,
 
 		ws: ws,
 

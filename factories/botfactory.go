@@ -40,7 +40,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating slack bot: %s", err)
 		}
 
-		bot, err = slack.CreateSlackBot(slackCfg, ws.NewClient())
+		bot, err = slack.CreateSlackBot(slackCfg, storage, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating slack bot: %s", err)
 		}
