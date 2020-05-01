@@ -14,7 +14,7 @@ type MockPluginFactory struct {
 }
 
 // CreatePlugin creates a new plugin with the provided configuration
-func (b *MockPluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
+func (b *MockPluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {

@@ -9,6 +9,7 @@ import (
 	"github.com/torlenor/abylebotter/plugin/echoplugin"
 	"github.com/torlenor/abylebotter/plugin/giveawayplugin"
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
+	"github.com/torlenor/abylebotter/plugin/quotesplugin"
 	"github.com/torlenor/abylebotter/plugin/rollplugin"
 	"github.com/torlenor/abylebotter/plugin/versionplugin"
 	"github.com/torlenor/abylebotter/plugin/voteplugin"
@@ -19,7 +20,7 @@ type PluginFactory struct {
 }
 
 // CreatePlugin creates a new plugin with the provided configuration
-func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
+func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botconfig.PluginConfig) (platform.BotPlugin, error) {
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {
@@ -39,6 +40,12 @@ func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.Plugi
 		p = &rp
 	case "httpping":
 		p = &httppingplugin.HTTPPingPlugin{}
+	case "quotes":
+		rp, err := quotesplugin.New(pluginConfig)
+		if err != nil {
+			return nil, err
+		}
+		p = rp
 	case "version":
 		p = &versionplugin.VersionPlugin{}
 	case "vote":
@@ -50,6 +57,8 @@ func (b *PluginFactory) CreatePlugin(plugin string, pluginConfig botconfig.Plugi
 	default:
 		return nil, fmt.Errorf("Unknown plugin type %s", pluginConfig.Type)
 	}
+
+	p.SetBotPluginID(botID, pluginID)
 
 	return p, nil
 }

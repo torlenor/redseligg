@@ -1,6 +1,9 @@
 package plugin
 
-import "github.com/torlenor/abylebotter/model"
+import (
+	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/storage"
+)
 
 // The API can be used to retrieve data or perform actions on behalf of the plugin.
 //
@@ -8,6 +11,9 @@ import "github.com/torlenor/abylebotter/model"
 //
 // Plugins obtain access to this API by embedding AbyleBotterPlugin.
 type API interface {
+	// GetStorage returns the storage or nil if none is provided by the platform
+	GetStorage() storage.Storage
+
 	// RegisterCommand registers a custom slash "/" or "!" command, depending on what the bot supports.
 	RegisterCommand(command string) error
 

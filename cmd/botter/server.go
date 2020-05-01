@@ -159,7 +159,10 @@ func (s *Server) Run() (err error) {
 
 	// Start all enabled bots
 	for _, id := range botProvider.GetAllEnabledBotIDs() {
-		s.botPool.AddViaID(id)
+		err := s.botPool.AddViaID(id)
+		if err != nil {
+			s.log.Errorf("Error creating bot with ID %s: %s", id, err)
+		}
 	}
 
 	defer func() {

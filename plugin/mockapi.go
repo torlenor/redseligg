@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/storage"
 )
 
 // The MockAPI can be used for testing Plugins by providing helper functions.
@@ -20,6 +21,10 @@ type MockAPI struct {
 	PostResponse model.PostResponse
 
 	ErrorToReturn error
+
+	Storage storage.Storage
+
+	LastLoggedError string
 }
 
 // Reset the MockAPI
@@ -30,7 +35,12 @@ func (b *MockAPI) Reset() {
 	b.WasUpdatePostCalled = false
 	b.LastUpdatePostMessageID = model.MessageIdentifier{}
 	b.LastUpdatePostPost = model.Post{}
+
+	b.LastLoggedError = ""
 }
+
+// GetStorage returns the storage or nil if none is provided by the platform
+func (b *MockAPI) GetStorage() storage.Storage { return b.Storage }
 
 // RegisterCommand registers a custom slash "/" or "!" command, depending on what the bot supports.
 func (b *MockAPI) RegisterCommand(command string) error { return nil }
@@ -91,7 +101,9 @@ func (b *MockAPI) LogInfo(msg string) {}
 func (b *MockAPI) LogWarn(msg string) {}
 
 // LogError writes a log message to the server log file.
-func (b *MockAPI) LogError(msg string) {}
+func (b *MockAPI) LogError(msg string) {
+	b.LastLoggedError = msg
+}
 
 // GetVersion returns the version of the server.
 func (b *MockAPI) GetVersion() string {

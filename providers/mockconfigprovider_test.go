@@ -15,6 +15,7 @@ func (m *mockConfigProvider) GetBotConfig(id string) (botconfig.BotConfig, error
 	case "mockSlackID":
 		return botconfig.BotConfig{
 			Type:    "mockSlack",
+			Enabled: true,
 			Plugins: m.pluginsConfig,
 		}, nil
 	case "mockMattermostID":
@@ -33,5 +34,5 @@ func (m *mockConfigProvider) GetBotConfig(id string) (botconfig.BotConfig, error
 }
 
 func (m *mockConfigProvider) GetAllEnabledBotIDs() []string {
-	return []string{}
+	return []string{"mockSlack"}
 }

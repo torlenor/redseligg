@@ -14,6 +14,7 @@ import (
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/abylebotter/storage"
 	"github.com/torlenor/abylebotter/utils"
 	"github.com/torlenor/abylebotter/webclient"
 )
@@ -43,6 +44,8 @@ type api interface {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
+	storage storage.Storage
+
 	api api
 
 	gatewayURL string
@@ -69,11 +72,12 @@ type Bot struct {
 
 // CreateDiscordBotWithAPI creates a new instance of a DiscordBot with the
 // provided api
-func CreateDiscordBotWithAPI(api api, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+func CreateDiscordBotWithAPI(api api, storage storage.Storage, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
 	log.Info("DiscordBot is CREATING itself")
 
 	b := Bot{
-		api: api,
+		api:     api,
+		storage: storage,
 
 		token: cfg.Token,
 		ws:    ws,
@@ -98,10 +102,10 @@ func CreateDiscordBotWithAPI(api api, cfg botconfig.DiscordConfig, ws webSocketC
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+func CreateDiscordBot(cfg botconfig.DiscordConfig, storage storage.Storage, ws webSocketClient) (*Bot, error) {
 	api := webclient.New("https://discordapp.com/api", "Bot "+cfg.Token, "application/json")
 
-	return CreateDiscordBotWithAPI(api, cfg, ws)
+	return CreateDiscordBotWithAPI(api, storage, cfg, ws)
 }
 
 func (b *Bot) startHeartbeatSender(heartbeatInterval time.Duration) {

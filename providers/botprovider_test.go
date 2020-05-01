@@ -54,7 +54,6 @@ func TestBotProvider_GetBot(t *testing.T) {
 	bot, err = botProvider.GetBot("mockSomeOtherPlatformID")
 	assert.Error(err)
 	assert.Nil(bot)
-
 }
 
 func TestBotProvider_GetBot_WithPlugins(t *testing.T) {
@@ -97,4 +96,21 @@ func TestBotProvider_GetBot_WithPlugins(t *testing.T) {
 	for key := range mbf.bot.plugins {
 		assert.Same(&mpf.plugin, mbf.bot.plugins[key].(*MockPlugin))
 	}
+}
+
+func TestBotProvider_GetAllEnabledBotIDs(t *testing.T) {
+	assert := assert.New(t)
+	mc := &mockConfigProvider{}
+	mbf := &MockBotFactory{
+		bot: MockBot{},
+	}
+	mpf := &MockPluginFactory{}
+
+	expectedBotIDs := []string{"mockSlack"}
+
+	botProvider, err := NewBotProvider(mc, mbf, mpf)
+	assert.NoError(err)
+
+	actualBotIDs := botProvider.GetAllEnabledBotIDs()
+	assert.Equal(expectedBotIDs, actualBotIDs)
 }
