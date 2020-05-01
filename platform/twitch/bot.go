@@ -141,7 +141,6 @@ func (b *Bot) messageLoop() {
 // Run the Bot (blocking)
 func (b *Bot) Run(ctx context.Context) error {
 	b.openWebSocketConnection()
-	// RUN SOMETHING
 
 	go func() {
 		b.wg.Add(1)
