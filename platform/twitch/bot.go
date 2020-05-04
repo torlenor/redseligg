@@ -135,6 +135,16 @@ func (b *Bot) messageLoop() {
 			}
 		case "USERSTATE":
 			// Not needed
+		case "JOIN":
+			// Viewer joins the channel
+		case "PART":
+			// View leaves the channel
+		case "001":
+			// Welcome message
+		case "CAP":
+			// Capabilities ack
+		case "353":
+			// List of current viewers "/NAMES"
 		default:
 			log.Warnf("Unhandled IRC command from server: %s, full message: %s", ircMessage.Command, ircMessage)
 		}
