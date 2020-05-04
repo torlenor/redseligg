@@ -6,11 +6,20 @@ import (
 	"strings"
 	"testing"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/stretchr/testify/assert"
+
+	"git.abyle.org/redseligg/botorchestrator/botconfig"
+
 	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
 )
+
+var providedFeatures = map[string]bool{
+	platform.FeatureMessagePost:    true,
+	platform.FeatureMessageUpdate:  true,
+	platform.FeatureReactionNotify: true,
+}
 
 func TestCreateVotePlugin(t *testing.T) {
 	assert := assert.New(t)
@@ -21,10 +30,31 @@ func TestCreateVotePlugin(t *testing.T) {
 
 	p, err = New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
 	assert.NoError(err)
+	assert.NotNil(p)
 	assert.Equal(nil, p.API)
 
 	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	err = p.SetAPI(&api)
+	assert.Error(err)
+
+	api.ProvidedFeatures = providedFeatures
+	err = p.SetAPI(&api)
+	assert.NoError(err)
+
+	assert.Equal(PLUGIN_TYPE, p.PluginType())
+}
+
+func TestVotePlugin_HasExpectedRequiredFeatures(t *testing.T) {
+	assert := assert.New(t)
+
+	expectedRequiredFeatures := []string{
+		platform.FeatureMessagePost,
+		platform.FeatureMessageUpdate,
+		platform.FeatureReactionNotify,
+	}
+
+	p, _ := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.Equal(expectedRequiredFeatures, p.NeededFeatures)
 }
 
 func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
@@ -34,8 +64,9 @@ func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
@@ -87,8 +118,9 @@ func TestVotePlugin_FailOnPost(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 	api.ErrorToReturn = fmt.Errorf("Some error")
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
@@ -124,8 +156,9 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -209,8 +242,9 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -293,8 +327,9 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -390,8 +425,9 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -476,8 +512,9 @@ func TestVotePlugin_CustomVoteCounting(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -568,8 +605,9 @@ func TestVotePlugin_CustomVoteOptionsLimit(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(nil, p.API)
 
-	api := plugin.MockAPI{}
-	p.SetAPI(&api)
+	api := plugin.MockAPI{ProvidedFeatures: providedFeatures}
+	err = p.SetAPI(&api)
+	assert.NoError(err)
 
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID

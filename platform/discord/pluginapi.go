@@ -36,23 +36,21 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 
 // CreatePost creates a post.
 func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
+	var mo messageObject
+	var err error
+
 	if post.IsPrivate {
-		mo, err := b.sendWhisper(post.User.ID, post.Content)
-		if err != nil {
-			return model.PostResponse{}, fmt.Errorf("Error sending whisper: %s", err)
-		}
-		return model.PostResponse{
-			PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
-		}, nil
+		mo, err = b.sendWhisper(post.User.ID, post.Content)
 	} else {
-		mo, err := b.sendMessage(post.ChannelID, post.Content)
-		if err != nil {
-			return model.PostResponse{}, fmt.Errorf("Error sending message: %s", err)
-		}
-		return model.PostResponse{
-			PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
-		}, nil
+		mo, err = b.sendMessage(post.ChannelID, post.Content)
 	}
+	if err != nil {
+		return model.PostResponse{}, fmt.Errorf("Error sending: %s", err)
+	}
+
+	return model.PostResponse{
+		PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
+	}, nil
 }
 
 // UpdatePost updates a post.

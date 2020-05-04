@@ -33,7 +33,10 @@ type webSocketClient interface {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
+	platform.BotImpl
+
 	storage storage.Storage
+
 	plugins []plugin.Hooks
 
 	cfg botconfig.TwitchConfig
@@ -183,8 +186,12 @@ func (b *Bot) sendCloseToWebsocket() error {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b)
-	b.plugins = append(b.plugins, plugin)
+	err := plugin.SetAPI(b)
+	if err != nil {
+		log.Errorf("Could not add plugin %s: %s", plugin.PluginType(), err)
+	} else {
+		b.plugins = append(b.plugins, plugin)
+	}
 }
 
 // GetInfo returns information about the Bot

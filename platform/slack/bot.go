@@ -29,10 +29,12 @@ type webSocketClient interface {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
-	config botconfig.SlackConfig
-	log    *logrus.Entry
+	platform.BotImpl
 
 	storage storage.Storage
+
+	config botconfig.SlackConfig
+	log    *logrus.Entry
 
 	rtmURL string
 	ws     webSocketClient
@@ -59,6 +61,15 @@ func CreateSlackBot(cfg botconfig.SlackConfig, storage storage.Storage, ws webSo
 	log.Printf("SlackBot is CREATING itself")
 
 	b := Bot{
+		BotImpl: platform.BotImpl{
+			ProvidedFeatures: map[string]bool{
+				platform.FeatureMessagePost:    true,
+				platform.FeatureMessageUpdate:  true,
+				platform.FeatureMessageDelete:  true,
+				platform.FeatureReactionNotify: true,
+			},
+		},
+
 		config: cfg,
 		log:    log,
 
@@ -172,8 +183,12 @@ func (b *Bot) Stop() {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b)
-	b.plugins = append(b.plugins, plugin)
+	err := plugin.SetAPI(b)
+	if err != nil {
+		b.log.Errorf("Could not add plugin %s: %s", plugin.PluginType(), err)
+	} else {
+		b.plugins = append(b.plugins, plugin)
+	}
 }
 
 // GetInfo returns information about the Bot

@@ -5,6 +5,8 @@ import (
 	"github.com/torlenor/abylebotter/plugin"
 )
 
+const MockPluginType = "MockPlugin"
+
 type MockPlugin struct {
 	BotID    string
 	PluginID string
@@ -15,7 +17,10 @@ func (m *MockPlugin) SetBotPluginID(botID, pluginID string) {
 	m.PluginID = pluginID
 }
 
-func (m *MockPlugin) SetAPI(api plugin.API) {}
+func (m *MockPlugin) SetAPI(api plugin.API) error { return nil }
+
+// PluginType returns the plugin type
+func (m *MockPlugin) PluginType() string { return MockPluginType }
 
 func (m *MockPlugin) OnPost(model.Post)                {}
 func (m *MockPlugin) OnRun()                           {}
