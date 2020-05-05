@@ -12,7 +12,7 @@
 - Storage memory added.
 - Storage mongo added.
 
-** New platforms:**
+**New platforms:**
 
 - Twitch Chat: AbyleBotter now supports Twitch Chat for sending/receiving messages.
 

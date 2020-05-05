@@ -12,11 +12,25 @@ func Test_convertMessageFromAbyleBotter(t *testing.T) {
 		want string
 	}{
 		{
-			// name: "Convert a message with newlines",
-			// args: args{
-			// 	text: "Some\nText",
-			// },
-			// want: "Some\\nText",
+			name: "Convert a AbyleBotter message containing a userid <@USERID>",
+			args: args{
+				text: "Some Text with <@USERID>",
+			},
+			want: "Some Text with USERID",
+		},
+		{
+			name: "Convert a AbyleBotter message containing more than one userid <@USERID>",
+			args: args{
+				text: "Some Text with <@USERID> and with also a user <@SOMETHING ELSE> and text afterwards",
+			},
+			want: "Some Text with USERID and with also a user SOMETHING ELSE and text afterwards",
+		},
+		{
+			name: "Convert a AbyleBotter message containing more than one userid <@USERID>",
+			args: args{
+				text: "<@test> and <@SOMETHING>",
+			},
+			want: "test and SOMETHING",
 		},
 	}
 	for _, tt := range tests {
