@@ -1,7 +1,10 @@
-package discord
+package twitch
 
 import (
 	"fmt"
+
+	"github.com/gorilla/websocket"
+	"gopkg.in/irc.v3"
 
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/storage"
@@ -36,38 +39,26 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 
 // CreatePost creates a post.
 func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
-	var mo messageObject
-	var err error
-
-	if post.IsPrivate {
-		mo, err = b.sendWhisper(post.User.ID, post.Content)
-	} else {
-		mo, err = b.sendMessage(post.ChannelID, post.Content)
+	ircMessage := irc.Message{
+		Command: "PRIVMSG",
+		Params:  []string{post.ChannelID, convertMessageFromAbyleBotter(post.Content)},
 	}
+	err := b.ws.SendMessage(websocket.TextMessage, []byte(ircMessage.String()))
 	if err != nil {
-		return model.PostResponse{}, fmt.Errorf("Error sending: %s", err)
+		return model.PostResponse{}, fmt.Errorf("Could not send message: %s", err)
 	}
 
-	return model.PostResponse{
-		PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
-	}, nil
+	return model.PostResponse{}, nil
 }
 
 // UpdatePost updates a post.
 func (b *Bot) UpdatePost(messageID model.MessageIdentifier, newPost model.Post) (model.PostResponse, error) {
-	mo, err := b.updateMessage(messageID, newPost.Content)
-	if err != nil {
-		return model.PostResponse{}, fmt.Errorf("Error updating message: %s", err)
-	}
-	return model.PostResponse{
-		PostedMessageIdent: model.MessageIdentifier{ID: mo.ID, Channel: mo.ChannelID},
-	}, nil
+	return model.PostResponse{}, fmt.Errorf("Not supported")
 }
 
 // DeletePost deletes a post.
 func (b *Bot) DeletePost(messageID model.MessageIdentifier) (model.PostResponse, error) {
-	b.deleteMessage(messageID)
-	return model.PostResponse{PostedMessageIdent: messageID}, nil
+	return model.PostResponse{}, fmt.Errorf("Not supported")
 }
 
 // GetReaction gives back the platform specific string for a reaction, e.g., one -> :one:

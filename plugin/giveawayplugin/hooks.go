@@ -31,7 +31,6 @@ func (p *GiveawayPlugin) OnRun() {
 
 // OnStop implements the hook from the bot
 func (p *GiveawayPlugin) OnStop() {
-	p.ticker.Stop()
 	if p.ticker != nil {
 		p.ticker.Stop()
 		p.tickerDoneChan <- true

@@ -11,6 +11,9 @@ import (
 //
 // Plugins obtain access to this API by embedding AbyleBotterPlugin.
 type API interface {
+	// HasFeature returns true if the bot serving the API implements the feature
+	HasFeature(feature string) bool
+
 	// GetStorage returns the storage or nil if none is provided by the platform
 	GetStorage() storage.Storage
 

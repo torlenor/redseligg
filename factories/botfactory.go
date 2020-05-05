@@ -11,6 +11,7 @@ import (
 	"github.com/torlenor/abylebotter/platform/matrix"
 	"github.com/torlenor/abylebotter/platform/mattermost"
 	"github.com/torlenor/abylebotter/platform/slack"
+	"github.com/torlenor/abylebotter/platform/twitch"
 	"github.com/torlenor/abylebotter/ws"
 )
 
@@ -73,6 +74,16 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 		bot, err = matrix.CreateMatrixBot(matrixCfg)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+		}
+	case "twitch":
+		twitchCfg, err := config.AsTwitchConfig()
+		if err != nil {
+			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
+		}
+
+		bot, err = twitch.CreateTwitchBot(twitchCfg, storage, ws.NewClient())
+		if err != nil {
+			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}
 	default:
 		return nil, fmt.Errorf("Unknown platform %s", p)

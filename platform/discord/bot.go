@@ -44,6 +44,8 @@ type api interface {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
+	platform.BotImpl
+
 	storage storage.Storage
 
 	api api
@@ -76,6 +78,15 @@ func CreateDiscordBotWithAPI(api api, storage storage.Storage, cfg botconfig.Dis
 	log.Info("DiscordBot is CREATING itself")
 
 	b := Bot{
+		BotImpl: platform.BotImpl{
+			ProvidedFeatures: map[string]bool{
+				platform.FeatureMessagePost:    true,
+				platform.FeatureMessageUpdate:  true,
+				platform.FeatureMessageDelete:  true,
+				platform.FeatureReactionNotify: true,
+			},
+		},
+
 		api:     api,
 		storage: storage,
 
@@ -171,8 +182,6 @@ func (b *Bot) run() {
 	if e != nil {
 		return
 	}
-
-	log.Info("DiscordBot is READY")
 
 	// Go into event handling
 	for {
@@ -287,7 +296,7 @@ func (b *Bot) start() error {
 	for _, plugin := range b.plugins {
 		plugin.OnRun()
 	}
-	log.Infoln("DiscordBot is RUNNING")
+	log.Info("DiscordBot is RUNNING")
 
 	return nil
 }
@@ -336,8 +345,12 @@ func (b *Bot) stop() {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b)
-	b.plugins = append(b.plugins, plugin)
+	err := plugin.SetAPI(b)
+	if err != nil {
+		log.Errorf("Could not add plugin %s: %s", plugin.PluginType(), err)
+	} else {
+		b.plugins = append(b.plugins, plugin)
+	}
 }
 
 // GetInfo returns information about the Bot

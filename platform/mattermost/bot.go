@@ -30,6 +30,8 @@ func (s stats) toString() string {
 
 // The Bot struct holds parameters related to the bot
 type Bot struct {
+	platform.BotImpl
+
 	config botconfig.MattermostConfig
 
 	ws *websocket.Conn
@@ -164,8 +166,12 @@ func (b *Bot) Stop() {
 // AddPlugin takes as argument a plugin and
 // adds it to the bot providing it with the API
 func (b *Bot) AddPlugin(plugin platform.BotPlugin) {
-	plugin.SetAPI(b)
-	b.plugins = append(b.plugins, plugin)
+	err := plugin.SetAPI(b)
+	if err != nil {
+		b.log.Errorf("Could not add plugin %s: %s", plugin.PluginType(), err)
+	} else {
+		b.plugins = append(b.plugins, plugin)
+	}
 }
 
 func (b *Bot) addKnownUser(user userData) {

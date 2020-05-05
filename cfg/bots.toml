@@ -71,3 +71,41 @@
 
     [bots.mm.plugins.3]
       type = "roll"
+
+  [bots.twitch]
+    type = "twitch"
+    enabled = true
+    [bots.twitch.config]
+      username = "username_goes_here"
+      token = "token_goes_jere"
+      channels = ["channels_to_join", "go_here"]
+    [bots.twitch.storage]
+      storage = "mongo"
+      [bots.twitch.storage.config]
+        URL = "mongodb://user1:test@localhost/testdb" # URL to connect to
+        Database = "testdb" # Database to use
+    [bots.twitch.plugins.1]
+      type = "echo"
+    [bots.twitch.plugins.1.config]
+      onlywhispers = false
+    [bots.twitch.plugins.2]
+      type = "giveaway"
+      [bots.twitch.plugins.2.config]
+        mods = ["Someone#5932"]
+        onlymods = true
+    [bots.twitch.plugins.3]
+      type = "httpping"
+    [bots.twitch.plugins.4]
+      type = "roll"
+    [bots.twitch.plugins.5]
+      type = "version"
+    [bots.twitch.plugins.6]
+      type = "vote"
+      [bots.twitch.plugins.6.config]
+        mods = ["Someone#5932"]
+        onlymods = true
+    [bots.twitch.plugins.7]
+      type = "quotes"
+      [bots.twitch.plugins.7.config]
+        mods = ["Someone#5932"]
+        onlymods = true

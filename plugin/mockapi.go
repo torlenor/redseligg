@@ -25,6 +25,8 @@ type MockAPI struct {
 	Storage storage.Storage
 
 	LastLoggedError string
+
+	ProvidedFeatures map[string]bool
 }
 
 // Reset the MockAPI
@@ -37,6 +39,11 @@ func (b *MockAPI) Reset() {
 	b.LastUpdatePostPost = model.Post{}
 
 	b.LastLoggedError = ""
+}
+
+// HasFeature returns true if the bot serving the API implements the feature
+func (b *MockAPI) HasFeature(feature string) bool {
+	return b.ProvidedFeatures[feature]
 }
 
 // GetStorage returns the storage or nil if none is provided by the platform

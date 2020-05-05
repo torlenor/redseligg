@@ -5,11 +5,16 @@
 **Implemented enhancements:**
 
 - Added storage system to Plugin API.
+- Added requested/provided features check between plugin and platform.
 
 **New storage support:**
 
 - Storage memory added.
 - Storage mongo added.
+
+**New platforms:**
+
+- Twitch Chat: AbyleBotter now supports Twitch Chat for sending/receiving messages.
 
 **New plugins:**
 

@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"
 )
 
@@ -29,6 +30,14 @@ func New(pluginConfig botconfig.PluginConfig) (*VotePlugin, error) {
 	}
 
 	ep := VotePlugin{
+		AbyleBotterPlugin: plugin.AbyleBotterPlugin{
+			NeededFeatures: []string{
+				platform.FeatureMessagePost,
+				platform.FeatureMessageUpdate,
+				platform.FeatureReactionNotify,
+			},
+			Type: PLUGIN_TYPE,
+		},
 		cfg:          cfg,
 		runningVotes: make(runningVotes),
 	}
