@@ -55,6 +55,8 @@ func (p *TimedMessagesPlugin) addTimedMessage(channelID, message string, interva
 		ChannelID: channelID,
 	})
 
+	p.API.LogTrace(fmt.Sprintf("Added message '%s' with interval %s for channel %s", message, interval, channelID))
+
 	return p.storeTimedMessages(timedMessages)
 }
 
@@ -71,7 +73,7 @@ func (p *TimedMessagesPlugin) removeTimedMessage(channelID, message string, inte
 			timedMessages.Messages[n] = x
 			n++
 		} else {
-			p.API.LogDebug(fmt.Sprintf("Removed message '%s' with interval %s", message, interval))
+			p.API.LogTrace(fmt.Sprintf("Removed message '%s' with interval %s for channel %s", message, interval, channelID))
 			wasRemoved = true
 		}
 	}
