@@ -23,6 +23,8 @@ These platforms are current supported (at least with the functionality to send a
 
 ### Slack
 
+### Twitch
+
 ## Releases
 
 For releases binaries for Linux, Windows and Mac are provided. Check out the respective section on GitHub.
@@ -58,6 +60,7 @@ Independent of the way you obtain it, you have to configure the bot first and it
 - Matrix: For Matrix it is simpler, just create a user for the bot on your preferred Matrix server.
 - Mattermost: For Mattermost a username and password with the necessary rights on the specified server is enough.
 - Slack: The bot as to be added to the workspace and a token has to be generated.
+- Twitch: It needs a username for the Twitch account and a list of channels to join. In addition a toen is needed for that user. You can generate one here: https://twitchapps.com/tmi/
 
 The bot configuration can either be stored in a toml file or in a MongoDB. An example for a toml file is provided in this repository in *cfg/bots.toml*.
 
@@ -162,6 +165,20 @@ or for MongoDB type
 ```bash
 docker run -d --name abylebotter BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/abylebotter:latest /usr/bin/botter
 ```
+
+## Storage
+
+Some plugins can use a storage to store permanent data. Currently we are supporting MongoDB as backend. To configure it, add a section of the form
+
+```yaml
+    [bots.slack.storage]
+      storage = "mongo"
+      [bots.slack.storage.config]
+        URL = "mongodb://user1:test@localhost/testdb" # URL to connect to
+        Database = "testdb" # Database to use
+```
+
+to the bot for wich you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
 
 ## Plugins
 
