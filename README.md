@@ -353,7 +353,7 @@ Use
 
 ## Timed Messages Plugin
 
-Post messages automatically in an given interval.
+Post messages automatically at a given interval.
 
 ### Configuration options
 
