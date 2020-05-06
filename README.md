@@ -347,6 +347,50 @@ Use
 !quoteremove ID
 ```
 
-, e.g., !quoteremove 123, to remove a quote.
+, e.g., `!quoteremove 123`, to remove a quote.
 
 **Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
+
+## Timed Messages Plugin
+
+Post messages automatically in an given interval.
+
+### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "timedmessages"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to add or removed timed messages. Per default everybody is allowed.
+
+### Adding a timed message
+
+To add a timed message type
+
+```
+!tm add <interval> <your message>
+```
+
+Example:
+```
+!tm add 1m This is awesome!
+```
+
+### Removing a timed message
+
+Use
+```
+!tm remove <interval> <your message>
+```
+, e.g., `!tm remove 1m This is awesome!`, to remove one message with a specific interval and text.
+
+or use
+```
+!tm remove all <your message>
+```
+, e.g., `!tm remove all This is awesome!`, to remove all message with a specific text, regardless of their interval.
