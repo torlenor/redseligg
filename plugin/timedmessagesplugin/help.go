@@ -4,8 +4,8 @@ import "github.com/torlenor/abylebotter/model"
 
 const (
 	helpText       = "Use !tm add to add and !tm remove to remove timed messages"
-	helpTextAdd    = "Type !tm add <interval> <message text>"
-	helpTextRemove = "Type !tm remove <message text>"
+	helpTextAdd    = "Type !tm add <interval> <message text> to add a timed message"
+	helpTextRemove = "Type !tm remove <interval> <message text> or !tm remove all <message text> to remove all messages matching the <message text>"
 )
 
 func (p *TimedMessagesPlugin) returnHelp(channelID string) {

@@ -329,6 +329,64 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_OnlyMods(t *testing.T) {
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
 
+func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_AllMessages(t *testing.T) {
+	assert := assert.New(t)
+
+	message := "some message"
+
+	p, err := New(botconfig.PluginConfig{Type: PLUGIN_TYPE})
+	assert.NoError(err)
+	assert.Equal(nil, p.API)
+
+	storage := &MockStorage{}
+	api := plugin.MockAPI{Storage: storage}
+	api.ProvidedFeatures = providedFeatures
+	err = p.SetAPI(&api)
+	assert.NoError(err)
+
+	postToPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Channel:   "SOME CHANNEL",
+		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
+		Content:   "!tm remove all " + message,
+		IsPrivate: false,
+	}
+
+	storage.DataToReturn.Messages = append(storage.DataToReturn.Messages, storagemodels.TimedMessagesPluginMessage{
+		Text:      message,
+		Interval:  time.Duration(5) * time.Second,
+		ChannelID: postToPlugin.ChannelID,
+	})
+
+	storage.DataToReturn.Messages = append(storage.DataToReturn.Messages, storagemodels.TimedMessagesPluginMessage{
+		Text:      message,
+		Interval:  time.Duration(15) * time.Second,
+		ChannelID: postToPlugin.ChannelID,
+	})
+
+	storage.DataToReturn.Messages = append(storage.DataToReturn.Messages, storagemodels.TimedMessagesPluginMessage{
+		Text:      "something else which should not be removed",
+		Interval:  time.Duration(10) * time.Second,
+		ChannelID: postToPlugin.ChannelID,
+	})
+
+	expectedPostFromPlugin := model.Post{
+		ChannelID: "CHANNEL ID",
+		Content:   fmt.Sprintf("All timed messages with text '%s' removed.", message),
+		IsPrivate: false,
+	}
+	p.OnPost(postToPlugin)
+	assert.Equal(true, api.WasCreatePostCalled)
+	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
+
+	assert.Equal(p.BotID, storage.LastRetrieved.BotID)
+	assert.Equal(p.PluginID, storage.LastRetrieved.PluginID)
+	assert.Equal(identFieldTimedMessages, storage.LastRetrieved.Identifier)
+
+	assert.Equal(1, len(storage.StoredMessages.Data.Messages))
+	assert.Equal(storage.DataToReturn.Messages[2], storage.StoredMessages.Data.Messages[0])
+}
+
 func TestTimedMessagesPlugin_NoStorage(t *testing.T) {
 	assert := assert.New(t)
 

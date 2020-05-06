@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/torlenor/abylebotter/model"
@@ -86,6 +87,32 @@ func (p *TimedMessagesPlugin) removeTimedMessage(channelID, message string, inte
 	return p.storeTimedMessages(timedMessages)
 }
 
+func (p *TimedMessagesPlugin) removeAllTimedMessage(channelID, message string) error {
+	timedMessages, err := p.getTimedMessages()
+	if err != nil && err != storage.ErrNotFound {
+		return fmt.Errorf("Could not remove timed message: %s", err)
+	}
+
+	var wasRemoved bool
+	n := 0
+	for _, x := range timedMessages.Messages {
+		if !(x.ChannelID == channelID && x.Text == message) {
+			timedMessages.Messages[n] = x
+			n++
+		} else {
+			p.API.LogTrace(fmt.Sprintf("Removed message '%s' with interval %s for channel %s", message, x.Interval, channelID))
+			wasRemoved = true
+		}
+	}
+	timedMessages.Messages = timedMessages.Messages[:n]
+
+	if !wasRemoved {
+		return errNotExist
+	}
+
+	return p.storeTimedMessages(timedMessages)
+}
+
 func parseTimeStringToDuration(timeStr string) (time.Duration, error) {
 	duration, err := time.ParseDuration(timeStr)
 	if err != nil {
@@ -130,6 +157,28 @@ func (p *TimedMessagesPlugin) onCommand(post model.Post) {
 		return
 	} else if post.Content == "!tm remove" {
 		p.returnHelpRemove(post.ChannelID)
+		return
+	}
+
+	if strings.HasPrefix(post.Content, "!tm remove all ") {
+		cont := strings.Split(post.Content, " ")
+		if len(cont) < 4 {
+			p.returnHelpRemove(post.ChannelID)
+			return
+		}
+
+		msg := strings.Join(cont[3:], " ")
+
+		err := p.removeAllTimedMessage(post.ChannelID, msg)
+		if err == errNotExist {
+			p.returnMessage(post.ChannelID, "Timed message to remove does not exist.")
+			return
+		} else if err != nil {
+			p.API.LogError(fmt.Sprintf("Could not remove all timed messages: %s", err))
+			p.returnMessage(post.ChannelID, fmt.Sprintf("Could not remove all timed message. Please try again later."))
+			return
+		}
+		p.returnMessage(post.ChannelID, fmt.Sprintf("All timed messages with text '%s' removed.", msg))
 		return
 	}
 
