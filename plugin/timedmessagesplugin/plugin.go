@@ -2,6 +2,7 @@ package timedmessagesplugin
 
 import (
 	"errors"
+	"time"
 
 	"git.abyle.org/redseligg/botorchestrator/botconfig"
 
@@ -37,6 +38,9 @@ type TimedMessagesPlugin struct {
 	cfg config
 
 	storage readerWriter
+
+	ticker         *time.Ticker
+	tickerDoneChan chan bool
 }
 
 // New returns a new TimedMessagesPlugin

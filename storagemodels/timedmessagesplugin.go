@@ -12,6 +12,8 @@ type TimedMessagesPluginMessage struct {
 	Interval time.Duration
 
 	ChannelID string
+
+	LastSent time.Time
 }
 
 // TimedMessagesPluginMessages is a TimedMessagesPlugin storage model.
