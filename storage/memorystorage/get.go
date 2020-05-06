@@ -1,14 +1,11 @@
 package memorystorage
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/torlenor/abylebotter/storage"
 	"github.com/torlenor/abylebotter/storagemodels"
 )
-
-// ErrNotFound is returned when no data could be found
-var ErrNotFound = errors.New("MemoryStorage: Could not find requested data")
 
 // GetQuotesPluginQuote returns a QuotesPluginQuote.
 func (b *MemoryStorage) GetQuotesPluginQuote(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuote, error) {
@@ -18,7 +15,7 @@ func (b *MemoryStorage) GetQuotesPluginQuote(botID, pluginID, identifier string)
 		}
 		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("Stored data is not a valid QuotesPluginQuote")
 	}
-	return storagemodels.QuotesPluginQuote{}, ErrNotFound
+	return storagemodels.QuotesPluginQuote{}, storage.ErrNotFound
 }
 
 // GetQuotesPluginQuotesList returns a QuotesPluginQuotesList.
@@ -29,5 +26,5 @@ func (b *MemoryStorage) GetQuotesPluginQuotesList(botID, pluginID, identifier st
 		}
 		return storagemodels.QuotesPluginQuotesList{}, fmt.Errorf("Stored data is not a valid QuotesPluginQuotesList")
 	}
-	return storagemodels.QuotesPluginQuotesList{}, ErrNotFound
+	return storagemodels.QuotesPluginQuotesList{}, storage.ErrNotFound
 }

@@ -2,16 +2,13 @@ package mongostorage
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
+	"github.com/torlenor/abylebotter/storage"
 	"github.com/torlenor/abylebotter/storagemodels"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// ErrNotFound is returned when no data could be found
-var ErrNotFound = errors.New("MongoStorage: Could not find requested data")
 
 // GetQuotesPluginQuote returns a QuotesPluginQuote.
 func (b *MongoStorage) GetQuotesPluginQuote(botID, pluginID, identifier string) (storagemodels.QuotesPluginQuote, error) {
@@ -25,7 +22,7 @@ func (b *MongoStorage) GetQuotesPluginQuote(botID, pluginID, identifier string) 
 	var data quotesPluginQuoteData
 	err := c.FindOne(context.Background(), filter).Decode(&data)
 	if err == mongo.ErrNoDocuments {
-		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("Could not find data for botID=%s, pluginID=%s, identifier=%s: %s", botID, pluginID, identifier, err)
+		return storagemodels.QuotesPluginQuote{}, storage.ErrNotFound
 	} else if err != nil {
 		return storagemodels.QuotesPluginQuote{}, fmt.Errorf("Error in finding the bot config with id %s: %s", botID, err)
 	}
@@ -45,9 +42,29 @@ func (b *MongoStorage) GetQuotesPluginQuotesList(botID, pluginID, identifier str
 	var data quotesPluginQuotesListData
 	err := c.FindOne(context.Background(), filter).Decode(&data)
 	if err == mongo.ErrNoDocuments {
-		return storagemodels.QuotesPluginQuotesList{}, fmt.Errorf("Could not find data for botID=%s, pluginID=%s, identifier=%s: %s", botID, pluginID, identifier, err)
+		return storagemodels.QuotesPluginQuotesList{}, storage.ErrNotFound
 	} else if err != nil {
 		return storagemodels.QuotesPluginQuotesList{}, fmt.Errorf("Error in finding the bot config with id %s: %s", botID, err)
+	}
+
+	return data.Data, nil
+}
+
+// GetTimedMessagesPluginMessages returns a TimedMessagesPluginMessages.
+func (b *MongoStorage) GetTimedMessagesPluginMessages(botID, pluginID, identifier string) (storagemodels.TimedMessagesPluginMessages, error) {
+	if !b.IsConnected() {
+		return storagemodels.TimedMessagesPluginMessages{}, fmt.Errorf("Not connected to MongoDB")
+	}
+
+	c := b.db.Collection(collectionPluginStorage)
+
+	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}
+	var data timedMessagesPluginMessagesData
+	err := c.FindOne(context.Background(), filter).Decode(&data)
+	if err == mongo.ErrNoDocuments {
+		return storagemodels.TimedMessagesPluginMessages{}, storage.ErrNotFound
+	} else if err != nil {
+		return storagemodels.TimedMessagesPluginMessages{}, fmt.Errorf("Error in finding the bot config with id %s: %s", botID, err)
 	}
 
 	return data.Data, nil

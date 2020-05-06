@@ -11,6 +11,7 @@ import (
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
 	"github.com/torlenor/abylebotter/plugin/quotesplugin"
 	"github.com/torlenor/abylebotter/plugin/rollplugin"
+	"github.com/torlenor/abylebotter/plugin/timedmessagesplugin"
 	"github.com/torlenor/abylebotter/plugin/versionplugin"
 	"github.com/torlenor/abylebotter/plugin/voteplugin"
 )
@@ -42,6 +43,12 @@ func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botcon
 		p = &httppingplugin.HTTPPingPlugin{}
 	case "quotes":
 		rp, err := quotesplugin.New(pluginConfig)
+		if err != nil {
+			return nil, err
+		}
+		p = rp
+	case "timedmessages":
+		rp, err := timedmessagesplugin.New(pluginConfig)
 		if err != nil {
 			return nil, err
 		}

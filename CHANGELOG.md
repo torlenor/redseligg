@@ -19,6 +19,7 @@
 **New plugins:**
 
 - Quotes Plugin: Lets users/viewers or mods add quotes and randomly fetch one.
+- Timed Messages Plugin: Post messages automatically at a given interval.
 
 ## [0.0.4](https://git.abyle.org/hps/abylebotter/-/tree/0.0.4) (2020-04-21)
 

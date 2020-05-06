@@ -17,3 +17,11 @@ type quotesPluginQuotesListData struct {
 
 	Data storagemodels.QuotesPluginQuotesList `bson:"data"`
 }
+
+type timedMessagesPluginMessagesData struct {
+	BotID      string `bson:"bot_id"`
+	PluginID   string `bson:"plugin_id"`
+	Identifier string `bson:"identifier"`
+
+	Data storagemodels.TimedMessagesPluginMessages `bson:"data"`
+}

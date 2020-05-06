@@ -15,36 +15,34 @@
     [bots.slack.config]
       workspace = "something"
 	    token = "token_goes_here"
-
     [bots.slack.plugins.1]
       type = "echo"
       [bots.slack.plugins.1.config]
         onlywhispers = false
-
     [bots.slack.plugins.2]
       type = "giveaway"
       [bots.slack.plugins.2.config]
         mods = ["user1", "user2"]
         onlymods = true
-
     [bots.slack.plugins.3]
       type = "httpping"
-
     [bots.slack.plugins.4]
       type = "roll"
-
     [bots.slack.plugins.5]
       type = "version"
-
     [bots.slack.plugins.6]
       type = "vote"
       [bots.slack.plugins.6.config]
         mods = ["user1", "user2"]
         onlymods = true
-
     [bots.slack.plugins.7]
       type = "quotes"
       [bots.slack.plugins.7.config]
+        mods = ["user1", "user2"]
+        onlymods = true
+    [bots.slack.plugins.8]
+      type = "timedmessages"
+      [bots.slack.plugins.8.config]
         mods = ["user1", "user2"]
         onlymods = true
 
@@ -60,15 +58,12 @@
 			server = "https://server.com"
 			username = "username_goes_here"
 			password = "password_goes_here"
-
     [bots.mm.plugins.1]
       type = "echo"
       [bots.mm.plugins.1.config]
         onlywhispers = false
-
     [bots.mm.plugins.2]
       type = "httpping"
-
     [bots.mm.plugins.3]
       type = "roll"
 
@@ -107,5 +102,10 @@
     [bots.twitch.plugins.7]
       type = "quotes"
       [bots.twitch.plugins.7.config]
+        mods = ["Someone#5932"]
+        onlymods = true
+    [bots.twitch.plugins.8]
+      type = "timedmessages"
+      [bots.twitch.plugins.8.config]
         mods = ["Someone#5932"]
         onlymods = true
