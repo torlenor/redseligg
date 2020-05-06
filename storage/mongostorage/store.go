@@ -31,3 +31,15 @@ func (b *MongoStorage) StoreQuotesPluginQuotesList(botID, pluginID, identifier s
 
 	return nil
 }
+
+// StoreTimedMessagesPluginMessages stores data for TimedMessagesPlugin
+func (b *MongoStorage) StoreTimedMessagesPluginMessages(botID, pluginID, identifier string, data storagemodels.TimedMessagesPluginMessages) error {
+	c := b.db.Collection(collectionPluginStorage)
+	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}
+	_, err := c.ReplaceOne(context.Background(), filter, timedMessagesPluginMessagesData{BotID: botID, PluginID: pluginID, Identifier: identifier, Data: data}, options.Replace().SetUpsert(true))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

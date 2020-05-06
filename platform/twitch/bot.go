@@ -51,6 +51,12 @@ func CreateTwitchBot(cfg botconfig.TwitchConfig, storage storage.Storage, ws web
 	log.Info("TwitchBot is CREATING itself")
 
 	b := Bot{
+		BotImpl: platform.BotImpl{
+			ProvidedFeatures: map[string]bool{
+				platform.FeatureMessagePost: true,
+			},
+		},
+
 		storage: storage,
 		cfg:     cfg,
 

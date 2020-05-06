@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/torlenor/abylebotter/storage"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -21,7 +22,7 @@ func (b *MongoStorage) DeleteQuotesPluginQuote(botID, pluginID, identifier strin
 		return fmt.Errorf("Error occurred deleting quote: %s", err)
 	}
 	if res.DeletedCount == 0 {
-		return ErrNotFound
+		return storage.ErrNotFound
 	}
 
 	return nil
