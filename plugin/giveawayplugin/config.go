@@ -3,7 +3,7 @@ package giveawayplugin
 import (
 	"fmt"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/botconfig"
 )
 
 type config struct {

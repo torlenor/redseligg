@@ -7,7 +7,7 @@ import (
 
 	"gopkg.in/irc.v3"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/gorilla/websocket"
 	"github.com/torlenor/abylebotter/logging"
