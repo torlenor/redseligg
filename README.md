@@ -1,6 +1,6 @@
 # AbyleBotter
 
-![Build and Test](https://github.com/torlenor/abylebotter/workflows/Build%20and%20Test/badge.svg)
++[![Build and Test](https://github.com/torlenor/abylebotter/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/torlenor/abylebotter/actions?query=workflow%3A%22Build+and+Test%22)
 [![Coverage Status](https://coveralls.io/repos/github/torlenor/abylebotter/badge.svg?branch=master)](https://coveralls.io/github/torlenor/abylebotter?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/abylebotter)](https://goreportcard.com/report/github.com/torlenor/abylebotter)
 [![Docker](https://img.shields.io/docker/pulls/torlenor/abylebotter.svg)](https://hub.docker.com/r/torlenor/abylebotter/)
