@@ -14,8 +14,8 @@ COPY bin/* /usr/bin/
 
 CMD ["/usr/bin/botterinstance"]
 
-LABEL org.label-schema.vendor="Abyle.org" \
-      org.label-schema.url="https://git.abyle.org/hps/abylebotter" \
+LABEL org.label-schema.vendor="Torlenor" \
+      org.label-schema.url="https://github.com/torlenor/abylebotter" \
       org.label-schema.name="Abylebotter" \
       org.label-schema.description="An extensible multi-platform chat bot for Discord, Matrix, Mattermost and Slack written in GO"
 

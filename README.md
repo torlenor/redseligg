@@ -2,7 +2,7 @@
 
 ![Build and Test](https://github.com/torlenor/abylebotter/workflows/Build%20and%20Test/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/torlenor/AbyleBotter/badge.svg?branch=master)](https://coveralls.io/github/torlenor/AbyleBotter?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/git.abyle.org/hps/abylebotter)](https://goreportcard.com/report/git.abyle.org/hps/abylebotter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/abylebotter)](https://goreportcard.com/report/github.com/torlenor/abylebotter)
 [![Docker](https://img.shields.io/docker/pulls/torlenor/abylebotter.svg)](https://hub.docker.com/r/torlenor/abylebotter/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
