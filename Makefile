@@ -13,7 +13,7 @@ VERSION := $(shell cat VERSION)
 COMPTIME := $(shell date -Is)
 LDFLAGS := -X main.version=${VERSION} -X main.compTime=${COMPTIME}
 SRCPATH := .
-DOCKERBASETAG := hpsch/abylebotter
+DOCKERBASETAG := torlenor/abylebotter
 CURRENTGITCOMMIT := $(shell git log -1 --format=%h)
 CURRENTGITUNTRACKED := $(shell git diff-index --quiet HEAD -- || echo "_untracked")
 ENVFLAGS := GONOSUMDB=git.abyle.org/redseligg GONOPROXY=git.abyle.org/redseligg
