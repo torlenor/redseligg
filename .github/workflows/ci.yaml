@@ -52,6 +52,13 @@ jobs:
         steps:
             - uses: actions/checkout@v2
 
+            - name: Login to docker hub
+              if: success()
+              uses: actions-hub/docker/login@master
+              env:
+                DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+                DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
             - name: Setup go
               uses: actions/setup-go@v2
               with:
@@ -59,3 +66,11 @@ jobs:
 
             - name: Build static
               run: make build-static
+
+            - name: Build image
+              if: success()
+              run: make build-container-gitcommit
+
+            - name: Push image
+              if: success()
+              run: make release-container-gitcommit
