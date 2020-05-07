@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/torlenor/abylebotter/platform"
 	"github.com/torlenor/abylebotter/plugin"

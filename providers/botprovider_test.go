@@ -3,8 +3,8 @@ package providers
 import (
 	"testing"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/stretchr/testify/assert"
+	"github.com/torlenor/abylebotter/botconfig"
 )
 
 func TestNewBotProvider(t *testing.T) {

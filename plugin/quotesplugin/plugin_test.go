@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/stretchr/testify/assert"
+	"github.com/torlenor/abylebotter/botconfig"
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/plugin"
 	"github.com/torlenor/abylebotter/storagemodels"

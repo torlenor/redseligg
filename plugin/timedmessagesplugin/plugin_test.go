@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/torlenor/abylebotter/model"
 	"github.com/torlenor/abylebotter/platform"

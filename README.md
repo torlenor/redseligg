@@ -1,9 +1,9 @@
 # AbyleBotter
 
-[![Build status](https://git.abyle.org/hps/abylebotter/badges/master/pipeline.svg)](https://git.abyle.org/hps/abylebotter/commits/master)
-[![Coverage Status](https://git.abyle.org/hps/abylebotter/badges/master/coverage.svg)](https://git.abyle.org/hps/abylebotter/commits/master)
-[![Go Report Card](https://goreportcard.com/badge/git.abyle.org/hps/abylebotter)](https://goreportcard.com/report/git.abyle.org/hps/abylebotter)
-[![Docker](https://img.shields.io/docker/pulls/hpsch/abylebotter.svg)](https://hub.docker.com/r/hpsch/abylebotter/)
+![Build and Test](https://github.com/torlenor/abylebotter/workflows/Build%20and%20Test/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/torlenor/abylebotter/badge.svg?branch=master)](https://coveralls.io/github/torlenor/abylebotter?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/abylebotter)](https://goreportcard.com/report/github.com/torlenor/abylebotter)
+[![Docker](https://img.shields.io/docker/pulls/torlenor/abylebotter.svg)](https://hub.docker.com/r/torlenor/abylebotter/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 

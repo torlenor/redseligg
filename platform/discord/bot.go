@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/gorilla/websocket"
 

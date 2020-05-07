@@ -3,7 +3,7 @@ package providers
 import (
 	"fmt"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
+	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/torlenor/abylebotter/platform"
 )

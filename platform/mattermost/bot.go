@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"git.abyle.org/redseligg/botorchestrator/botconfig"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
+	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/torlenor/abylebotter/logging"
 	"github.com/torlenor/abylebotter/platform"
