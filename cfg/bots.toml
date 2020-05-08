@@ -45,6 +45,11 @@
       [bots.slack.plugins.8.config]
         mods = ["user1", "user2"]
         onlymods = true
+    [bots.slack.plugins.9]
+      type = "customcommands"
+      [bots.slack.plugins.9.config]
+        mods = ["user1", "user2"]
+        onlymods = true
 
   [bots.mm]
     type = "mattermost"
@@ -107,5 +112,10 @@
     [bots.twitch.plugins.8]
       type = "timedmessages"
       [bots.twitch.plugins.8.config]
+        mods = ["Someone#5932"]
+        onlymods = true
+    [bots.twitch.plugins.9]
+      type = "customcommands"
+      [bots.twitch.plugins.9.config]
         mods = ["Someone#5932"]
         onlymods = true
