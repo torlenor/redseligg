@@ -1,8 +1,8 @@
 package plugin
 
 import (
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/storage"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/storage"
 )
 
 // The API can be used to retrieve data or perform actions on behalf of the plugin.

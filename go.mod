@@ -1,4 +1,4 @@
-module github.com/torlenor/abylebotter
+module github.com/torlenor/redseligg
 
 go 1.14
 

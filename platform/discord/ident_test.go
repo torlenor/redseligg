@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/websocket"
-	"github.com/torlenor/abylebotter/ws"
+	"github.com/torlenor/redseligg/ws"
 )
 
 func Test_SendIdent(t *testing.T) {
@@ -19,8 +19,8 @@ func Test_SendIdent(t *testing.T) {
 				"token": "` + testToken + `",
 				"properties": {
 					"$os": "linux",
-					"$browser": "abylebotter",
-					"$device": "abylebotter"
+					"$browser": "redseligg",
+					"$device": "redseligg"
 				  },
 				"compress": false,
 				"large_threshold": 250
@@ -51,8 +51,8 @@ func Test_SendIdentFail(t *testing.T) {
 				"token": "` + testToken + `",
 				"properties": {
 					"$os": "linux",
-					"$browser": "abylebotter",
-					"$device": "abylebotter"
+					"$browser": "redseligg",
+					"$device": "redseligg"
 				  },
 				"compress": false,
 				"large_threshold": 250

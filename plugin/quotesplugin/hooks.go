@@ -3,8 +3,8 @@ package quotesplugin
 import (
 	"strings"
 
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/utils"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/utils"
 )
 
 // OnRun is called when the platform is ready

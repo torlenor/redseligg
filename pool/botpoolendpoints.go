@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/torlenor/abylebotter/utils"
+	"github.com/torlenor/redseligg/utils"
 )
 
 // GetBotsResponse is the response for bots endpoint

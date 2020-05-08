@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/torlenor/abylebotter/pool"
+	"github.com/torlenor/redseligg/pool"
 )
 
 /**

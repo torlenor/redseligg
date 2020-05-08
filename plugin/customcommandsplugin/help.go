@@ -1,6 +1,6 @@
 package customcommandsplugin
 
-import "github.com/torlenor/abylebotter/model"
+import "github.com/torlenor/redseligg/model"
 
 const (
 	helpText       = "Use '!customcommand add' to add and '!customcommand remove' to remove a custom command"

@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/storagemodels"
 )
 
 var now = time.Now

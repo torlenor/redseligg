@@ -7,14 +7,14 @@ import (
 
 	"gopkg.in/irc.v3"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
 	"github.com/gorilla/websocket"
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storage"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin"
+	"github.com/torlenor/redseligg/storage"
 )
 
 var (

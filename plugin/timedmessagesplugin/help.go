@@ -1,6 +1,6 @@
 package timedmessagesplugin
 
-import "github.com/torlenor/abylebotter/model"
+import "github.com/torlenor/redseligg/model"
 
 const (
 	helpText       = "Use !tm add to add and !tm remove to remove timed messages"

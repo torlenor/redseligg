@@ -1,7 +1,7 @@
 package echoplugin
 
 import (
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 // EchoPlugin is a plugin implementing a echo command

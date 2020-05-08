@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 func parseTimeStringToDuration(timeStr string) (time.Duration, error) {

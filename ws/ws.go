@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/redseligg/logging"
 )
 
 type wsClient interface {

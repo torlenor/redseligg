@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 type randomizer interface {

@@ -3,7 +3,7 @@ package plugin
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 // AbyleBotterPlugin should be embedded in the Plugin to get access to the bot API

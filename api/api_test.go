@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"github.com/torlenor/abylebotter/config"
+	"github.com/torlenor/redseligg/config"
 )
 
 type mockRouter struct {

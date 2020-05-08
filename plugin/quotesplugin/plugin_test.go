@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/torlenor/abylebotter/botconfig"
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/plugin"
+	"github.com/torlenor/redseligg/storagemodels"
 )
 
 func TestCreateQuotesPlugin(t *testing.T) {

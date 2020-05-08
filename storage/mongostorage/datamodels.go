@@ -1,6 +1,6 @@
 package mongostorage
 
-import "github.com/torlenor/abylebotter/storagemodels"
+import "github.com/torlenor/redseligg/storagemodels"
 
 type quotesPluginQuoteData struct {
 	BotID      string `bson:"bot_id"`

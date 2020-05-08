@@ -3,8 +3,8 @@ package memorystorage
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/storage"
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/storage"
+	"github.com/torlenor/redseligg/storagemodels"
 )
 
 // GetQuotesPluginQuote returns a QuotesPluginQuote.

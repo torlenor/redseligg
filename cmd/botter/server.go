@@ -13,15 +13,15 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
-	mongodbbotconfigprovider "github.com/torlenor/abylebotter/botconfigprovider/mongodb"
-	tomlbotconfigprovider "github.com/torlenor/abylebotter/botconfigprovider/toml"
+	mongodbbotconfigprovider "github.com/torlenor/redseligg/botconfigprovider/mongodb"
+	tomlbotconfigprovider "github.com/torlenor/redseligg/botconfigprovider/toml"
 
-	"github.com/torlenor/abylebotter/api"
-	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/factories"
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/pool"
-	"github.com/torlenor/abylebotter/providers"
+	"github.com/torlenor/redseligg/api"
+	"github.com/torlenor/redseligg/config"
+	"github.com/torlenor/redseligg/factories"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/pool"
+	"github.com/torlenor/redseligg/providers"
 )
 
 // NewServer returns a new instance of Server

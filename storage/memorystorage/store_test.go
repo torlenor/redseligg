@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/storagemodels"
 )
 
 func TestMemoryStorage_StoreQuotesPluginQuote(t *testing.T) {

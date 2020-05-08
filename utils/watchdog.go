@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/redseligg/logging"
 )
 
 type failCallback func()

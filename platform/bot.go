@@ -3,7 +3,7 @@ package platform
 import (
 	"context"
 
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 const (

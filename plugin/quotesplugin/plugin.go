@@ -5,10 +5,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/plugin"
+	"github.com/torlenor/redseligg/storagemodels"
 )
 
 const (

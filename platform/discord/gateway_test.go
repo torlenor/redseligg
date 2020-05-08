@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/torlenor/abylebotter/webclient"
+	"github.com/torlenor/redseligg/webclient"
 )
 
 func TestBot_getGateway(t *testing.T) {

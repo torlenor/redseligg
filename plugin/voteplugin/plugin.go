@@ -3,9 +3,9 @@ package voteplugin
 import (
 	"sync"
 
-	"github.com/torlenor/abylebotter/botconfig"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 const (

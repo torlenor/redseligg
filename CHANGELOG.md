@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.0.5](https://github.com/torlenor/abylebotter/releases/tag/0.0.5) (TBD)
+## [0.0.5](https://github.com/torlenor/redseligg/releases/tag/0.0.5) (TBD)
 
 **Implemented enhancements:**
 
@@ -22,7 +22,7 @@
 - Quotes Plugin: Lets users/viewers or mods add quotes and randomly fetch one.
 - Timed Messages Plugin: Post messages automatically at a given interval.
 
-## [0.0.4](https://github.com/torlenor/abylebotter/releases/tag/0.0.4) (2020-04-21)
+## [0.0.4](https://github.com/torlenor/redseligg/releases/tag/0.0.4) (2020-04-21)
 
 **Implemented enhancements:**
 
@@ -52,7 +52,7 @@
 - Discord: Bot should be able to recover in case of errors
 - Discord: Make Callback URL configurable
 
-## [0.0.3](https://github.com/torlenor/abylebotter/releases/tag/0.0.3) (2020-03-31)
+## [0.0.3](https://github.com/torlenor/redseligg/releases/tag/0.0.3) (2020-03-31)
 
 *Major rework of the whole project to a modern and more Go-like structure.*
 
@@ -66,6 +66,6 @@
 
 - Various bugs fixed all over the place
 
-## [0.0.2](https://github.com/torlenor/abylebotter/releases/tag/0.0.2) (2018-10-06)
+## [0.0.2](https://github.com/torlenor/redseligg/releases/tag/0.0.2) (2018-10-06)
 
 *First release.*

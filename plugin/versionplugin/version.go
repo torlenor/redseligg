@@ -1,7 +1,7 @@
 package versionplugin
 
 import (
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 // VersionPlugin is a plugin implementing a version command

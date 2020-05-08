@@ -3,12 +3,12 @@ package factories
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/storage"
-	"github.com/torlenor/abylebotter/storage/memorystorage"
-	"github.com/torlenor/abylebotter/storage/mongostorage"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/storage"
+	"github.com/torlenor/redseligg/storage/memorystorage"
+	"github.com/torlenor/redseligg/storage/mongostorage"
 )
 
 var (

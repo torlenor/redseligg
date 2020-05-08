@@ -3,18 +3,18 @@ package factories
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugin/customcommandsplugin"
-	"github.com/torlenor/abylebotter/plugin/echoplugin"
-	"github.com/torlenor/abylebotter/plugin/giveawayplugin"
-	"github.com/torlenor/abylebotter/plugin/httppingplugin"
-	"github.com/torlenor/abylebotter/plugin/quotesplugin"
-	"github.com/torlenor/abylebotter/plugin/rollplugin"
-	"github.com/torlenor/abylebotter/plugin/timedmessagesplugin"
-	"github.com/torlenor/abylebotter/plugin/versionplugin"
-	"github.com/torlenor/abylebotter/plugin/voteplugin"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin/customcommandsplugin"
+	"github.com/torlenor/redseligg/plugin/echoplugin"
+	"github.com/torlenor/redseligg/plugin/giveawayplugin"
+	"github.com/torlenor/redseligg/plugin/httppingplugin"
+	"github.com/torlenor/redseligg/plugin/quotesplugin"
+	"github.com/torlenor/redseligg/plugin/rollplugin"
+	"github.com/torlenor/redseligg/plugin/timedmessagesplugin"
+	"github.com/torlenor/redseligg/plugin/versionplugin"
+	"github.com/torlenor/redseligg/plugin/voteplugin"
 )
 
 // PluginFactory can be used to generate plugins

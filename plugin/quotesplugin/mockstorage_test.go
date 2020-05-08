@@ -1,6 +1,6 @@
 package quotesplugin
 
-import "github.com/torlenor/abylebotter/storagemodels"
+import "github.com/torlenor/redseligg/storagemodels"
 
 type storedQuoteData struct {
 	BotID      string
