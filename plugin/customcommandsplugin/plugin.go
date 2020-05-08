@@ -33,7 +33,7 @@ type readerWriter interface {
 
 // CustomCommandsPlugin is a plugin that posts messages automatically in an given interval.
 type CustomCommandsPlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 
 	cfg config
 
@@ -51,7 +51,7 @@ func New(pluginConfig botconfig.PluginConfig) (*CustomCommandsPlugin, error) {
 	}
 
 	ep := CustomCommandsPlugin{
-		AbyleBotterPlugin: plugin.AbyleBotterPlugin{
+		RedseliggPlugin: plugin.RedseliggPlugin{
 			NeededFeatures: []string{
 				platform.FeatureMessagePost,
 			},

@@ -14,7 +14,7 @@ type randomizer interface {
 // which sends back a random number in the range [0,100] per default or
 // [0,specific_number] if the roll command contained a number.
 type RollPlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 	randomizer randomizer
 }
 

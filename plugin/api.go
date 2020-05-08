@@ -9,7 +9,7 @@ import (
 //
 // A valid Bot has to implement all of these functions (or provide a wrapper for the Plugin).
 //
-// Plugins obtain access to this API by embedding AbyleBotterPlugin.
+// Plugins obtain access to this API by embedding RedseliggPlugin.
 type API interface {
 	// HasFeature returns true if the bot serving the API implements the feature
 	HasFeature(feature string) bool

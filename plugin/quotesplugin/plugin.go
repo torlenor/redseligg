@@ -43,7 +43,7 @@ type quotesPluginReaderWriter interface {
 
 // QuotesPlugin is a plugin that allows viewers or mods to add quotes and randomly fetch one.
 type QuotesPlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 
 	cfg config
 

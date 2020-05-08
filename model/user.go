@@ -18,7 +18,7 @@ type User struct {
 	IsBot   bool `json:"is_bot"`
 	IsOwner bool `json:"is_owner"`
 
-	// IsMod is a AbyleBotter property indicating certain rights of that user inside of AbyleBotter and its plugins
+	// IsMod is a Redseligg property indicating certain rights of that user inside of Redseligg and its plugins
 	IsMod bool `json:"is_mod"`
 }
 

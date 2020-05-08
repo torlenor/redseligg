@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func replaceAbyleBotterUserID(msg string) string {
+func replaceRedseliggUserID(msg string) string {
 	re := regexp.MustCompile(`(<@[a-zA-Z ]+>)`)
 
 	foundUserIDs := map[string]bool{}
@@ -25,6 +25,6 @@ func replaceAbyleBotterUserID(msg string) string {
 	return replaced
 }
 
-func convertMessageFromAbyleBotter(text string) string {
-	return replaceAbyleBotterUserID(text)
+func convertMessageFromRedseligg(text string) string {
+	return replaceRedseliggUserID(text)
 }

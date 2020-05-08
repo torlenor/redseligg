@@ -2,7 +2,7 @@ package twitch
 
 import "fmt"
 
-func getAbyleBotterEmojiFromTwitchEmoji(discordEmoji string) (string, error) {
+func getRedseliggEmojiFromTwitchEmoji(discordEmoji string) (string, error) {
 	switch discordEmoji {
 
 	case "0️⃣":

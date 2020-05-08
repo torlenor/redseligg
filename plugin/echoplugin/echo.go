@@ -8,7 +8,7 @@ import (
 // which sends back all text received by that command to the
 // User/Channel where the command was initiated.
 type EchoPlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 	onlyOnWhisper bool
 }
 

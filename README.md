@@ -1,4 +1,4 @@
-# AbyleBotter
+# Redseligg
 
 [![Build and Test](https://github.com/torlenor/redseligg/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/torlenor/redseligg/actions?query=workflow%3A%22Build+and+Test%22)
 [![Coverage Status](https://coveralls.io/repos/github/torlenor/redseligg/badge.svg?branch=master)](https://coveralls.io/github/torlenor/redseligg?branch=master)
@@ -9,7 +9,7 @@
 
 ## Description
 
-This is AbyleBotter, an extensible Chat Bot for various platforms. It is based on a server architecture which can be controlled via a REST API.
+This is Redseligg, an extensible Chat Bot for various platforms. It is based on a server architecture which can be controlled via a REST API.
 
 ## Supported platforms
 
@@ -66,7 +66,7 @@ The bot configuration can either be stored in a toml file or in a MongoDB. An ex
 
 ### Self-built or downloaded release
 
-To start the AbyleBotter BotterInstance using the self-built or downloaded binary enter for use with a TOML config
+To start the Redseligg BotterInstance using the self-built or downloaded binary enter for use with a TOML config
 
 ```bash
 BOTTER_BOT_CFG_SOURCE="TOML" BOTTER_BOT_CFG_TOML_FILE=/path/to/config/file.toml ./botterinstance
@@ -82,7 +82,7 @@ for use with a MongoDB for the Bot configuration.
 
 ### Using Docker
 
-Probably an easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it type
+Probably an easiest way to try out Redseligg is using Docker. To pull the latest version from DockerHub and start it type
 
 ```bash
 docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/redseligg:latest
@@ -182,10 +182,10 @@ to the bot for wich you want to enable the storage (in the example above for a b
 
 ## Plugins
 
-Plugins are used to implement actual functionality of AbyleBotter. They serve as handlers of received messages and can send messages over the Bot to the platform.
+Plugins are used to implement actual functionality of Redseligg. They serve as handlers of received messages and can send messages over the Bot to the platform.
 In the future it is planed to support external Plugins via gRPC.
 
-Currently these Plugins are part of AbyleBotter:
+Currently these Plugins are part of Redseligg:
 
 ### EchoPlugin
 

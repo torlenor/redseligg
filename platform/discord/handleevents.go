@@ -141,7 +141,7 @@ func (b *Bot) handleMessageReactionAdd(data json.RawMessage) {
 		return
 	}
 
-	emoji, err := getAbyleBotterEmojiFromDiscordEmoji(newMessageReactionAdd.Emoji.Name)
+	emoji, err := getRedseliggEmojiFromDiscordEmoji(newMessageReactionAdd.Emoji.Name)
 
 	reaction := model.Reaction{
 		Message: model.MessageIdentifier{
@@ -168,7 +168,7 @@ func (b *Bot) handleMessageReactionRemove(data json.RawMessage) {
 		return
 	}
 
-	emoji, err := getAbyleBotterEmojiFromDiscordEmoji(newMessageReactionRemove.Emoji.Name)
+	emoji, err := getRedseliggEmojiFromDiscordEmoji(newMessageReactionRemove.Emoji.Name)
 
 	reaction := model.Reaction{
 		Message: model.MessageIdentifier{

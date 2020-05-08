@@ -111,7 +111,7 @@ func (b *Bot) messageRunner(channelID string, content string) (messageObject, er
 			return messageObject{}, errors.New("Message sending still failing after 3 tries, giving up")
 		}
 
-		response, err := b.api.Call("/channels/"+channelID+"/messages", "POST", `{"content": "`+convertMessageFromAbyleBotter(content)+`"}`)
+		response, err := b.api.Call("/channels/"+channelID+"/messages", "POST", `{"content": "`+convertMessageFromRedseligg(content)+`"}`)
 		if err != nil {
 			return messageObject{}, errors.Wrap(err, "apiCall failed")
 		}
@@ -134,7 +134,7 @@ func (b *Bot) updateRunner(channelID, messageID, content string) (messageObject,
 			return messageObject{}, errors.New("Message update still failing after 3 tries, giving up")
 		}
 
-		response, err := b.api.Call("/channels/"+channelID+"/messages/"+messageID, "PATCH", `{"content": "`+convertMessageFromAbyleBotter(content)+`"}`)
+		response, err := b.api.Call("/channels/"+channelID+"/messages/"+messageID, "PATCH", `{"content": "`+convertMessageFromRedseligg(content)+`"}`)
 		if err != nil {
 			return messageObject{}, errors.Wrap(err, "apiCall failed")
 		}

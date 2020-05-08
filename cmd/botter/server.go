@@ -1,5 +1,5 @@
 // Concept how to build such a server inspired from https://github.com/grafana/grafana/blob/master/pkg/cmd/grafana-server/server.go
-// Modified for AbyleBotter
+// Modified for Redseligg
 
 package main
 

@@ -16,6 +16,6 @@ CMD ["/usr/bin/botterinstance"]
 
 LABEL org.label-schema.vendor="Torlenor" \
       org.label-schema.url="https://github.com/torlenor/redseligg" \
-      org.label-schema.name="Abylebotter" \
+      org.label-schema.name="Redseligg" \
       org.label-schema.description="An extensible multi-platform chat bot for Discord, Matrix, Mattermost and Slack written in GO"
 

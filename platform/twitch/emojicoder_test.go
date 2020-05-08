@@ -2,7 +2,7 @@ package twitch
 
 import "testing"
 
-func Test_getAbyleBotterEmojiFromTwitchEmoji(t *testing.T) {
+func Test_getRedseliggEmojiFromTwitchEmoji(t *testing.T) {
 	type args struct {
 		discordEmoji string
 	}
@@ -26,13 +26,13 @@ func Test_getAbyleBotterEmojiFromTwitchEmoji(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getAbyleBotterEmojiFromTwitchEmoji(tt.args.discordEmoji)
+			got, err := getRedseliggEmojiFromTwitchEmoji(tt.args.discordEmoji)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("getAbyleBotterEmojiFromTwitchEmoji() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("getRedseliggEmojiFromTwitchEmoji() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("getAbyleBotterEmojiFromTwitchEmoji() = %v, want %v", got, tt.want)
+				t.Errorf("getRedseliggEmojiFromTwitchEmoji() = %v, want %v", got, tt.want)
 			}
 		})
 	}

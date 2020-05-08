@@ -8,5 +8,5 @@ import (
 // which sends back the results of a http connection atttempt
 // to the url provided with the command.
 type HTTPPingPlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 }

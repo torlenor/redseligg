@@ -17,7 +17,7 @@ type randomizer interface {
 
 // GiveawayPlugin is a plugin that lets you hold giveaways in your channel and let the bot pick a winner.
 type GiveawayPlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 
 	cfg config
 

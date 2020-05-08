@@ -14,7 +14,7 @@
 
 **New platforms:**
 
-- Twitch Chat: AbyleBotter now supports Twitch Chat for sending/receiving messages.
+- Twitch Chat: Redseligg now supports Twitch Chat for sending/receiving messages.
 
 **New plugins:**
 
@@ -40,8 +40,8 @@
 
 **Platform specific changes:**
 
-- Discord: Initial mapping of AbyleBotter to Discord emojis.
-- Discord: Initial converter between AbyleBotter and Discord text format.
+- Discord: Initial mapping of Redseligg to Discord emojis.
+- Discord: Initial converter between Redseligg and Discord text format.
 - Discord: Support for updating/deleting message.
 - Discord: Support for receiving reactions to messages.
 - Slack: Support for updating messages.
@@ -58,8 +58,8 @@
 
 **Implemented enhancements:**
 
-- Migrated to a server architecture where AbyleBotter is controlled via REST API
-- Introduce the command line tool BotterControl to control a AbyleBotter instance
+- Migrated to a server architecture where Redseligg is controlled via REST API
+- Introduce the command line tool BotterControl to control a Redseligg instance
 - Cleaner plugin interface and therefore much easier to implement new plugins
 
 **Fixed bugs:**

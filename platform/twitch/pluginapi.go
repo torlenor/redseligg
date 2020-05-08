@@ -41,7 +41,7 @@ func (b *Bot) GetChannelByName(name string) (model.Channel, error) { return mode
 func (b *Bot) CreatePost(post model.Post) (model.PostResponse, error) {
 	ircMessage := irc.Message{
 		Command: "PRIVMSG",
-		Params:  []string{post.ChannelID, convertMessageFromAbyleBotter(post.Content)},
+		Params:  []string{post.ChannelID, convertMessageFromRedseligg(post.Content)},
 	}
 	err := b.ws.SendMessage(websocket.TextMessage, []byte(ircMessage.String()))
 	if err != nil {

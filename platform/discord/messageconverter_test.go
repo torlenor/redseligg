@@ -2,7 +2,7 @@ package discord
 
 import "testing"
 
-func Test_convertMessageFromAbyleBotter(t *testing.T) {
+func Test_convertMessageFromRedseligg(t *testing.T) {
 	type args struct {
 		text string
 	}
@@ -21,8 +21,8 @@ func Test_convertMessageFromAbyleBotter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := convertMessageFromAbyleBotter(tt.args.text); got != tt.want {
-				t.Errorf("convertMessageFromAbyleBotter() = %v, want %v", got, tt.want)
+			if got := convertMessageFromRedseligg(tt.args.text); got != tt.want {
+				t.Errorf("convertMessageFromRedseligg() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -1,6 +1,6 @@
 package config
 
-// API holds the API settings for the AbyleBotter configuration
+// API holds the API settings for the Redseligg configuration
 type API struct {
 	Enabled bool `toml:"enabled"`
 	// IP Address the REST API listens on

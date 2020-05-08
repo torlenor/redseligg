@@ -14,7 +14,7 @@ const (
 
 // VotePlugin is a plugin to initiate a vote in the channel about arbitrary topics.
 type VotePlugin struct {
-	plugin.AbyleBotterPlugin
+	plugin.RedseliggPlugin
 
 	cfg config
 
@@ -30,7 +30,7 @@ func New(pluginConfig botconfig.PluginConfig) (*VotePlugin, error) {
 	}
 
 	ep := VotePlugin{
-		AbyleBotterPlugin: plugin.AbyleBotterPlugin{
+		RedseliggPlugin: plugin.RedseliggPlugin{
 			NeededFeatures: []string{
 				platform.FeatureMessagePost,
 				platform.FeatureMessageUpdate,
