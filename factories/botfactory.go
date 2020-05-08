@@ -3,16 +3,16 @@ package factories
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/platform/discord"
-	"github.com/torlenor/abylebotter/platform/matrix"
-	"github.com/torlenor/abylebotter/platform/mattermost"
-	"github.com/torlenor/abylebotter/platform/slack"
-	"github.com/torlenor/abylebotter/platform/twitch"
-	"github.com/torlenor/abylebotter/ws"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/platform/discord"
+	"github.com/torlenor/redseligg/platform/matrix"
+	"github.com/torlenor/redseligg/platform/mattermost"
+	"github.com/torlenor/redseligg/platform/slack"
+	"github.com/torlenor/redseligg/platform/twitch"
+	"github.com/torlenor/redseligg/ws"
 )
 
 var (

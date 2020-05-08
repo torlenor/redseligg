@@ -3,7 +3,7 @@ package discord
 import (
 	"encoding/json"
 
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 type messageType int

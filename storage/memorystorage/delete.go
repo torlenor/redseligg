@@ -1,6 +1,6 @@
 package memorystorage
 
-import "github.com/torlenor/abylebotter/storage"
+import "github.com/torlenor/redseligg/storage"
 
 // DeleteQuotesPluginQuote returns a QuotesPluginQuote.
 func (b *MemoryStorage) DeleteQuotesPluginQuote(botID, pluginID, identifier string) error {

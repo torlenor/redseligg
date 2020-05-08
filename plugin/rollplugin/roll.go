@@ -3,7 +3,7 @@ package rollplugin
 import (
 	"time"
 
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 type randomizer interface {

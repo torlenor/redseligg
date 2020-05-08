@@ -3,7 +3,7 @@ package voteplugin
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 )
 
 type config struct {

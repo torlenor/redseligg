@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/torlenor/abylebotter/api"
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/providers"
+	"github.com/torlenor/redseligg/api"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/providers"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 )

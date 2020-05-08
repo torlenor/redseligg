@@ -8,13 +8,13 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugin"
-	"github.com/torlenor/abylebotter/storage"
-	"github.com/torlenor/abylebotter/utils"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin"
+	"github.com/torlenor/redseligg/storage"
+	"github.com/torlenor/redseligg/utils"
 )
 
 type webSocketClient interface {

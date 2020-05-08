@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/torlenor/abylebotter/ws"
+	"github.com/torlenor/redseligg/ws"
 )
 
 type onFailMock struct {

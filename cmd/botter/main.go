@@ -9,9 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/utils"
+	"github.com/torlenor/redseligg/config"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/utils"
 )
 
 const (

@@ -3,8 +3,8 @@ package plugin
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/storage"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/storage"
 )
 
 // The MockAPI can be used for testing Plugins by providing helper functions.

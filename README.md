@@ -1,9 +1,9 @@
 # AbyleBotter
 
-[![Build and Test](https://github.com/torlenor/abylebotter/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/torlenor/abylebotter/actions?query=workflow%3A%22Build+and+Test%22)
-[![Coverage Status](https://coveralls.io/repos/github/torlenor/abylebotter/badge.svg?branch=master)](https://coveralls.io/github/torlenor/abylebotter?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/abylebotter)](https://goreportcard.com/report/github.com/torlenor/abylebotter)
-[![Docker](https://img.shields.io/docker/pulls/torlenor/abylebotter.svg)](https://hub.docker.com/r/torlenor/abylebotter/)
+[![Build and Test](https://github.com/torlenor/redseligg/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/torlenor/redseligg/actions?query=workflow%3A%22Build+and+Test%22)
+[![Coverage Status](https://coveralls.io/repos/github/torlenor/redseligg/badge.svg?branch=master)](https://coveralls.io/github/torlenor/redseligg?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/torlenor/redseligg)](https://goreportcard.com/report/github.com/torlenor/redseligg)
+[![Docker](https://img.shields.io/docker/pulls/torlenor/redseligg.svg)](https://hub.docker.com/r/torlenor/redseligg/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 
@@ -85,13 +85,13 @@ for use with a MongoDB for the Bot configuration.
 Probably an easiest way to try out AbyleBotter is using Docker. To pull the latest version from DockerHub and start it type
 
 ```bash
-docker run -d --name abylebotter --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/abylebotter:latest
+docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/redseligg:latest
 ```
 
 or for MongoDB type
 
 ```bash
-docker run -d --name abylebotter BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/abylebotter:latest
+docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/redseligg:latest
 ```
 
 ## How to control it
@@ -107,7 +107,7 @@ We are providing a command line tool to control a BotterInstance called BotterCo
 or
 
 ```bash
-docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
+docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
 ```
 
 ### Start a bot on a BotterInstance
@@ -119,7 +119,7 @@ docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_
 or
 
 ```bash
-docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
+docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
 ```
 
 ### Stop a bot on a BotterInstance
@@ -131,7 +131,7 @@ docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_
 or
 
 ```bash
-docker run --net host hpsch/abylebotter:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
+docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
 ```
 
 ## Standalone version
@@ -157,13 +157,13 @@ for use with a MongoDB for the Bot configuration.
 To launch the standalone version using Docker type
 
 ```bash
-docker run -d --name abylebotter --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/abylebotter:latest /usr/bin/botter
+docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/redseligg:latest /usr/bin/botter
 ```
 
 or for MongoDB type
 
 ```bash
-docker run -d --name abylebotter BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/abylebotter:latest /usr/bin/botter
+docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/redseligg:latest /usr/bin/botter
 ```
 
 ## Storage

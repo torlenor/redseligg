@@ -3,9 +3,9 @@ package providers
 import (
 	"fmt"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/redseligg/platform"
 )
 
 // MockPluginFactory can be used to generate plugins

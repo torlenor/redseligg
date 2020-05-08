@@ -1,7 +1,7 @@
 package memorystorage
 
 import (
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/storagemodels"
 )
 
 // StoreQuotesPluginQuote takes a QuotesPluginQuote and stores it.

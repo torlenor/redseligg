@@ -3,7 +3,7 @@ package mongostorage
 import (
 	"context"
 
-	"github.com/torlenor/abylebotter/storagemodels"
+	"github.com/torlenor/redseligg/storagemodels"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

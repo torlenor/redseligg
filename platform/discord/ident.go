@@ -13,8 +13,8 @@ func sendIdent(token string, ws webSocketClient) error {
 				"token": "` + token + `",
 				"properties": {
 					"$os": "linux",
-					"$browser": "abylebotter",
-					"$device": "abylebotter"
+					"$browser": "redseligg",
+					"$device": "redseligg"
 				  },
 				"compress": false,
 				"large_threshold": 250

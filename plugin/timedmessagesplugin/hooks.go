@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/storage"
-	"github.com/torlenor/abylebotter/utils"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/storage"
+	"github.com/torlenor/redseligg/utils"
 )
 
 func (p *TimedMessagesPlugin) checkTimedMessages(t time.Time) {

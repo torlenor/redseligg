@@ -3,11 +3,11 @@ package matrix
 import (
 	"time"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/logging"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/logging"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 var (

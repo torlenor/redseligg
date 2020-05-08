@@ -7,13 +7,13 @@
 .PHONY: update clean build build-all test authors dist vendor build-container-latest \
 build-container-tagged build-container-gitcommit release-container release-container-gitcommit
 
-NAME := abylebotter
+NAME := redseligg
 BINARIES := botterinstance bottercontrol botter
 VERSION := $(shell cat VERSION)
 COMPTIME := $(shell date -Is)
 LDFLAGS := -X main.version=${VERSION} -X main.compTime=${COMPTIME}
 SRCPATH := .
-DOCKERBASETAG := torlenor/abylebotter
+DOCKERBASETAG := torlenor/redseligg
 CURRENTGITCOMMIT := $(shell git log -1 --format=%h)
 CURRENTGITUNTRACKED := $(shell git diff-index --quiet HEAD -- || echo "_untracked")
 ENVFLAGS :=

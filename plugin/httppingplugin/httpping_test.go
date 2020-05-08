@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/plugin"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 // OnPost implements the hook from the Bot

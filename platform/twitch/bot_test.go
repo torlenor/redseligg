@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/storage"
-	"github.com/torlenor/abylebotter/ws"
+	"github.com/torlenor/redseligg/storage"
+	"github.com/torlenor/redseligg/ws"
 )
 
 func Test_CreateDiscordBot(t *testing.T) {

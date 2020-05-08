@@ -12,8 +12,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/torlenor/abylebotter/config"
-	"github.com/torlenor/abylebotter/logging"
+	"github.com/torlenor/redseligg/config"
+	"github.com/torlenor/redseligg/logging"
 )
 
 // Router is the interface to the router used for distributing to the endpoints

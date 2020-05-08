@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 const (

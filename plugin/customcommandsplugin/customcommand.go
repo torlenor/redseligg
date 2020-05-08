@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 func (p *CustomCommandsPlugin) onCustomCommand(post model.Post) {

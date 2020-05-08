@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/torlenor/abylebotter/model"
+	"github.com/torlenor/redseligg/model"
 )
 
 type rateLimitResponse struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/torlenor/abylebotter/storage"
+	"github.com/torlenor/redseligg/storage"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

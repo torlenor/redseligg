@@ -1,7 +1,7 @@
 package httppingplugin
 
 import (
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 // HTTPPingPlugin is a plugin implementing a httpping command

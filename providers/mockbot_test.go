@@ -3,7 +3,7 @@ package providers
 import (
 	"context"
 
-	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/redseligg/platform"
 )
 
 type MockBot struct {

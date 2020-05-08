@@ -8,11 +8,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/platform"
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 var providedFeatures = map[string]bool{

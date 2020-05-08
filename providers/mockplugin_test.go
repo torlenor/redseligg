@@ -1,8 +1,8 @@
 package providers
 
 import (
-	"github.com/torlenor/abylebotter/model"
-	"github.com/torlenor/abylebotter/plugin"
+	"github.com/torlenor/redseligg/model"
+	"github.com/torlenor/redseligg/plugin"
 )
 
 const MockPluginType = "MockPlugin"

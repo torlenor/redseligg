@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/torlenor/abylebotter/botconfig"
+	"github.com/torlenor/redseligg/botconfig"
 )
 
 func Test_parseConfig(t *testing.T) {
