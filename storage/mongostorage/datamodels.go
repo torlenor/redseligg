@@ -25,3 +25,11 @@ type timedMessagesPluginMessagesData struct {
 
 	Data storagemodels.TimedMessagesPluginMessages `bson:"data"`
 }
+
+type customCommandsPluginCommandsData struct {
+	BotID      string `bson:"bot_id"`
+	PluginID   string `bson:"plugin_id"`
+	Identifier string `bson:"identifier"`
+
+	Data storagemodels.CustomCommandsPluginCommands `bson:"data"`
+}

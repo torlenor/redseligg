@@ -6,6 +6,7 @@ import (
 	"github.com/torlenor/abylebotter/botconfig"
 
 	"github.com/torlenor/abylebotter/platform"
+	"github.com/torlenor/abylebotter/plugin/customcommandsplugin"
 	"github.com/torlenor/abylebotter/plugin/echoplugin"
 	"github.com/torlenor/abylebotter/plugin/giveawayplugin"
 	"github.com/torlenor/abylebotter/plugin/httppingplugin"
@@ -25,6 +26,12 @@ func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botcon
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {
+	case "customcommands":
+		rp, err := customcommandsplugin.New(pluginConfig)
+		if err != nil {
+			return nil, err
+		}
+		p = rp
 	case "echo":
 		p = &echoplugin.EchoPlugin{}
 	case "giveaway":

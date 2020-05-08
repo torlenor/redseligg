@@ -394,3 +394,43 @@ or use
 !tm remove all <your message>
 ```
 , e.g., `!tm remove all This is awesome!`, to remove all message with a specific text, regardless of their interval.
+
+## Custom Commands Plugin
+
+Allow mods to add custom commands which will return text.
+
+### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "customcommands"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to add or removed custom commands. Per default everybody is allowed.
+
+### Adding a custom command
+
+To add a custom command type
+
+```
+!customcommand add <customCommand> <your message>
+```
+
+Example:
+```
+!customcommand hello Hi there!
+```
+
+When a user then types `!hello` in chat the plugin will answer with `Hi there!`.
+
+### Removing a custom command
+
+Use
+```
+!customcommand remove <customCommand>
+```
+, e.g., `!tm remove hello`, to remove the custom command.

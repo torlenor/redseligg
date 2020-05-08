@@ -18,6 +18,7 @@
 
 **New plugins:**
 
+- Custom Commands Plugin: Allow mods to add custom commands which will return text.
 - Quotes Plugin: Lets users/viewers or mods add quotes and randomly fetch one.
 - Timed Messages Plugin: Post messages automatically at a given interval.
 
