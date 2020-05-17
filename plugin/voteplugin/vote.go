@@ -7,7 +7,6 @@ import (
 	"github.com/torlenor/redseligg/model"
 )
 
-// TODO: There has to be a mapping from that to the emojis and syntax used from the platform via an API call.
 func getDefaultReactions() []string {
 	return []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "keycap_ten"}
 }

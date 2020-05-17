@@ -7,7 +7,7 @@ import (
 )
 
 func checkEventsOK(response []byte) bool {
-	// TODO check if response is containing any errors
+	// TODO: Check if Matrix API response contains any errors
 	return true
 }
 

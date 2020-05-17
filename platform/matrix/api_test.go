@@ -25,5 +25,5 @@ func Test_matrixAPI_call(t *testing.T) {
 	mr := &mockHTTPrequest{}
 	doHTTPRequest = mr.Do
 
-	// TODO: Add tests
+	// TODO: Add unit tests for Matrix
 }
