@@ -279,7 +279,7 @@ func TestGiveawayPluginCreateAndAutomaticEndGiveaway(t *testing.T) {
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	// TODO: Do not use sleeps in giveaway unit tests
+	// TODO (#32): Do not use sleeps in giveaway unit tests
 	time.Sleep(4 * time.Second)
 	assert.Equal(true, api.WasCreatePostCalled)
 	expectedPostFromPlugin = model.Post{
