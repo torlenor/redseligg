@@ -8,7 +8,7 @@ import (
 )
 
 func (p *CustomCommandsPlugin) onCustomCommand(post model.Post) {
-	// TODO: Do not fetch commands in CustomCommandPlugin every time
+	// TODO (#31): Do not fetch commands in CustomCommandPlugin every time
 	customCommands, err := p.getCommands()
 	if err != nil {
 		p.API.LogError(fmt.Sprintf("Could not get custom commands from storage: %s", err))
