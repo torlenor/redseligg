@@ -1,6 +1,5 @@
 package customcommandsplugin
 
-// TODO (#17): Custom Commands Plugin
 
 import (
 	"errors"
