@@ -188,10 +188,10 @@ func (b *Bot) run() {
 		_, message, err := b.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-				log.Debugln("Connection to Discord Gateway closed normally: ", err)
+				log.Tracef("Connection to Discord Gateway closed normally: %s", err)
 				break
 			} else if websocket.IsCloseError(err, websocket.CloseGoingAway) {
-				log.Infof("Received GoingAway from Discord Gateway, attempting a reconnect")
+				log.Debugf("Received GoingAway from Discord Gateway, attempting a reconnect")
 				b.stopHeartBeatWatchdog()
 				b.ws.Close()
 				err := b.openGatewayConnection()
@@ -213,7 +213,7 @@ func (b *Bot) run() {
 		}
 
 		if data.Op == 7 { // Reconnect: You must reconnect with a new session immediately.
-			log.Info("Received request to reconnect")
+			log.Debugf("Received request to reconnect")
 			b.stopHeartBeatWatchdog()
 			b.ws.Close()
 			e = b.openGatewayConnection()

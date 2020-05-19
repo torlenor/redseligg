@@ -69,7 +69,7 @@ func (b *Bot) sendMessage(receiver string, content string) (messageObject, error
 
 	splitString := strings.Split(receiver, "#")
 	if len(splitString) != 2 {
-		log.Errorf("Error decoding '%s' into Guild/Server and Channel. Format must be Guild#Channel. We will try using it as a channelID", receiver)
+		log.Tracef("Error decoding '%s' into Guild/Server and Channel. Format must be Guild#Channel. We will try using it as a channelID", receiver)
 		channelID = receiver
 	} else {
 		guild := splitString[0]
@@ -121,7 +121,7 @@ func (b *Bot) messageRunner(channelID string, content string) (messageObject, er
 			time.Sleep(time.Duration(retryAfter) * time.Millisecond)
 			continue
 		}
-		log.Debugf("DiscordBot: Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
+		log.Tracef("Sent: MESSAGE to ChannelID = %s, Content = %s", channelID, content)
 		return getMessageObject(response.Body)
 	}
 

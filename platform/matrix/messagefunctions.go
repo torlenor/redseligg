@@ -31,8 +31,8 @@ func (b Bot) sendRoomMessage(roomIdent string, content string) error {
 		return errors.Wrap(err, "apiCall failed")
 	}
 
-	log.Debugln("send api response:", string(response))
-	log.Debugf("Sent: MESSAGE to roomID = %s, Content = %s", roomID, content)
+	log.Traceln("send api response:", string(response))
+	log.Tracef("Sent: MESSAGE to roomID = %s, Content = %s", roomID, content)
 
 	return nil
 }

@@ -40,7 +40,6 @@ var dialer = func(wsURL string) (wsClient, error) {
 // NewClient prepares a new ws Client
 func NewClient() *Client {
 	log := logging.Get("WSClient")
-	log.Debug("WS Client is CREATING itself")
 
 	c := Client{
 		log: log,

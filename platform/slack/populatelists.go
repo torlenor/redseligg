@@ -10,7 +10,7 @@ func (b *Bot) populateChannelList() error {
 		b.channels.addKnownChannel(channel)
 	}
 
-	b.log.Infof("Added %d known channels", b.channels.Len())
+	b.log.Debugf("Added %d known channels", b.channels.Len())
 	return nil
 }
 
@@ -24,6 +24,6 @@ func (b *Bot) populateUserList() error {
 		b.users.addKnownUser(user)
 	}
 
-	b.log.Infof("Added %d known users", b.users.Len())
+	b.log.Debugf("Added %d known users", b.users.Len())
 	return nil
 }
