@@ -18,7 +18,7 @@ const (
 // ErrNoValidStorage is set when the provided storage does not implement the correct functions
 var ErrNoValidStorage = errors.New("No valid storage set")
 
-// TODO: CustomCommandsPlugin storage interface should only store one command at a time and not always overwrite all of them
+// TODO (#34): CustomCommandsPlugin storage interface should only store one command at a time and not always overwrite all of them
 type writer interface {
 	StoreCustomCommandsPluginCommands(botID, pluginID, identifier string, data storagemodels.CustomCommandsPluginCommands) error
 }
