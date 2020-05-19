@@ -11,6 +11,7 @@
 
 - Storage memory added.
 - Storage mongo added.
+- Storage sqlite added.
 
 **New platforms:**
 
