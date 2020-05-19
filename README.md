@@ -60,7 +60,7 @@ Independent of the way you obtain it, you have to configure the bot first and it
 - Matrix: For Matrix it is simpler, just create a user for the bot on your preferred Matrix server.
 - Mattermost: For Mattermost a username and password with the necessary rights on the specified server is enough.
 - Slack: The bot as to be added to the workspace and a token has to be generated.
-- Twitch: It needs a username for the Twitch account and a list of channels to join. In addition a toen is needed for that user. You can generate one here: https://twitchapps.com/tmi/
+- Twitch: It needs a username for the Twitch account and a list of channels to join. In addition a token is needed for that user. You can generate one here: https://twitchapps.com/tmi/
 
 The bot configuration can either be stored in a toml file or in a MongoDB. An example for a toml file is provided in this repository in *cfg/bots.toml*.
 
@@ -283,7 +283,7 @@ Example:
         onlymods = true
 ```
 
-When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to start/end vots. Per default everybody is allowed.
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to start/end votes. Per default everybody is allowed.
 
 #### Starting a vote
 Type `!vote message` to start the vote. The vote is limited to the channel where you initiate the vote. Per default the options are Yes/No. They can be changed by providing custom options (see below).
