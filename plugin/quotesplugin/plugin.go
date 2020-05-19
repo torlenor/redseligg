@@ -22,6 +22,7 @@ type randomizer interface {
 	Intn(max int) int
 }
 
+// TODO: The separate QuotesList storage is actually dumb, we should get rid of it
 type quotesPluginWriter interface {
 	StoreQuotesPluginQuote(botID, pluginID, identifier string, data storagemodels.QuotesPluginQuote) error
 	StoreQuotesPluginQuotesList(botID, pluginID, identifier string, data storagemodels.QuotesPluginQuotesList) error

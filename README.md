@@ -168,7 +168,11 @@ docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONG
 
 ## Storage
 
-Some plugins can use a storage to store permanent data. Currently we are supporting MongoDB as backend. To configure it, add a section of the form
+Some plugins can use a storage to store permanent data. Currently we are supporting MongoDB and SQLite3 as a storage backend.
+
+### MongoDB
+
+To configure a MongoDB storage, add a section of the form
 
 ```yaml
     [bots.slack.storage]
@@ -178,7 +182,20 @@ Some plugins can use a storage to store permanent data. Currently we are support
         Database = "testdb" # Database to use
 ```
 
-to the bot for wich you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
+to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
+
+### SQLite3
+
+To configure a SQLite3 storage, add a section of the form
+
+```yaml
+    [bots.slack.storage]
+      storage = "sqlite"
+      [bots.slack.storage.config]
+        Database = "/tmp/database.db" # Database file to use
+```
+
+to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
 
 ## Plugins
 

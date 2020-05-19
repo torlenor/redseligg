@@ -157,7 +157,7 @@ func (p *QuotesPlugin) onCommandQuoteAdd(post model.Post) {
 
 	num := p.storeQuote(quote)
 	if num > 0 {
-		p.returnMessage(post.ChannelID, fmt.Sprintf("Successfully added quote #%d", num))
+		p.returnMessage(post.ChannelID, fmt.Sprintf("Successfully added quote #%d", num-1))
 	} else {
 		p.returnMessage(post.ChannelID, "Error storing quote. Try again later!")
 	}
