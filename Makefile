@@ -52,7 +52,7 @@ build-static:
 	@for cmd in ${BINARIES}; \
 	do \
 		echo "\t$${cmd}" ;\
-		CGO_ENABLED=0 ${ENVFLAGS} go build -o ./bin/$${cmd} -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
+		CGO_ENABLED=1 ${ENVFLAGS} go build -o ./bin/$${cmd} -ldflags '-s -w --extldflags "-static" ${LDFLAGS}' ./cmd/$${cmd}/ ;\
 	done
 	@echo Done.
 
