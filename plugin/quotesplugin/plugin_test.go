@@ -156,7 +156,7 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "Successfully added quote #1",
+		Content:   "Successfully added quote #0", // because we are getting 0 entries for QuotesList from mockstorage
 		IsPrivate: false,
 	}
 	postToPlugin.IsPrivate = false

@@ -18,6 +18,7 @@ const (
 // ErrNoValidStorage is set when the provided storage does not implement the correct functions
 var ErrNoValidStorage = errors.New("No valid storage set")
 
+// TODO: TimedMessagesPlugin storage interface should only store one message at a time and not always overwrite all of them
 type writer interface {
 	StoreTimedMessagesPluginMessages(botID, pluginID, identifier string, data storagemodels.TimedMessagesPluginMessages) error
 }

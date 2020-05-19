@@ -85,13 +85,13 @@ for use with a MongoDB for the Bot configuration.
 Probably an easiest way to try out Redseligg is using Docker. To pull the latest version from DockerHub and start it type
 
 ```bash
-docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/redseligg:latest
+docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro torlenor/redseligg:latest
 ```
 
 or for MongoDB type
 
 ```bash
-docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/redseligg:latest
+docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" torlenor/redseligg:latest
 ```
 
 ## How to control it
@@ -107,7 +107,7 @@ We are providing a command line tool to control a BotterInstance called BotterCo
 or
 
 ```bash
-docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
+docker run --net host torlenor/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c GetBots
 ```
 
 ### Start a bot on a BotterInstance
@@ -119,7 +119,7 @@ docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BO
 or
 
 ```bash
-docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
+docker run --net host torlenor/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StartBot -a BOTID
 ```
 
 ### Stop a bot on a BotterInstance
@@ -131,7 +131,7 @@ docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BO
 or
 
 ```bash
-docker run --net host hpsch/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
+docker run --net host torlenor/redseligg:latest /usr/bin/bottercontrol -u URL_OF_BOTTER_INSTANCE -c StopBot -a BOTID
 ```
 
 ## Standalone version
@@ -157,18 +157,22 @@ for use with a MongoDB for the Bot configuration.
 To launch the standalone version using Docker type
 
 ```bash
-docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro hpsch/redseligg:latest /usr/bin/botter
+docker run -d --name redseligg --env BOTTER_BOT_CFG_SOURCE=TOML --env BOTTER_BOT_CFG_TOML_FILE=/bots.toml -v /path/to/config/file.toml:/bots.toml:ro torlenor/redseligg:latest /usr/bin/botter
 ```
 
 or for MongoDB type
 
 ```bash
-docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" hpsch/redseligg:latest /usr/bin/botter
+docker run -d --name redseligg BOTTER_BOT_CFG_SOURCE="MONGO" BOTTER_BOT_CFG_MONGO_URL="mongodb://user:password@localhost/database" BOTTER_BOT_CFG_MONGO_DB="database" torlenor/redseligg:latest /usr/bin/botter
 ```
 
 ## Storage
 
-Some plugins can use a storage to store permanent data. Currently we are supporting MongoDB as backend. To configure it, add a section of the form
+Some plugins can use a storage to store permanent data. Currently we are supporting MongoDB and SQLite3 as a storage backend.
+
+### MongoDB
+
+To configure a MongoDB storage, add a section of the form
 
 ```yaml
     [bots.slack.storage]
@@ -178,7 +182,20 @@ Some plugins can use a storage to store permanent data. Currently we are support
         Database = "testdb" # Database to use
 ```
 
-to the bot for wich you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
+to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
+
+### SQLite3
+
+To configure a SQLite3 storage, add a section of the form
+
+```yaml
+    [bots.slack.storage]
+      storage = "sqlite"
+      [bots.slack.storage.config]
+        Database = "/tmp/database.db" # Database file to use
+```
+
+to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
 
 ## Plugins
 

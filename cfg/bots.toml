@@ -80,10 +80,9 @@
       token = "token_goes_jere"
       channels = ["channels_to_join", "go_here"]
     [bots.twitch.storage]
-      storage = "mongo"
+      type = "sqlite"
       [bots.twitch.storage.config]
-        URL = "mongodb://user1:test@localhost/testdb" # URL to connect to
-        Database = "testdb" # Database to use
+        database = "/tmp/database.db" # Database file to use
     [bots.twitch.plugins.1]
       type = "echo"
     [bots.twitch.plugins.1.config]

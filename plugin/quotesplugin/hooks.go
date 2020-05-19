@@ -23,6 +23,7 @@ func (p *QuotesPlugin) OnPost(post model.Post) {
 
 	msg := strings.Trim(post.Content, " ")
 
+	// TODO: Use command prefix !quote for everything, e.g., !quote add some quote instead of !quoteadd
 	if strings.HasPrefix(msg, "!quote ") || msg == "!quote" {
 		p.onCommandQuote(post)
 		return

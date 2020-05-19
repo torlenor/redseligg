@@ -9,6 +9,7 @@ import (
 	"github.com/torlenor/redseligg/storage"
 	"github.com/torlenor/redseligg/storage/memorystorage"
 	"github.com/torlenor/redseligg/storage/mongostorage"
+	"github.com/torlenor/redseligg/storage/sqlitestorage"
 )
 
 var (
@@ -20,12 +21,12 @@ type StorageFactory struct{}
 
 // CreateBackend creates a new storage backend with the provided configuration
 func (f *StorageFactory) CreateBackend(storageConfig botconfig.StorageConfig) (storage.Storage, error) {
-	var b storage.Storage
+	var s storage.Storage
 
 	switch storageConfig.Type {
 	case "memory":
 		logStorageFactory.Tracef("Creating Memory storage")
-		b = memorystorage.New()
+		s = memorystorage.New()
 	case "mongodb":
 		fallthrough
 	case "mongo":
@@ -38,12 +39,25 @@ func (f *StorageFactory) CreateBackend(storageConfig botconfig.StorageConfig) (s
 		if err != nil {
 			return nil, err
 		}
-		b = m
+		s = m
+	case "sqlite3":
+		fallthrough
+	case "sqlite":
+		logStorageFactory.Tracef("Creating SQLite storage")
+		sql, err := sqlitestorage.New(storageConfig)
+		if err != nil {
+			return nil, err
+		}
+		err = sql.Connect()
+		if err != nil {
+			return nil, err
+		}
+		s = sql
 	case "":
 		return nil, fmt.Errorf("No storage defined in config")
 	default:
 		return nil, fmt.Errorf("Unknown storage type %s", storageConfig.Type)
 	}
 
-	return b, nil
+	return s, nil
 }
