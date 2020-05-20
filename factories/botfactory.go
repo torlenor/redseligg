@@ -42,42 +42,42 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 	case "slack":
 		slackCfg, err := config.AsSlackConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating slack bot: %s", err)
+			return nil, fmt.Errorf("Error creating Slack bot: %s", err)
 		}
 
 		bot, err = slack.CreateSlackBot(slackCfg, storage, ws.NewClient())
 		if err != nil {
-			return nil, fmt.Errorf("Error creating slack bot: %s", err)
+			return nil, fmt.Errorf("Error creating Slack bot: %s", err)
 		}
 	case "mattermost":
 		mmCfg, err := config.AsMattermostConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating mattermost bot: %s", err)
+			return nil, fmt.Errorf("Error creating Mattermost bot: %s", err)
 		}
 
 		bot, err = mattermost.CreateMattermostBot(mmCfg)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating mattermost bot: %s", err)
+			return nil, fmt.Errorf("Error creating Mattermost bot: %s", err)
 		}
 	case "discord":
 		discordCfg, err := config.AsDiscordConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Discord bot: %s", err)
 		}
 
 		bot, err = discord.CreateDiscordBot(discordCfg, storage, commandDispatcher, ws.NewClient())
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Discord bot: %s", err)
 		}
 	case "matrix":
 		matrixCfg, err := config.AsMatrixConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Matrix bot: %s", err)
 		}
 
 		bot, err = matrix.CreateMatrixBot(matrixCfg)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Matrix bot: %s", err)
 		}
 	case "twitch":
 		twitchCfg, err := config.AsTwitchConfig()
