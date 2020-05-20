@@ -33,7 +33,7 @@ func (h *httpGetter) get(url string) (resp *http.Response, err error) {
 	}, nil
 }
 
-func TestHTTPPingPlugin_OnPost(t *testing.T) {
+func TestHTTPPingPlugin_OnCommand(t *testing.T) {
 	assert := assert.New(t)
 
 	mockHTTPGetter := httpGetter{}
@@ -45,6 +45,8 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 	api := plugin.MockAPI{}
 	p.SetAPI(&api)
 
+	command := "httpping"
+
 	postToPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
@@ -52,15 +54,6 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
-	assert.Equal(false, mockHTTPGetter.WasGetCalled)
-
-	mockHTTPGetter.reset()
-	api.Reset()
-	postToPlugin.Content = "!httpping"
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
 	mockHTTPGetter.reset()
 	api.Reset()
@@ -72,13 +65,13 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 		Content:   "FAIL (Not a valid url).",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "not a valid url", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	mockHTTPGetter.reset()
 	api.Reset()
-	postToPlugin.Content = "!httpping http://validurl.com"
+	postToPlugin.Content = "!" + command + "http://validurl.com"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
@@ -86,7 +79,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 		Content:   "SUCCESS. Request took ",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "http://validurl.com", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	// we do not want to check the time it took, because this is not mocked
 	api.LastCreatePostPost.Content = api.LastCreatePostPost.Content[:len(expectedPostFromPlugin.Content)]
@@ -102,7 +95,7 @@ func TestHTTPPingPlugin_OnPost(t *testing.T) {
 		Content:   "FAIL (Error pinging the url: Some error).",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "http://validurl.com", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

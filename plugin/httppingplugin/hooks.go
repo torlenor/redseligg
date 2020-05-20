@@ -2,29 +2,27 @@ package httppingplugin
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/torlenor/redseligg/model"
-	"github.com/torlenor/redseligg/utils"
 )
 
-// OnPost implements the hook from the Bot
-func (p *HTTPPingPlugin) OnPost(post model.Post) {
-	msg := strings.Trim(post.Content, " ")
-	if strings.HasPrefix(msg, "!httpping ") {
-		u := utils.StripCmd(msg, "httpping")
+// OnRun implements the hool from the Boot
+func (p *HTTPPingPlugin) OnRun() {
+	p.API.RegisterCommand(p, "httpping")
+}
 
-		timeMs, err := httpPing(u)
+// OnCommand implements the hook from the Bot
+func (p *HTTPPingPlugin) OnCommand(cmd string, content string, post model.Post) {
+	timeMs, err := httpPing(content)
 
-		var response string
-		if err != nil {
-			response = fmt.Sprintf("FAIL (%s).", err)
-		} else {
-			response = fmt.Sprintf("SUCCESS. Request took %d ms", timeMs)
-		}
-
-		pingReply := post
-		pingReply.Content = response
-		p.API.CreatePost(pingReply)
+	var response string
+	if err != nil {
+		response = fmt.Sprintf("FAIL (%s).", err)
+	} else {
+		response = fmt.Sprintf("SUCCESS. Request took %d ms", timeMs)
 	}
+
+	pingReply := post
+	pingReply.Content = response
+	p.API.CreatePost(pingReply)
 }
