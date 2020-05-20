@@ -18,8 +18,8 @@ var now = time.Now
 const (
 	identFieldList = "list"
 
-	helpText       = "Type !quoteadd <your quote> to add a new quote."
-	helpTextRemove = "Type `!quoteremove <your quote>` or !quoteremove (ID) to remove a quote."
+	helpText       = "Type `quoteadd <your quote>` to add a new quote."
+	helpTextRemove = "Type `quoteremove <your quote>` or `quoteremove (ID)` to remove a quote."
 )
 
 func (p *QuotesPlugin) returnHelp(channelID string) {
@@ -143,9 +143,8 @@ func (p *QuotesPlugin) storeQuote(quote storagemodels.QuotesPluginQuote) int {
 }
 
 // onCommandAddQuote adds a new quote.
-func (p *QuotesPlugin) onCommandQuoteAdd(post model.Post) {
-	cont := strings.Split(post.Content, " ")
-	quoteText := strings.Join(cont[1:], " ")
+func (p *QuotesPlugin) onCommandQuoteAdd(content string, post model.Post) {
+	quoteText := content
 
 	quote := storagemodels.QuotesPluginQuote{
 		Author:    post.User.Name,
@@ -192,19 +191,19 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 	p.returnMessage(post.ChannelID, "Successfully removed quote #"+removeID)
 }
 
-func (p *QuotesPlugin) onCommandQuote(post model.Post) {
-	cont := strings.Split(post.Content, " ")
+func (p *QuotesPlugin) onCommandQuote(content string, post model.Post) {
+	cont := strings.Split(content, " ")
 
 	currentList := p.getQuotesList()
 	if len(currentList.UUIDs) == 0 {
-		p.returnMessage(post.ChannelID, "No quotes found. Use the command `!quoteadd <your quote>` to add a new one.")
+		p.returnMessage(post.ChannelID, "No quotes found. Use the command `quoteadd <your quote>` to add a new one.")
 		return
 	}
 
 	n := 0
-	if len(cont) == 2 {
+	if len(cont) == 1 {
 		var err error
-		n, err = strconv.Atoi(cont[1])
+		n, err = strconv.Atoi(cont[0])
 		if err == nil && n <= len(currentList.UUIDs) {
 			n = n - 1
 		} else {

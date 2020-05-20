@@ -12,6 +12,11 @@ import (
 	"github.com/torlenor/redseligg/storagemodels"
 )
 
+var commandQuote = "quote"
+var commandAdd = "quoteadd"
+var commandRemove = "quoteremove"
+var commandHelp = "quotehelp"
+
 func TestCreateQuotesPlugin(t *testing.T) {
 	assert := assert.New(t)
 
@@ -68,29 +73,20 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
-	api.Reset()
 	postToPlugin.Content = "!quoteadd"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   helpText,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(true, api.WasCreatePostCalled)
-	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-
-	api.Reset()
-	postToPlugin.Content = "!quoteadd "
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandAdd, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!quotehelp"
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandHelp, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -101,13 +97,13 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 		Content:   helpTextRemove,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandRemove, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!quoteremove something"
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandRemove, "something", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -151,7 +147,7 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 	}
 
 	postToPlugin.Content = "!quoteadd " + quote.Text
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandAdd, quote.Text, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	expectedPostFromPlugin := model.Post{
@@ -160,7 +156,7 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 		IsPrivate: false,
 	}
 	postToPlugin.IsPrivate = false
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandAdd, quote.Text, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -227,7 +223,7 @@ func TestQuotesPlugin_AddQuoteFail(t *testing.T) {
 		Content:   "Error storing quote. Try again later!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandAdd, quote.Text, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -273,10 +269,10 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No quotes found. Use the command `!quoteadd <your quote>` to add a new one.",
+		Content:   "No quotes found. Use the command `quoteadd <your quote>` to add a new one.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandQuote, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -291,7 +287,7 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 		Content:   fmt.Sprintf(`1. "%s" - %d-%d-%d, added by %s`, quote.Text, year, month, day, postToPlugin.User.Name),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandQuote, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -346,7 +342,7 @@ func TestQuotesPlugin_GetQuote_Number(t *testing.T) {
 		Content:   fmt.Sprintf(`2. "%s" - %d-%d-%d, added by %s`, quote2.Text, year, month, day, postToPlugin.User.Name),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandQuote, "2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -400,7 +396,7 @@ func TestQuotesPlugin_RemoveQuote_OnlyMods(t *testing.T) {
 		IsPrivate: false,
 	}
 
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandRemove, "2", postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	expectedPostFromPlugin := model.Post{
@@ -409,7 +405,7 @@ func TestQuotesPlugin_RemoveQuote_OnlyMods(t *testing.T) {
 		IsPrivate: false,
 	}
 	postToPlugin.User.Name = userName
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandRemove, "2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -467,7 +463,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 		Content:   "Quote #2 not found",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandRemove, "2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -481,7 +477,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 		Content:   "Successfully removed quote #2",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandRemove, "2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
