@@ -2,9 +2,9 @@ package botconfig
 
 // DiscordConfig contains config related to the Discord component
 type DiscordConfig struct {
-	ID     string `toml:"id" toml:"id"`
-	Token  string `toml:"token" toml:"token"`
-	Secret string `toml:"secret" toml:"secret"`
+	ID     string `toml:"id" json:"id"`
+	Token  string `toml:"token" json:"token"`
+	Secret string `toml:"secret" json:"secret"`
 }
 
 // MatrixConfig contains config related to the Matrix component

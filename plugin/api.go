@@ -18,10 +18,10 @@ type API interface {
 	GetStorage() storage.Storage
 
 	// RegisterCommand registers a custom slash "/" or "!" command, depending on what the bot supports.
-	RegisterCommand(command string) error
+	RegisterCommand(p Hooks, command string) error
 
-	// UnregisterCommand unregisters a command previously registered via RegisterCommand.
-	UnregisterCommand(command string) error
+	// UnRegisterCommand unregisters a command previously registered via RegisterCommand.
+	UnRegisterCommand(command string) error
 
 	// GetUsers a list of all users the bot knows.
 	GetUsers() ([]model.User, error)

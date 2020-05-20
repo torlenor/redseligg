@@ -44,6 +44,8 @@ func (b *Bot) dispatchMessage(msg messageCreate) {
 	for _, plugin := range b.plugins {
 		plugin.OnPost(receiveMessage)
 	}
+
+	b.dispatcher.OnPost(receiveMessage)
 }
 
 func (b *Bot) handleMessageCreate(data json.RawMessage) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/logging"
 	"github.com/torlenor/redseligg/platform"
@@ -34,6 +35,9 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 		return nil, fmt.Errorf("Error creating storage backend for botID %s: %s", p, err)
 	}
 
+	logBotFactory.Tracef("Creating CommandDispatcher for botID %s", p)
+	commandDispatcher := commanddispatcher.New(config.GeneralConfig.CallPrefix)
+
 	switch p {
 	case "slack":
 		slackCfg, err := config.AsSlackConfig()
@@ -61,7 +65,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}
 
-		bot, err = discord.CreateDiscordBot(discordCfg, storage, ws.NewClient())
+		bot, err = discord.CreateDiscordBot(discordCfg, storage, commandDispatcher, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating discord bot: %s", err)
 		}

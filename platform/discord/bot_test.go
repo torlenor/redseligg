@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/storage"
 	"github.com/torlenor/redseligg/webclient"
@@ -14,6 +15,7 @@ import (
 func Test_CreateDiscordBot(t *testing.T) {
 	ws := &ws.MockClient{}
 	storage := storage.MockStorage{}
+	dispatcher := commanddispatcher.CommandDispatcher{}
 	api := webclient.NewMock()
 
 	expectedAPICallPath := "/gateway"
@@ -27,7 +29,7 @@ func Test_CreateDiscordBot(t *testing.T) {
 
 	cfg := botconfig.DiscordConfig{}
 
-	bot, err := CreateDiscordBotWithAPI(api, &storage, cfg, ws)
+	bot, err := CreateDiscordBotWithAPI(api, &storage, &dispatcher, cfg, ws)
 	if err != nil {
 		t.Fatalf("Creating the bot should not have failed")
 	}
@@ -49,7 +51,7 @@ func Test_CreateDiscordBot(t *testing.T) {
 
 	api.Reset()
 	api.ReturnOnCallError = fmt.Errorf("Some error")
-	bot, err = CreateDiscordBotWithAPI(api, &storage, cfg, ws)
+	bot, err = CreateDiscordBotWithAPI(api, &storage, &dispatcher, cfg, ws)
 	if err == nil {
 		t.Fatalf("Creating the bot should have failed")
 	}

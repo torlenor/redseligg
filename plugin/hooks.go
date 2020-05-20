@@ -13,6 +13,8 @@ type Hooks interface {
 	OnStop()
 	// OnPost is called when a new post is made
 	OnPost(model.Post)
+	// OnCommand delivers the command, the content where the command is already stripped off and the raw Post.
+	OnCommand(cmd string, content string, post model.Post)
 	// OnReactionAdded is called when a reaction to posted message is received. This can be, e.g., an emoji.
 	OnReactionAdded(model.Reaction)
 	// OnReactionRemoved is called when a reaction is removed from a posted message. This can be, e.g., an emoji.

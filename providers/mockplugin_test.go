@@ -22,8 +22,9 @@ func (m *MockPlugin) SetAPI(api plugin.API) error { return nil }
 // PluginType returns the plugin type
 func (m *MockPlugin) PluginType() string { return MockPluginType }
 
-func (m *MockPlugin) OnPost(model.Post)                {}
-func (m *MockPlugin) OnRun()                           {}
-func (m *MockPlugin) OnStop()                          {}
-func (m *MockPlugin) OnReactionAdded(model.Reaction)   {}
-func (m *MockPlugin) OnReactionRemoved(model.Reaction) {}
+func (m *MockPlugin) OnPost(model.Post)                                     {}
+func (m *MockPlugin) OnCommand(cmd string, content string, post model.Post) {}
+func (m *MockPlugin) OnRun()                                                {}
+func (m *MockPlugin) OnStop()                                               {}
+func (m *MockPlugin) OnReactionAdded(model.Reaction)                        {}
+func (m *MockPlugin) OnReactionRemoved(model.Reaction)                      {}

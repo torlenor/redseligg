@@ -52,6 +52,9 @@ func (p *RedseliggPlugin) OnStop() {}
 // OnPost in its default implementation.
 func (p *RedseliggPlugin) OnPost(post model.Post) {}
 
+// OnCommand in its default implementation.
+func (p *RedseliggPlugin) OnCommand(cmd string, content string, post model.Post) {}
+
 // OnReactionAdded in its default implementation.
 func (p *RedseliggPlugin) OnReactionAdded(model.Reaction) {}
 
