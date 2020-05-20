@@ -64,7 +64,7 @@ func (c *CommandDispatcher) OnPost(post model.Post) {
 	if !strings.HasPrefix(splitted[0], c.callPrefix) {
 		return
 	}
-	cmd := splitted[0][1:]
+	cmd := splitted[0][len(c.callPrefix):]
 	content := ""
 	if len(splitted) > 1 {
 		content = strings.Join(splitted[1:], " ")
