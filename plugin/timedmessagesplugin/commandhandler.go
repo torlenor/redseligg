@@ -123,7 +123,7 @@ func parseTimeStringToDuration(timeStr string) (time.Duration, error) {
 }
 
 func splitTmCommand(text string) (c string, interval time.Duration, msg string, err error) {
-	var re = regexp.MustCompile(`(?m)^!tm +(add|remove) +([0-9]+[a-zA-Z]*) +(.+)$`)
+	var re = regexp.MustCompile(`(?m)^+(add|remove) +([0-9]+[a-zA-Z]*) +(.+)$`)
 
 	const cgCommand = 1
 	const cgInterval = 2
@@ -151,23 +151,23 @@ func splitTmCommand(text string) (c string, interval time.Duration, msg string, 
 }
 
 // onCommand handles a !tm command.
-func (p *TimedMessagesPlugin) onCommand(post model.Post) {
-	if post.Content == "!tm add" {
+func (p *TimedMessagesPlugin) onCommand(content string, post model.Post) {
+	if content == "add" {
 		p.returnHelpAdd(post.ChannelID)
 		return
-	} else if post.Content == "!tm remove" {
+	} else if content == "remove" {
 		p.returnHelpRemove(post.ChannelID)
 		return
 	}
 
-	if strings.HasPrefix(post.Content, "!tm remove all ") {
-		cont := strings.Split(post.Content, " ")
+	if strings.HasPrefix(content, "remove all ") {
+		cont := strings.Split(content, " ")
 		if len(cont) < 4 {
 			p.returnHelpRemove(post.ChannelID)
 			return
 		}
 
-		msg := strings.Join(cont[3:], " ")
+		msg := strings.Join(cont[2:], " ")
 
 		err := p.removeAllTimedMessage(post.ChannelID, msg)
 		if err == errNotExist {
@@ -182,9 +182,9 @@ func (p *TimedMessagesPlugin) onCommand(post model.Post) {
 		return
 	}
 
-	c, interval, message, err := splitTmCommand(post.Content)
+	c, interval, message, err := splitTmCommand(content)
 	if err != nil {
-		p.API.LogError(fmt.Sprintf("Error parsing !tm command '%s': %s", post.Content, err))
+		p.API.LogError(fmt.Sprintf("Error parsing command '%s': %s", content, err))
 		p.returnHelp(post.ChannelID)
 		return
 	}

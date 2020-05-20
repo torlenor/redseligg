@@ -2,7 +2,6 @@ package timedmessagesplugin
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/torlenor/redseligg/model"
@@ -36,6 +35,8 @@ func (p *TimedMessagesPlugin) checkTimedMessages(t time.Time) {
 
 // OnRun is called when the platform is ready
 func (p *TimedMessagesPlugin) OnRun() {
+	p.API.RegisterCommand(p, "tm")
+
 	p.storage = p.getStorage()
 	if p.storage == nil {
 		p.API.LogError(ErrNoValidStorage.Error())
@@ -65,18 +66,16 @@ func (p *TimedMessagesPlugin) OnStop() {
 	}
 }
 
-// OnPost implements the hook from the Bot
-func (p *TimedMessagesPlugin) OnPost(post model.Post) {
+// OnCommand implements the hook from the Bot
+func (p *TimedMessagesPlugin) OnCommand(cmd string, content string, post model.Post) {
 	if post.IsPrivate {
 		return
 	}
 
-	msg := strings.Trim(post.Content, " ")
-
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!tm ") {
-			p.onCommand(post)
-		} else if msg == "!tm" {
+		if len(content) > 0 {
+			p.onCommand(content, post)
+		} else {
 			p.returnHelp(post.ChannelID)
 		}
 	} else {

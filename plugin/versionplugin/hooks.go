@@ -4,7 +4,7 @@ import (
 	"github.com/torlenor/redseligg/model"
 )
 
-// OnRun implements the hool from the Boot
+// OnRun implements the hook from the Boot
 func (p *VersionPlugin) OnRun() {
 	p.API.RegisterCommand(p, "version")
 }

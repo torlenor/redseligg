@@ -20,6 +20,8 @@ var providedFeatures = map[string]bool{
 	platform.FeatureMessagePost: true,
 }
 
+var command = "tm"
+
 func TestCreateTimedMessagesPlugin(t *testing.T) {
 	assert := assert.New(t)
 
@@ -95,34 +97,29 @@ func TestTimedMessagesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "MESSAGE CONTENT",
+		Content:   "", // not used by plugin
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = "!tm"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   helpText,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!tm add"
 	expectedPostFromPlugin.Content = helpTextAdd
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "add", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!tm remove"
 	expectedPostFromPlugin.Content = helpTextRemove
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "remove", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -150,7 +147,7 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "!tm add " + timeIntervalStr + " " + message,
+		Content:   "", // not used by plugin
 		IsPrivate: false,
 	}
 	expectedPostFromPlugin := model.Post{
@@ -158,7 +155,7 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage(t *testing.T) {
 		Content:   fmt.Sprintf("Timed message '%s' with interval %s added.", message, timeInterval),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "add "+timeIntervalStr+" "+message, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -173,15 +170,13 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage(t *testing.T) {
 	otherTimeIntervalStr := "2m"
 	otherMessage := "some other message"
 
-	postToPlugin.Content = "!tm remove " + otherTimeIntervalStr + " " + otherMessage
 	expectedPostFromPlugin.Content = "Timed message to remove does not exist."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "remove "+otherTimeIntervalStr+" "+otherMessage, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	postToPlugin.Content = "!tm remove " + otherTimeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = "Timed message to remove does not exist."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "remove "+otherTimeIntervalStr+" "+message, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -197,9 +192,8 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage(t *testing.T) {
 		ChannelID: postToPlugin.ChannelID,
 	})
 
-	postToPlugin.Content = "!tm remove " + timeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = fmt.Sprintf("Timed message '%s' with interval %s removed.", message, timeInterval)
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "remove "+timeIntervalStr+" "+message, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -211,15 +205,13 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage(t *testing.T) {
 	assert.Equal(storage.DataToReturn.Messages[1], storage.StoredMessages.Data.Messages[0])
 
 	storage.ErrorToReturn = errors.New("Some error")
-	postToPlugin.Content = "!tm add " + timeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = "Could not add timed message. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "add "+timeIntervalStr+" "+message, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	postToPlugin.Content = "!tm remove " + timeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = "Could not remove timed message. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "remove "+timeIntervalStr+" "+message, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -257,7 +249,7 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_OnlyMods(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "!tm add " + timeIntervalStr + " " + message,
+		Content:   "", // not used by plugin
 		IsPrivate: false,
 	}
 	expectedPostFromPlugin := model.Post{
@@ -265,12 +257,13 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_OnlyMods(t *testing.T) {
 		Content:   fmt.Sprintf("Timed message '%s' with interval %s added.", message, timeInterval),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	content := "add " + timeIntervalStr + " " + message
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.User.Name = userName
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -296,15 +289,15 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_OnlyMods(t *testing.T) {
 
 	api.Reset()
 	postToPlugin.User.Name = " some other user"
-	postToPlugin.Content = "!tm remove " + timeIntervalStr + " " + message
+	content = "remove " + timeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = fmt.Sprintf("Timed message '%s' with interval %s removed.", message, timeInterval)
 
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.User.Name = userName
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -316,15 +309,15 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_OnlyMods(t *testing.T) {
 	assert.Equal(storage.DataToReturn.Messages[1], storage.StoredMessages.Data.Messages[0])
 
 	storage.ErrorToReturn = errors.New("Some error")
-	postToPlugin.Content = "!tm add " + timeIntervalStr + " " + message
+	content = "add " + timeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = "Could not add timed message. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
-	postToPlugin.Content = "!tm remove " + timeIntervalStr + " " + message
+	content = "remove " + timeIntervalStr + " " + message
 	expectedPostFromPlugin.Content = "Could not remove timed message. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -348,9 +341,11 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_AllMessages(t *testing.T) 
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "!tm remove all " + message,
+		Content:   "", // not used by plugin
 		IsPrivate: false,
 	}
+
+	content := "remove all " + message
 
 	storage.DataToReturn.Messages = append(storage.DataToReturn.Messages, storagemodels.TimedMessagesPluginMessage{
 		Text:      message,
@@ -375,7 +370,7 @@ func TestTimedMessagesPlugin_AddAndRemoveTimedMessage_AllMessages(t *testing.T) 
 		Content:   fmt.Sprintf("All timed messages with text '%s' removed.", message),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -413,15 +408,16 @@ func TestTimedMessagesPlugin_NoStorage(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "!tm add " + timeIntervalStr + " " + message,
+		Content:   "", // not used by plugin
 		IsPrivate: false,
 	}
+	content := "add " + timeIntervalStr + " " + message
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Could not add timed message. Please try again later.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

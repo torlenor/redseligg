@@ -7,7 +7,7 @@ import (
 	"github.com/torlenor/redseligg/model"
 )
 
-// OnRun implements the hool from the Boot
+// OnRun implements the hook from the Boot
 func (p *RollPlugin) OnRun() {
 	p.API.RegisterCommand(p, "roll")
 }

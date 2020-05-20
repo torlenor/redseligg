@@ -26,7 +26,7 @@ func Test_splitTmCommand(t *testing.T) {
 		{
 			name: "Valid add command",
 			args: args{
-				text: "!tm add " + validIntervalStr + " some text",
+				text: "add " + validIntervalStr + " some text",
 			},
 			wantC:        "add",
 			wantInterval: validInterval,
@@ -35,7 +35,7 @@ func Test_splitTmCommand(t *testing.T) {
 		{
 			name: "Valid remove command",
 			args: args{
-				text: "!tm remove " + validOtherIntervalStr + " some other text",
+				text: "remove " + validOtherIntervalStr + " some other text",
 			},
 			wantC:        "remove",
 			wantInterval: validOtherInterval,
@@ -44,14 +44,14 @@ func Test_splitTmCommand(t *testing.T) {
 		{
 			name: "Invalid command",
 			args: args{
-				text: "!tm blub",
+				text: "blub",
 			},
 			wantErr: true,
 		},
 		{
 			name: "Invalid add command",
 			args: args{
-				text: "!tm add 4dfdfd ssdsd",
+				text: "add 4dfdfd ssdsd",
 			},
 			wantC:   "add",
 			wantErr: true,
@@ -59,7 +59,7 @@ func Test_splitTmCommand(t *testing.T) {
 		{
 			name: "Invalid remove command",
 			args: args{
-				text: "!tm remove 1mmm ssdsd",
+				text: "remove 1mmm ssdsd",
 			},
 			wantC:   "remove",
 			wantErr: true,
@@ -67,14 +67,14 @@ func Test_splitTmCommand(t *testing.T) {
 		{
 			name: "Invalid add command - empty message",
 			args: args{
-				text: "!tm add 1m",
+				text: "add 1m",
 			},
 			wantErr: true,
 		},
 		{
 			name: "Invalid remove command - empty message",
 			args: args{
-				text: "!tm remove 2h",
+				text: "remove 2h",
 			},
 			wantErr: true,
 		},
