@@ -21,6 +21,10 @@ var providedFeatures = map[string]bool{
 	platform.FeatureReactionNotify: true,
 }
 
+var commandVote = "vote"
+var commandVoteEnd = "voteend"
+var commandVoteHelp = "votehelp"
+
 func TestCreateVotePlugin(t *testing.T) {
 	assert := assert.New(t)
 
@@ -75,36 +79,30 @@ func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.Content = "!vote"
+	content := ""
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   helpText,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!votehelp"
-	p.OnPost(postToPlugin)
-	assert.Equal(true, api.WasCreatePostCalled)
-	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-
-	api.Reset()
-	postToPlugin.Content = "!vote    "
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteHelp, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!vote something"
+	content = "something"
 	postToPlugin.IsPrivate = true
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 }
 
@@ -141,7 +139,7 @@ func TestVotePlugin_FailOnPost(t *testing.T) {
 		Content:   "Sorry to inform you, but we failed to create the Vote! Please try again later.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -171,24 +169,14 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 	}
 
 	api.Reset()
-	postToPlugin.Content = "!voteend"
+	content := "something else"
+	postToPlugin.Content = "!voteend " + content
 	expectedPostFromPlugin := model.Post{
 		ChannelID: expectedChannel,
-		Content:   voteEndHelpText,
+		Content:   "No vote running with that description in this channel. Use the vote command to start a new one.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(true, api.WasCreatePostCalled)
-	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-
-	api.Reset()
-	postToPlugin.Content = "!voteend something else"
-	expectedPostFromPlugin = model.Post{
-		ChannelID: expectedChannel,
-		Content:   "No vote running with that description in this channel. Use the !vote command to start a new one.",
-		IsPrivate: false,
-	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteEnd, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -200,18 +188,7 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(true, api.WasCreatePostCalled)
-	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
-
-	api.Reset()
-	postToPlugin.Content = "!voteend"
-	expectedPostFromPlugin = model.Post{
-		ChannelID: expectedChannel,
-		Content:   voteEndHelpText,
-		IsPrivate: false,
-	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -226,7 +203,7 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 		ID:      expectedMessageID,
 		Channel: expectedChannel,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -264,7 +241,7 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -309,7 +286,7 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 	api.Reset()
 	postToPlugin.Content = "!voteend " + voteText
 	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: Yes\n:two:: No - 1\nThis vote has ended, thanks for participating!"
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -349,7 +326,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -361,7 +338,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 		Content:   "A vote with the same description is already running. End that vote first or enter a different description.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -376,7 +353,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -395,7 +372,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 		ID:      expectedMessageID,
 		Channel: expectedChannel,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -408,7 +385,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -447,7 +424,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText+" "+customOptionsStr, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -462,7 +439,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 		ID:      expectedMessageID,
 		Channel: expectedChannel,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -479,7 +456,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText+" "+customOptionsStr, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -495,7 +472,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText+" "+customOptionsStr, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -534,7 +511,7 @@ func TestVotePlugin_CustomVoteCounting(t *testing.T) {
 		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nParticipate by reacting with the appropriate emoji corresponding to the option you want to vote for!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText+" "+customOptionsStr, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -579,7 +556,7 @@ func TestVotePlugin_CustomVoteCounting(t *testing.T) {
 	api.Reset()
 	postToPlugin.Content = "!voteend " + voteText
 	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + " - 1\nThis vote has ended, thanks for participating!"
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -627,7 +604,7 @@ func TestVotePlugin_CustomVoteOptionsLimit(t *testing.T) {
 		Content:   "More than the allowed number of options specified. Please specify " + strconv.Itoa(optionsLimit) + " or less options.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandVote, voteText+" "+customOptionsText, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

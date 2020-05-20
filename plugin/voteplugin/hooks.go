@@ -2,30 +2,36 @@ package voteplugin
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/torlenor/redseligg/model"
 	"github.com/torlenor/redseligg/utils"
 )
 
-// OnPost implements the hook from the Bot
-func (p *VotePlugin) OnPost(post model.Post) {
+// OnRun implements the hook from the Boot
+func (p *VotePlugin) OnRun() {
+	// TODO: Use only one vote command instead of three separate ones
+	p.API.RegisterCommand(p, "vote")
+	p.API.RegisterCommand(p, "voteend")
+	p.API.RegisterCommand(p, "votehelp")
+}
+
+// OnCommand implements the hook from the Bot
+func (p *VotePlugin) OnCommand(cmd string, content string, post model.Post) {
 	if post.IsPrivate {
 		return
 	}
 
-	msg := strings.Trim(post.Content, " ")
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!vote ") {
-			p.onCommandVoteStart(post)
+		if cmd == "vote" && len(content) > 0 {
+			p.onCommandVoteStart(content, post)
 			return
-		} else if strings.HasPrefix(msg, "!voteend ") {
-			p.onCommandVoteEnd(post)
+		} else if cmd == "voteend" && len(content) > 0 {
+			p.onCommandVoteEnd(content, post)
 			return
-		} else if msg == "!voteend" {
+		} else if cmd == "voteend" {
 			p.returnVoteEndHelp(post.ChannelID)
 			return
-		} else if msg == "!vote" || msg == "!votehelp" {
+		} else if (cmd == "vote" && len(content) == 0) || cmd == "votehelp" {
 			p.returnHelp(post.ChannelID)
 			return
 		}
