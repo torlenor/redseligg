@@ -19,7 +19,7 @@ func parseTimeStringToDuration(timeStr string) (time.Duration, error) {
 }
 
 func (p *GiveawayPlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.")
+	p.returnMessage(channelID, "Type 'gstart <time> <secretword> [winners] [prize]' to start a new giveaway.")
 }
 
 func (p *GiveawayPlugin) returnMessage(channelID, msg string) {
@@ -30,9 +30,8 @@ func (p *GiveawayPlugin) returnMessage(channelID, msg string) {
 	p.API.CreatePost(post)
 }
 
-func (p *GiveawayPlugin) onCommandGStart(post model.Post) {
-	cont := strings.Split(post.Content, " ")
-	args := cont[1:]
+func (p *GiveawayPlugin) onCommandGStart(content string, post model.Post) {
+	args := strings.Split(content, " ")
 
 	if len(args) < 2 {
 		p.returnHelp(post.ChannelID)
@@ -88,7 +87,7 @@ func (p *GiveawayPlugin) onCommandGEnd(post model.Post) {
 		return
 	}
 
-	p.returnMessage(post.ChannelID, "No giveaway running. Use !gstart command to start a new one.")
+	p.returnMessage(post.ChannelID, "No giveaway running. Use gstart command to start a new one.")
 }
 
 func (p *GiveawayPlugin) onCommandGReroll(post model.Post) {
@@ -127,5 +126,5 @@ func (p *GiveawayPlugin) onCommandGReroll(post model.Post) {
 		return
 	}
 
-	p.returnMessage(post.ChannelID, "No previous giveaway in that channel. Use !gstart command to start a new one.")
+	p.returnMessage(post.ChannelID, "No previous giveaway in that channel. Use gstart command to start a new one.")
 }

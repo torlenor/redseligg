@@ -15,7 +15,7 @@ const (
 	PLUGIN_TYPE = "quotes"
 )
 
-// ErrNoValidStorage is set when the provided storage does not implement the correct funtions
+// ErrNoValidStorage is set when the provided storage does not implement the correct functions
 var ErrNoValidStorage = errors.New("No valid storage set")
 
 type randomizer interface {
