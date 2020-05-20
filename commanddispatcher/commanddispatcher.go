@@ -33,7 +33,7 @@ func New(callPrefix string) *CommandDispatcher {
 		c.callPrefix = callPrefix
 	}
 
-	log.Debugf("Created new CommandDispatcher with call prefix = '%s'", c.callPrefix)
+	log.Tracef("Created new CommandDispatcher with call prefix = '%s'", c.callPrefix)
 
 	c.receivers = make(map[string]receiver)
 
@@ -42,7 +42,7 @@ func New(callPrefix string) *CommandDispatcher {
 
 // Register a new command receiver with the specified command (without call prefix).
 func (c *CommandDispatcher) Register(cmd string, r receiver) {
-	log.Debugf("Registering command %s", cmd)
+	log.Tracef("Registering command %s", cmd)
 	if len(cmd) > 0 {
 		c.receivers[cmd] = r
 	} else {
