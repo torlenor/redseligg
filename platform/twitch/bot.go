@@ -8,6 +8,7 @@ import (
 	"gopkg.in/irc.v3"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/gorilla/websocket"
 	"github.com/torlenor/redseligg/logging"
@@ -35,7 +36,8 @@ type webSocketClient interface {
 type Bot struct {
 	platform.BotImpl
 
-	storage storage.Storage
+	dispatcher *commanddispatcher.CommandDispatcher
+	storage    storage.Storage
 
 	plugins []plugin.Hooks
 
@@ -47,7 +49,7 @@ type Bot struct {
 }
 
 // CreateTwitchBot creates a new instance of a TwitchBot
-func CreateTwitchBot(cfg botconfig.TwitchConfig, storage storage.Storage, ws webSocketClient) (*Bot, error) {
+func CreateTwitchBot(cfg botconfig.TwitchConfig, storage storage.Storage, commandDispatcher *commanddispatcher.CommandDispatcher, ws webSocketClient) (*Bot, error) {
 	log.Info("TwitchBot is CREATING itself")
 
 	b := Bot{
@@ -57,8 +59,9 @@ func CreateTwitchBot(cfg botconfig.TwitchConfig, storage storage.Storage, ws web
 			},
 		},
 
-		storage: storage,
-		cfg:     cfg,
+		dispatcher: commandDispatcher,
+		storage:    storage,
+		cfg:        cfg,
 
 		ws: ws,
 	}
@@ -136,6 +139,7 @@ func (b *Bot) messageLoop() {
 				for _, plugin := range b.plugins {
 					plugin.OnPost(post)
 				}
+				b.dispatcher.OnPost(post)
 			} else {
 				log.Warnf("Params not long enough")
 			}

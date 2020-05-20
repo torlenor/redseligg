@@ -36,7 +36,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 	}
 
 	logBotFactory.Tracef("Creating CommandDispatcher for botID %s", p)
-	commandDispatcher := commanddispatcher.New(config.GeneralConfig.CallPrefix)
+	dispatcher := commanddispatcher.New(config.GeneralConfig.CallPrefix)
 
 	switch p {
 	case "slack":
@@ -65,7 +65,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating Discord bot: %s", err)
 		}
 
-		bot, err = discord.CreateDiscordBot(discordCfg, storage, commandDispatcher, ws.NewClient())
+		bot, err = discord.CreateDiscordBot(discordCfg, storage, dispatcher, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating Discord bot: %s", err)
 		}
@@ -85,7 +85,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}
 
-		bot, err = twitch.CreateTwitchBot(twitchCfg, storage, ws.NewClient())
+		bot, err = twitch.CreateTwitchBot(twitchCfg, storage, dispatcher, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}

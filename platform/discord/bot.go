@@ -47,8 +47,8 @@ type api interface {
 type Bot struct {
 	platform.BotImpl
 
-	storage    storage.Storage
 	dispatcher *commanddispatcher.CommandDispatcher
+	storage    storage.Storage
 
 	api api
 
