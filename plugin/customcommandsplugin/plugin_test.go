@@ -19,7 +19,7 @@ var providedFeatures = map[string]bool{
 	platform.FeatureMessagePost: true,
 }
 
-const command = "!customcommand"
+const command = "customcommand"
 
 func TestCreateCustomCommandsPlugin(t *testing.T) {
 	assert := assert.New(t)
@@ -99,31 +99,29 @@ func TestCustomCommandsPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = command
+	postToPlugin.Content = "!" + command
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   helpText,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!customcommand add"
 	expectedPostFromPlugin.Content = helpTextAdd
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "add", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!customcommand remove"
 	expectedPostFromPlugin.Content = helpTextRemove
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, "remove", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -152,12 +150,13 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand(t *testing.T) {
 		Content:   "!customcommand add " + customCommand + " " + message,
 		IsPrivate: false,
 	}
+	content := "add " + customCommand + " " + message
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   fmt.Sprintf("Custom command '%s' with message '%s' added.", customCommand, message),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -172,8 +171,9 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand(t *testing.T) {
 	otherCustomCommand := "someOtherCommand"
 
 	postToPlugin.Content = "!customcommand remove " + otherCustomCommand
+	content = "remove " + otherCustomCommand
 	expectedPostFromPlugin.Content = "Custom command to remove does not exist."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -190,8 +190,9 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand(t *testing.T) {
 	})
 
 	postToPlugin.Content = "!customcommand remove " + customCommand
+	content = "remove " + customCommand
 	expectedPostFromPlugin.Content = fmt.Sprintf("Custom command '%s' removed.", customCommand)
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -204,14 +205,16 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand(t *testing.T) {
 
 	storage.ErrorToReturn = errors.New("Some error")
 	postToPlugin.Content = "!customcommand add " + customCommand + " " + message
+	content = "add " + customCommand + " " + message
 	expectedPostFromPlugin.Content = "Could not add custom command. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	postToPlugin.Content = "!customcommand remove " + customCommand
+	content = "remove " + customCommand
 	expectedPostFromPlugin.Content = "Could not remove custom command. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -261,7 +264,8 @@ func TestCustomCommandsPlugin_UpdateCustomCommand(t *testing.T) {
 		Content:   fmt.Sprintf("Custom command '%s' with message '%s' added.", customCommand, updatedMessage),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	content := "add " + customCommand + " " + updatedMessage
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -313,12 +317,13 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand_OnlyMods(t *testing.T) {
 		Content:   fmt.Sprintf("Custom command '%s' with message '%s' added.", customCommand, message),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	content := "add " + customCommand + " " + message
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.User.Name = userName
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -345,14 +350,15 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand_OnlyMods(t *testing.T) {
 	api.Reset()
 	postToPlugin.User.Name = " some other user"
 	postToPlugin.Content = "!customcommand remove " + customCommand
+	content = "remove " + customCommand
 	expectedPostFromPlugin.Content = fmt.Sprintf("Custom command '%s' removed.", customCommand)
 
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.User.Name = userName
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -365,14 +371,16 @@ func TestCustomCommandsPlugin_AddAndRemoveCustomCommand_OnlyMods(t *testing.T) {
 
 	storage.ErrorToReturn = errors.New("Some error")
 	postToPlugin.Content = "!customcommand add " + customCommand + " " + message
+	content = "add " + customCommand + " " + message
 	expectedPostFromPlugin.Content = "Could not add custom command. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	postToPlugin.Content = "!customcommand remove " + customCommand
+	content = "remove " + customCommand
 	expectedPostFromPlugin.Content = "Could not remove custom command. Please try again later."
-	p.OnPost(postToPlugin)
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -429,14 +437,14 @@ func TestCustomCommandsPlugin_UseCustomCommand(t *testing.T) {
 	}
 	postToPlugin.ChannelID = channel1
 	postToPlugin.Content = "!" + ccommand1
-	p.OnPost(postToPlugin)
+	p.OnCommand(ccommand1, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled, "1. test failed")
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost, "1. test failed")
 
 	api.Reset()
 	postToPlugin.ChannelID = channel1
 	postToPlugin.Content = "!" + ccommandOtherChannel
-	p.OnPost(postToPlugin)
+	p.OnCommand(ccommandOtherChannel, "", postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled, "2. test failed")
 
 	api.Reset()
@@ -446,7 +454,7 @@ func TestCustomCommandsPlugin_UseCustomCommand(t *testing.T) {
 	}
 	postToPlugin.ChannelID = channel2
 	postToPlugin.Content = "!" + ccommandOtherChannel
-	p.OnPost(postToPlugin)
+	p.OnCommand(ccommandOtherChannel, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled, "3. test failed")
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost, "3. test failed")
 
@@ -457,7 +465,7 @@ func TestCustomCommandsPlugin_UseCustomCommand(t *testing.T) {
 	}
 	postToPlugin.ChannelID = channel2
 	postToPlugin.Content = "!" + ccommand1
-	p.OnPost(postToPlugin)
+	p.OnCommand(ccommand1, "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled, "4. test failed")
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost, "4. test failed")
 }
@@ -495,7 +503,8 @@ func TestCustomCommandsPlugin_NoStorage(t *testing.T) {
 		Content:   "Could not add custom command. Please try again later.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	content := "add " + customCommand + " " + message
+	p.OnCommand(command, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

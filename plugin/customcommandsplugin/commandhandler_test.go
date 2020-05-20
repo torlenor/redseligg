@@ -22,7 +22,7 @@ func Test_splitCommand(t *testing.T) {
 		{
 			name: "Valid add command",
 			args: args{
-				text: "!customcommand add " + customCommand + " some text",
+				text: "add " + customCommand + " some text",
 			},
 			wantC:             "add",
 			wantCustomCommand: customCommand,
@@ -31,7 +31,7 @@ func Test_splitCommand(t *testing.T) {
 		{
 			name: "Valid remove command",
 			args: args{
-				text: "!customcommand remove " + customCommand,
+				text: "remove " + customCommand,
 			},
 			wantC:             "remove",
 			wantCustomCommand: customCommand,
@@ -39,14 +39,14 @@ func Test_splitCommand(t *testing.T) {
 		{
 			name: "Invalid command",
 			args: args{
-				text: "!customcommand blub",
+				text: "blub",
 			},
 			wantErr: true,
 		},
 		{
 			name: "Invalid add command - empty message",
 			args: args{
-				text: "!customcommand add " + customCommand,
+				text: "add " + customCommand,
 			},
 			wantErr: true,
 		},
