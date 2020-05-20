@@ -13,6 +13,7 @@ import (
 
 const (
 	PLUGIN_TYPE = "quotes"
+	command     = "quote"
 )
 
 // ErrNoValidStorage is set when the provided storage does not implement the correct functions

@@ -197,6 +197,17 @@ To configure a SQLite3 storage, add a section of the form
 
 to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
 
+## Custom call prefix
+
+It is possible to specify a custom call prefix for the commands by adding a section
+
+```yaml
+    [bots.slack.general]
+        callprefix = "~"
+```
+
+to the bot for which you want to change it. The default is "!".
+
 ## Plugins
 
 Plugins are used to implement actual functionality of Redseligg. They serve as handlers of received messages and can send messages over the Bot to the platform.
@@ -330,12 +341,12 @@ When `onlymods` is set to `true`, only the users which are listed in `mods` are 
 To add a quote type
 
 ```
-!quoteadd <your quote>
+!quote add <your quote>
 ```
 
 Example:
 ```
-!quoteadd This is awesome!
+!quote add This is awesome!
 ```
 
 ### Getting a quote
@@ -361,10 +372,16 @@ The output will be similar to
 Use 
 
 ```
-!quoteremove ID
+!quote remove ID
 ```
 
-, e.g., `!quoteremove 123`, to remove a quote.
+to remove a quote.
+
+Example:
+
+```
+!quote remove 123
+```
 
 **Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
 

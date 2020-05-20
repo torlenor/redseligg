@@ -12,10 +12,10 @@ import (
 	"github.com/torlenor/redseligg/storagemodels"
 )
 
-var commandQuote = "quote"
-var commandAdd = "quoteadd"
-var commandRemove = "quoteremove"
-var commandHelp = "quotehelp"
+var commandQuote = command
+var commandAdd = command + " add"
+var commandRemove = command + " remove"
+var commandHelp = command + "help"
 
 func TestCreateQuotesPlugin(t *testing.T) {
 	assert := assert.New(t)
@@ -74,36 +74,36 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 		IsPrivate: false,
 	}
 
-	postToPlugin.Content = "!quoteadd"
+	postToPlugin.Content = "!" + commandAdd
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   helpText,
 		IsPrivate: false,
 	}
-	p.OnCommand(commandAdd, "", postToPlugin)
+	p.OnCommand(commandQuote, "add", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!quotehelp"
-	p.OnCommand(commandHelp, "", postToPlugin)
+	postToPlugin.Content = "!" + commandHelp
+	p.OnCommand(commandQuote, "help", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!quoteremove"
+	postToPlugin.Content = "!" + commandRemove
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   helpTextRemove,
 		IsPrivate: false,
 	}
-	p.OnCommand(commandRemove, "", postToPlugin)
+	p.OnCommand(commandQuote, "remove", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!quoteremove something"
-	p.OnCommand(commandRemove, "something", postToPlugin)
+	postToPlugin.Content = "!" + commandRemove + " something"
+	p.OnCommand(commandQuote, "remove something", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -146,7 +146,7 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 		IsPrivate: true,
 	}
 
-	postToPlugin.Content = "!quoteadd " + quote.Text
+	postToPlugin.Content = "!" + commandAdd + " " + quote.Text
 	p.OnCommand(commandAdd, quote.Text, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
@@ -156,7 +156,7 @@ func TestQuotesPlugin_AddQuote(t *testing.T) {
 		IsPrivate: false,
 	}
 	postToPlugin.IsPrivate = false
-	p.OnCommand(commandAdd, quote.Text, postToPlugin)
+	p.OnCommand(commandQuote, "add "+quote.Text, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -217,13 +217,13 @@ func TestQuotesPlugin_AddQuoteFail(t *testing.T) {
 		IsPrivate: false,
 	}
 
-	postToPlugin.Content = "!quoteadd " + quote.Text
+	postToPlugin.Content = "!" + commandAdd + " " + quote.Text
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Error storing quote. Try again later!",
 		IsPrivate: false,
 	}
-	p.OnCommand(commandAdd, quote.Text, postToPlugin)
+	p.OnCommand(commandQuote, "add "+quote.Text, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }
@@ -263,13 +263,13 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "!quote",
+		Content:   "!" + commandQuote,
 		IsPrivate: false,
 	}
 
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No quotes found. Use the command `quoteadd <your quote>` to add a new one.",
+		Content:   "No quotes found. Use the command `" + command + " add <your quote>` to add a new one.",
 		IsPrivate: false,
 	}
 	p.OnCommand(commandQuote, "", postToPlugin)
@@ -332,7 +332,7 @@ func TestQuotesPlugin_GetQuote_Number(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "!quote 2",
+		Content:   "!" + commandQuote + " 2",
 		IsPrivate: false,
 	}
 
@@ -392,11 +392,11 @@ func TestQuotesPlugin_RemoveQuote_OnlyMods(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "SOME OTHER USER NAME"},
-		Content:   "!quoteremove 2",
+		Content:   "!" + commandRemove + " 2",
 		IsPrivate: false,
 	}
 
-	p.OnCommand(commandRemove, "2", postToPlugin)
+	p.OnCommand(commandQuote, "remove 2", postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	expectedPostFromPlugin := model.Post{
@@ -405,7 +405,7 @@ func TestQuotesPlugin_RemoveQuote_OnlyMods(t *testing.T) {
 		IsPrivate: false,
 	}
 	postToPlugin.User.Name = userName
-	p.OnCommand(commandRemove, "2", postToPlugin)
+	p.OnCommand(commandQuote, "remove 2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -454,7 +454,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME OTHER USER ID", Name: "USER 1"},
-		Content:   "!quoteremove 2",
+		Content:   "!" + commandRemove + " 2",
 		IsPrivate: false,
 	}
 
@@ -463,7 +463,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 		Content:   "Quote #2 not found",
 		IsPrivate: false,
 	}
-	p.OnCommand(commandRemove, "2", postToPlugin)
+	p.OnCommand(commandQuote, "remove 2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -477,7 +477,7 @@ func TestQuotesPlugin_RemoveQuote(t *testing.T) {
 		Content:   "Successfully removed quote #2",
 		IsPrivate: false,
 	}
-	p.OnCommand(commandRemove, "2", postToPlugin)
+	p.OnCommand(commandQuote, "remove 2", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
