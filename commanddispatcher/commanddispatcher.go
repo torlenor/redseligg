@@ -12,7 +12,7 @@ var log = logging.Get("CommandDispatcher")
 var defaultCallPrefix = "!"
 
 type receiver interface {
-	// OnCommand delivers the command, the content where the command is already stripped off and the raw Post.
+	// OnCommand delivers the command, the whitespace-trimmed content where the command is already stripped off and the raw Post.
 	OnCommand(cmd string, content string, post model.Post)
 }
 
@@ -68,6 +68,7 @@ func (c *CommandDispatcher) OnPost(post model.Post) {
 	content := ""
 	if len(splitted) > 1 {
 		content = strings.Join(splitted[1:], " ")
+		content = strings.TrimSpace(content)
 	}
 	for c, r := range c.receivers {
 		if cmd == c {
