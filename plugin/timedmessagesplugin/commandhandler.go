@@ -162,7 +162,7 @@ func (p *TimedMessagesPlugin) onCommand(content string, post model.Post) {
 
 	if strings.HasPrefix(content, "remove all ") {
 		cont := strings.Split(content, " ")
-		if len(cont) < 4 {
+		if len(cont) < 3 {
 			p.returnHelpRemove(post.ChannelID)
 			return
 		}
