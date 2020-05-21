@@ -6,6 +6,7 @@
 
 - Added storage system to Plugin API.
 - Added requested/provided features check between plugin and platform.
+- Added OnCommand() hook from Bot to Plugin which is called when a messages with a previously registered command is received.
 
 **New storage support:**
 

@@ -26,7 +26,7 @@ func TestCreateRollPlugin(t *testing.T) {
 	p.SetAPI(&api)
 }
 
-func TestRollPlugin_OnPost(t *testing.T) {
+func TestRollPlugin_OnCommand(t *testing.T) {
 	assert := assert.New(t)
 
 	p := RollPlugin{
@@ -44,8 +44,6 @@ func TestRollPlugin_OnPost(t *testing.T) {
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.Content = "!roll"
@@ -56,7 +54,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 		Content:   "<@" + postToPlugin.User.ID + "> rolled *" + strconv.Itoa(123) + "* in [0,100]",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand("roll", "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -69,7 +67,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 		Content:   "<@" + postToPlugin.User.ID + "> rolled *" + strconv.Itoa(123) + "* in [0,1000]",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand("roll", "1000", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -82,7 +80,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 		Content:   "Number must be > 0",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand("roll", "-1", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -95,7 +93,7 @@ func TestRollPlugin_OnPost(t *testing.T) {
 		Content:   "Not a number",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand("roll", "sdsadsad", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

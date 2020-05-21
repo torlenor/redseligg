@@ -69,7 +69,7 @@ func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botcon
 		}
 		p = rp
 	default:
-		return nil, fmt.Errorf("Unknown plugin type %s", pluginConfig.Type)
+		return nil, fmt.Errorf("Unknown plugin type '%s'", pluginConfig.Type)
 	}
 
 	p.SetBotPluginID(botID, pluginID)

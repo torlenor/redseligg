@@ -2,9 +2,7 @@ package quotesplugin
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,8 +16,8 @@ var now = time.Now
 const (
 	identFieldList = "list"
 
-	helpText       = "Type !quoteadd <your quote> to add a new quote."
-	helpTextRemove = "Type `!quoteremove <your quote>` or !quoteremove (ID) to remove a quote."
+	helpText       = "Type `" + command + " add <your quote>` to add a new quote."
+	helpTextRemove = "Type `" + command + " remove <your quote>` or `" + command + " remove (ID)` to remove a quote."
 )
 
 func (p *QuotesPlugin) returnHelp(channelID string) {
@@ -36,21 +34,6 @@ func (p *QuotesPlugin) returnMessage(channelID, msg string) {
 		Content:   msg,
 	}
 	p.API.CreatePost(post)
-}
-
-func (p *QuotesPlugin) extractRemoveID(fullText string) string {
-	re := regexp.MustCompile(`!quoteremove (.*)?`)
-	const captureGroup = 1
-
-	matches := re.FindAllStringSubmatch(fullText, -1)
-
-	if matches == nil || len(matches) < 1 {
-		return ""
-	} else if len(matches) > 1 {
-		p.API.LogWarn("QuotesPlugin: extractRemoveID matched more than one occurrence")
-	}
-
-	return strings.Trim(matches[0][captureGroup], " ")
 }
 
 func generateIdentifier() string {
@@ -143,16 +126,13 @@ func (p *QuotesPlugin) storeQuote(quote storagemodels.QuotesPluginQuote) int {
 }
 
 // onCommandAddQuote adds a new quote.
-func (p *QuotesPlugin) onCommandQuoteAdd(post model.Post) {
-	cont := strings.Split(post.Content, " ")
-	quoteText := strings.Join(cont[1:], " ")
-
+func (p *QuotesPlugin) onCommandQuoteAdd(argument string, post model.Post) {
 	quote := storagemodels.QuotesPluginQuote{
 		Author:    post.User.Name,
 		Added:     now(),
 		AuthorID:  post.User.ID,
 		ChannelID: post.ChannelID,
-		Text:      quoteText,
+		Text:      argument,
 	}
 
 	num := p.storeQuote(quote)
@@ -164,14 +144,8 @@ func (p *QuotesPlugin) onCommandQuoteAdd(post model.Post) {
 }
 
 // onCommandQuoteRemove removes a quote.
-func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
-	removeID := p.extractRemoveID(post.Content)
-	if len(removeID) == 0 {
-		p.returnHelpRemove(post.ChannelID)
-		return
-	}
-
-	n, err := strconv.Atoi(removeID)
+func (p *QuotesPlugin) onCommandQuoteRemove(argument string, post model.Post) {
+	n, err := strconv.Atoi(argument)
 	if err != nil {
 		p.returnHelpRemove(post.ChannelID)
 		return
@@ -179,33 +153,33 @@ func (p *QuotesPlugin) onCommandQuoteRemove(post model.Post) {
 
 	currentList := p.getQuotesList()
 
+	indexToRemove := 0
 	if n <= len(currentList.UUIDs) {
-		n = n - 1
+		indexToRemove = n - 1
 	} else {
-		p.returnMessage(post.ChannelID, "Quote #"+removeID+" not found")
+		p.returnMessage(post.ChannelID, fmt.Sprintf("Quote #%d not found", n))
 		return
 	}
 
-	p.removeQuoteIdentifierToList(currentList.UUIDs[n])
-	p.removeQuote(currentList.UUIDs[n])
+	p.removeQuoteIdentifierToList(currentList.UUIDs[indexToRemove])
+	p.removeQuote(currentList.UUIDs[indexToRemove])
 
-	p.returnMessage(post.ChannelID, "Successfully removed quote #"+removeID)
+	p.returnMessage(post.ChannelID, fmt.Sprintf("Successfully removed quote #%d", n))
 }
 
-func (p *QuotesPlugin) onCommandQuote(post model.Post) {
-	cont := strings.Split(post.Content, " ")
-
+func (p *QuotesPlugin) onCommandQuote(argument string, post model.Post) {
 	currentList := p.getQuotesList()
 	if len(currentList.UUIDs) == 0 {
-		p.returnMessage(post.ChannelID, "No quotes found. Use the command `!quoteadd <your quote>` to add a new one.")
+		p.returnMessage(post.ChannelID, "No quotes found. Use the command `"+command+" add <your quote>` to add a new one.")
 		return
 	}
 
 	n := 0
-	if len(cont) == 2 {
+	if len(argument) > 0 {
 		var err error
-		n, err = strconv.Atoi(cont[1])
+		n, err = strconv.Atoi(argument)
 		if err == nil && n <= len(currentList.UUIDs) {
+			fmt.Printf("\nGetting quote %d\n", n)
 			n = n - 1
 		} else {
 			n = p.randomizer.Intn(len(currentList.UUIDs))

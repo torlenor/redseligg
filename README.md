@@ -197,6 +197,17 @@ To configure a SQLite3 storage, add a section of the form
 
 to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
 
+## Custom call prefix
+
+It is possible to specify a custom call prefix for the commands by adding a section
+
+```yaml
+    [bots.slack.general]
+        callprefix = "~"
+```
+
+to the bot for which you want to change it. The default is "!".
+
 ## Plugins
 
 Plugins are used to implement actual functionality of Redseligg. They serve as handlers of received messages and can send messages over the Bot to the platform.
@@ -234,7 +245,7 @@ When `onlymods` is set to `true`, only the users which are listed in `mods` are 
 To start a giveaway in the current channel type
 
 ```
-!gstart <time> <secretword> [winners] [prize]
+!giveaway start <time> <secretword> [winners] [prize]
 ```
 
 * `<time>` is the time the giveaway should run. It should include s/m/h to indicate seconds/minutes/hours.
@@ -245,16 +256,16 @@ To start a giveaway in the current channel type
 Example:
 
 ```
-!gstart 1m hello 2 Bananas
+!giveaway start 1m hello 2 Bananas
 ```
 
 #### Ending a giveaway
 
-To stop a currently running giveaway type `!gend`.
+To stop a currently running giveaway type `!giveaway end`.
 
 #### Rerolling the winner
 
-Type `!greroll` to pick a new winner from the last ended giveaway.
+Type `!giveaway reroll` to pick a new winner from the last ended giveaway.
 
 ### HTTPPingPlugin
 
@@ -299,9 +310,9 @@ Provide the custom options in square brackets after the message, e.g.,
 
 #### Ending a vote
 
-Type '!voteend message' to end a vote. No additional choices will be counted. For example to end the vote started above type
+Type `!vote end message` to end a vote. No additional choices will be counted. For example to end the vote started above type
 ```
-!voteend What is the best color?
+!vote end What is the best color?
 ```
 
 #### Deleting a vote
@@ -330,12 +341,12 @@ When `onlymods` is set to `true`, only the users which are listed in `mods` are 
 To add a quote type
 
 ```
-!quoteadd <your quote>
+!quote add <your quote>
 ```
 
 Example:
 ```
-!quoteadd This is awesome!
+!quote add This is awesome!
 ```
 
 ### Getting a quote
@@ -361,10 +372,16 @@ The output will be similar to
 Use 
 
 ```
-!quoteremove ID
+!quote remove ID
 ```
 
-, e.g., `!quoteremove 123`, to remove a quote.
+to remove a quote.
+
+Example:
+
+```
+!quote remove 123
+```
 
 **Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
 
@@ -439,7 +456,7 @@ To add a custom command type
 
 Example:
 ```
-!customcommand hello Hi there!
+!customcommand add hello Hi there!
 ```
 
 When a user then types `!hello` in chat the plugin will answer with `Hi there!`.

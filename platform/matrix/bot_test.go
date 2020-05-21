@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/torlenor/redseligg/commanddispatcher"
 )
 
 type mockAPI struct {
@@ -61,8 +62,10 @@ func TestCreateMatrixBot(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
+	dispatcher := commanddispatcher.New("")
+
 	// Login with user and password
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create MatrixBot from username and password")
@@ -76,7 +79,7 @@ func TestCreateMatrixBot(t *testing.T) {
 	api.reset()
 	api.letLoginFail = true
 
-	bot, err = createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	bot, err = createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 
 	if bot != nil || err == nil {
 		t.Fatalf("Created Matrix bot even though login failed")
@@ -91,7 +94,9 @@ func TestMatrixBotPolling(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	dispatcher := commanddispatcher.New("")
+
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}
@@ -139,7 +144,9 @@ func TestMatrixBotStartingAndStopping(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	dispatcher := commanddispatcher.New("")
+
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}
@@ -154,7 +161,9 @@ func TestMatrixBotAddRemoveRoom(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	dispatcher := commanddispatcher.New("")
+
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}

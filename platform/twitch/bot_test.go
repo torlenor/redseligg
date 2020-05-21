@@ -6,30 +6,31 @@ import (
 	"time"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/storage"
 	"github.com/torlenor/redseligg/ws"
 )
 
-func Test_CreateDiscordBot(t *testing.T) {
+func Test_CreateTwitchBot(t *testing.T) {
 	ws := &ws.MockClient{}
+	dispatcher := commanddispatcher.CommandDispatcher{}
 	storage := storage.MockStorage{}
 	cfg := botconfig.TwitchConfig{}
 
-	_, err := CreateTwitchBot(cfg, &storage, ws)
+	_, err := CreateTwitchBot(cfg, &storage, &dispatcher, ws)
 	if err != nil {
 		t.Fatalf("Creating the bot should not have failed")
 	}
 }
 
-func Test_DiscordBot_Run(t *testing.T) {
-	// assert := assert.New(t)
-
+func Test_TwitchBot_Run(t *testing.T) {
 	ws := &ws.MockClient{}
+	dispatcher := commanddispatcher.CommandDispatcher{}
 	storage := storage.MockStorage{}
 	cfg := botconfig.TwitchConfig{}
 
-	bot, err := CreateTwitchBot(cfg, &storage, ws)
+	bot, err := CreateTwitchBot(cfg, &storage, &dispatcher, ws)
 	if err != nil {
 		t.Fatalf("Creating the bot should not have failed")
 	}

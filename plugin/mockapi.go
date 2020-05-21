@@ -50,10 +50,10 @@ func (b *MockAPI) HasFeature(feature string) bool {
 func (b *MockAPI) GetStorage() storage.Storage { return b.Storage }
 
 // RegisterCommand registers a custom slash "/" or "!" command, depending on what the bot supports.
-func (b *MockAPI) RegisterCommand(command string) error { return nil }
+func (b *MockAPI) RegisterCommand(p Hooks, command string) error { return nil }
 
-// UnregisterCommand unregisters a command previously registered via RegisterCommand.
-func (b *MockAPI) UnregisterCommand(command string) error { return nil }
+// UnRegisterCommand unregisters a command previously registered via RegisterCommand.
+func (b *MockAPI) UnRegisterCommand(command string) error { return nil }
 
 // GetUsers a list of all users the bot knows.
 func (b *MockAPI) GetUsers() ([]model.User, error) { return nil, nil }

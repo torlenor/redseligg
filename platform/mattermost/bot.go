@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/logging"
 	"github.com/torlenor/redseligg/platform"
@@ -33,6 +34,8 @@ type Bot struct {
 	platform.BotImpl
 
 	config botconfig.MattermostConfig
+
+	dispatcher *commanddispatcher.CommandDispatcher
 
 	ws *websocket.Conn
 
@@ -90,13 +93,15 @@ func (b *Bot) startMattermostBot() {
 }
 
 // CreateMattermostBot creates a new instance of a MattermostBot
-func CreateMattermostBot(cfg botconfig.MattermostConfig) (*Bot, error) {
+func CreateMattermostBot(cfg botconfig.MattermostConfig, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
 	log := logging.Get("MattermostBot")
 	log.Printf("MattermostBot is CREATING itself")
 
 	b := Bot{
 		config: cfg,
 		log:    log,
+
+		dispatcher: commandDispatcher,
 
 		lastWsSeqNumber: 0,
 

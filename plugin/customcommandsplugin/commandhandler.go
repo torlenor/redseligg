@@ -69,6 +69,9 @@ func (p *CustomCommandsPlugin) addCommand(channelID, customCommand string, messa
 	} else {
 		p.API.LogTrace(fmt.Sprintf("Updated custom command '%s' with message '%s' for channel %s", customCommand, message, channelID))
 	}
+
+	p.API.RegisterCommand(p, customCommand)
+
 	return p.storeCommands(commands)
 }
 
@@ -95,11 +98,13 @@ func (p *CustomCommandsPlugin) removeCommand(channelID, customCommand string) er
 		return errNotExist
 	}
 
+	p.API.UnRegisterCommand(customCommand)
+
 	return p.storeCommands(commands)
 }
 
 func splitCommand(text string) (c string, customCommand string, msg string, err error) {
-	var re = regexp.MustCompile(`(?m)^!customcommand +(add|remove) +([a-zA-Z]+) *(.*)$`)
+	var re = regexp.MustCompile(`(?m)^+(add|remove) +([a-zA-Z]+) *(.*)$`)
 
 	const cgCommand = 1
 	const cgCustomCommand = 2
@@ -136,16 +141,16 @@ func splitCommand(text string) (c string, customCommand string, msg string, err 
 }
 
 // onCommand handles a !customcommand command.
-func (p *CustomCommandsPlugin) onCommand(post model.Post) {
-	if post.Content == "!customcommand add" {
+func (p *CustomCommandsPlugin) onCommand(content string, post model.Post) {
+	if content == "add" {
 		p.returnHelpAdd(post.ChannelID)
 		return
-	} else if post.Content == "!customcommand remove" {
+	} else if content == "remove" {
 		p.returnHelpRemove(post.ChannelID)
 		return
 	}
 
-	c, customCommand, message, err := splitCommand(post.Content)
+	c, customCommand, message, err := splitCommand(content)
 	if err != nil {
 		p.API.LogError(fmt.Sprintf("Error parsing !customcommand command '%s': %s", post.Content, err))
 		p.returnHelp(post.ChannelID)

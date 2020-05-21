@@ -1,20 +1,25 @@
 package echoplugin
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/torlenor/redseligg/model"
-	"github.com/torlenor/redseligg/utils"
 )
 
-// OnPost implements the hook from the Bot
-func (p *EchoPlugin) OnPost(post model.Post) {
-	msg := strings.Trim(post.Content, " ")
-	if (!p.onlyOnWhisper || post.IsPrivate) && strings.HasPrefix(msg, "!echo ") {
-		p.API.LogTrace(fmt.Sprintf("Echoing message back to Channel = %s, content = %s", post.Channel, utils.StripCmd(msg, "echo")))
+// OnRun implements the hook from the Boot
+func (p *EchoPlugin) OnRun() {
+	p.API.RegisterCommand(p, "echo")
+}
+
+// OnCommand implements the hook from the Bot
+func (p *EchoPlugin) OnCommand(cmd string, content string, post model.Post) {
+	msg := strings.Trim(content, " ")
+	if len(msg) == 0 {
+		return
+	}
+	if !p.onlyOnWhisper || post.IsPrivate {
 		echo := post
-		echo.Content = utils.StripCmd(msg, "echo")
+		echo.Content = msg
 		p.API.CreatePost(echo)
 	}
 }

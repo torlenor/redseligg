@@ -1,45 +1,46 @@
 package quotesplugin
 
 import (
-	"strings"
-
 	"github.com/torlenor/redseligg/model"
 	"github.com/torlenor/redseligg/utils"
 )
 
 // OnRun is called when the platform is ready
 func (p *QuotesPlugin) OnRun() {
+	p.API.RegisterCommand(p, command)
+
 	p.storage = p.getStorage()
 	if p.storage == nil {
 		p.API.LogError(ErrNoValidStorage.Error())
 	}
 }
 
-// OnPost implements the hook from the Bot
-func (p *QuotesPlugin) OnPost(post model.Post) {
+// OnCommand implements the hook from the Bot
+func (p *QuotesPlugin) OnCommand(cmd string, content string, post model.Post) {
 	if post.IsPrivate {
 		return
 	}
 
-	msg := strings.Trim(post.Content, " ")
+	subcommand, argument := utils.ExtractSubCommandAndArgsString(content)
 
-	// TODO (#35): Use command prefix !quote for everything, e.g., !quote add some quote instead of !quoteadd
-	if strings.HasPrefix(msg, "!quote ") || msg == "!quote" {
-		p.onCommandQuote(post)
+	if subcommand != "add" && subcommand != "remove" && subcommand != "help" {
+		// In case of raw quote command the subcommand is the actual argument to fetch
+		// a specific quote
+		p.onCommandQuote(subcommand, post)
 		return
-	} else if strings.HasPrefix(msg, "!quoteadd ") {
-		p.onCommandQuoteAdd(post)
+	} else if subcommand == "add" && len(argument) > 0 {
+		p.onCommandQuoteAdd(argument, post)
 		return
-	} else if msg == "!quoteadd" || msg == "!quotehelp" {
+	} else if (subcommand == "add" && len(argument) == 0) || subcommand == "help" {
 		p.returnHelp(post.ChannelID)
 		return
 	}
 
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!quoteremove ") {
-			p.onCommandQuoteRemove(post)
+		if subcommand == "remove" && len(argument) > 0 {
+			p.onCommandQuoteRemove(argument, post)
 			return
-		} else if msg == "!quoteremove" {
+		} else if subcommand == "remove" {
 			p.returnHelpRemove(post.ChannelID)
 			return
 		}

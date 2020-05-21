@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	helpText        = "Type '!vote What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
-	voteEndHelpText = "To end a vote type !voteend description text of the vote."
+	// TODO: Add API call to get callPrefix for commands
+	helpText        = "Type '" + command + " What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
+	voteEndHelpText = "To end a vote type `" + command + " end description text of the vote`."
 )
 
 func (p *VotePlugin) returnHelp(channelID string) {
@@ -52,7 +53,7 @@ func (p *VotePlugin) updatePost(vote *vote) {
 }
 
 func (p *VotePlugin) extractDescriptionAndOptions(fullText string) (string, []string) {
-	re := regexp.MustCompile(`!vote ([^\[\]]*)\s?(\[([^\[\]]*)])?`)
+	re := regexp.MustCompile(`([^\[\]]*)\s?(\[([^\[\]]*)])?`)
 	const captureGroupDescription = 1
 	const captureGroupOptions = 3
 
@@ -85,11 +86,11 @@ func (p *VotePlugin) extractDescriptionAndOptions(fullText string) (string, []st
 }
 
 // onCommandVoteStart starts a new vote with the settings extracted
-// from the received !vote command.
-// Note: The command requires a valid !vote command. This check
+// from the received vote command.
+// Note: The command requires a valid vote command. This check
 // shall be performed at post retrieval.
-func (p *VotePlugin) onCommandVoteStart(post model.Post) {
-	description, options := p.extractDescriptionAndOptions(post.Content)
+func (p *VotePlugin) onCommandVoteStart(content string, post model.Post) {
+	description, options := p.extractDescriptionAndOptions(content)
 	if len(options) == 0 {
 		options = []string{"Yes", "No"}
 	}
@@ -121,9 +122,8 @@ func (p *VotePlugin) onCommandVoteStart(post model.Post) {
 	p.runningVotes[nVote.messageIdent.Channel][nVote.Settings.Text] = &nVote
 }
 
-func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
-	cont := strings.Split(post.Content, " ")
-	args := cont[1:]
+func (p *VotePlugin) onCommandVoteEnd(content string, post model.Post) {
+	args := strings.Split(content, " ")
 
 	p.votesMutex.Lock()
 	defer p.votesMutex.Unlock()
@@ -137,5 +137,5 @@ func (p *VotePlugin) onCommandVoteEnd(post model.Post) {
 		}
 	}
 
-	p.returnMessage(post.ChannelID, "No vote running with that description in this channel. Use the !vote command to start a new one.")
+	p.returnMessage(post.ChannelID, "No vote running with that description in this channel. Use the vote command to start a new one.")
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/gorilla/websocket"
 
@@ -46,7 +47,8 @@ type api interface {
 type Bot struct {
 	platform.BotImpl
 
-	storage storage.Storage
+	dispatcher *commanddispatcher.CommandDispatcher
+	storage    storage.Storage
 
 	api api
 
@@ -74,7 +76,7 @@ type Bot struct {
 
 // CreateDiscordBotWithAPI creates a new instance of a DiscordBot with the
 // provided api
-func CreateDiscordBotWithAPI(api api, storage storage.Storage, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
+func CreateDiscordBotWithAPI(api api, storage storage.Storage, commandDispatcher *commanddispatcher.CommandDispatcher, cfg botconfig.DiscordConfig, ws webSocketClient) (*Bot, error) {
 	log.Info("DiscordBot is CREATING itself")
 
 	b := Bot{
@@ -87,8 +89,9 @@ func CreateDiscordBotWithAPI(api api, storage storage.Storage, cfg botconfig.Dis
 			},
 		},
 
-		api:     api,
-		storage: storage,
+		api:        api,
+		dispatcher: commandDispatcher,
+		storage:    storage,
 
 		token: cfg.Token,
 		ws:    ws,
@@ -113,10 +116,10 @@ func CreateDiscordBotWithAPI(api api, storage storage.Storage, cfg botconfig.Dis
 }
 
 // CreateDiscordBot creates a new instance of a DiscordBot
-func CreateDiscordBot(cfg botconfig.DiscordConfig, storage storage.Storage, ws webSocketClient) (*Bot, error) {
+func CreateDiscordBot(cfg botconfig.DiscordConfig, storage storage.Storage, commandDispatcher *commanddispatcher.CommandDispatcher, ws webSocketClient) (*Bot, error) {
 	api := webclient.New("https://discordapp.com/api", "Bot "+cfg.Token, "application/json")
 
-	return CreateDiscordBotWithAPI(api, storage, cfg, ws)
+	return CreateDiscordBotWithAPI(api, storage, commandDispatcher, cfg, ws)
 }
 
 func (b *Bot) startHeartbeatSender(heartbeatInterval time.Duration) {

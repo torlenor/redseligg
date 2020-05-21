@@ -7,6 +7,8 @@ import (
 // EchoPlugin is a plugin implementing a echo command
 // which sends back all text received by that command to the
 // User/Channel where the command was initiated.
+//
+// It serves as a working example how a simple plugin is implemented.
 type EchoPlugin struct {
 	plugin.RedseliggPlugin
 	onlyOnWhisper bool

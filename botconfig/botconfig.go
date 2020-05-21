@@ -5,6 +5,11 @@ import (
 	"reflect"
 )
 
+// GeneralConfig contains all parameters related to the general behavior of redseligg
+type GeneralConfig struct {
+	CallPrefix string `toml:"callprefix" json:"callprefix"`
+}
+
 // StorageConfig holds the configuration for a storage
 type StorageConfig struct {
 	Type string `toml:"type" bson:"type"`
@@ -28,6 +33,7 @@ type BotConfig struct {
 	Type    string `toml:"type" bson:"type"`
 	Enabled bool   `toml:"enabled" bson:"enabled"`
 
+	GeneralConfig GeneralConfig `toml:"general" bson:"general"`
 	StorageConfig StorageConfig `toml:"storage" bson:"storage"`
 
 	Config  map[string]interface{} `toml:"config" bson:"config"`

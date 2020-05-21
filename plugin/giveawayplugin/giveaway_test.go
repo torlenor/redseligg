@@ -11,6 +11,12 @@ import (
 	"github.com/torlenor/redseligg/plugin"
 )
 
+var commandGiveaway = "giveaway"
+var contentCommandStart = "!" + commandGiveaway + " start"
+var contentCommandEnd = "!" + commandGiveaway + " end"
+var contentCommandReroll = "!" + commandGiveaway + " reroll"
+var contentCommandHelp = "!" + commandGiveaway + " help"
+
 type mockRandomizer struct {
 	RandomNumber int
 
@@ -58,73 +64,73 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 		Content:   "MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
+
+	expectedHelpMessage := "Type `giveaway start <time> <secretword> [winners] [prize]` to start a new giveaway."
 
 	api.Reset()
-	postToPlugin.Content = "!gstarttt"
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
-
-	api.Reset()
-	postToPlugin.Content = "!gstart help"
+	postToPlugin.Content = contentCommandHelp
+	content := "help"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
+		Content:   expectedHelpMessage,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gstart    "
+	postToPlugin.Content = contentCommandStart + "    "
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
+		Content:   expectedHelpMessage,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "start", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gstart 1m"
+	postToPlugin.Content = contentCommandStart + " 1m"
+	content = "start 1m"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
+		Content:   expectedHelpMessage,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gstart 1kk hello"
+	postToPlugin.Content = contentCommandStart + " 1kk hello"
+	content = "start 1kk hello"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
+		Content:   expectedHelpMessage,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gstart 1m hello k"
+	postToPlugin.Content = contentCommandStart + " 1m hello k"
+	content = "start 1m hello k"
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "Type '!gstart <time> <secretword> [winners] [prize]' to start a new giveaway.",
+		Content:   expectedHelpMessage,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gstart 1m hello"
+	postToPlugin.Content = contentCommandStart + " 1m hello"
+	content = "start 1m hello"
 	postToPlugin.IsPrivate = true
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 }
 
@@ -150,48 +156,50 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	}
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No giveaway running. Use !gstart command to start a new one.",
+		Content:   "No giveaway running. Use giveaway start command to start a new one.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	secretword := "hello"
-	postToPlugin.Content = "!gstart 10m " + secretword
+	postToPlugin.Content = contentCommandStart + " 10m " + secretword
+	content := "start 10m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Cannot pick a winner. There were no participants to the giveaway.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	secretword = "sonne"
-	postToPlugin.Content = "!gstart 5m " + secretword
+	postToPlugin.Content = contentCommandStart + " 5m " + secretword
+	content = "start 5m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -209,24 +217,25 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 
 	api.Reset()
 	secretword = "hello"
-	postToPlugin.Content = "!gstart 10m " + secretword
+	postToPlugin.Content = contentCommandStart + " 10m " + secretword
+	content = "start 10m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway already running.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
@@ -256,13 +265,14 @@ func TestGiveawayPluginCreateAndAutomaticEndGiveaway(t *testing.T) {
 
 	api.Reset()
 	secretword := "sonne"
-	postToPlugin.Content = "!gstart 2s " + secretword
+	postToPlugin.Content = contentCommandStart + " 2s " + secretword
+	content := "start 2s " + secretword
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -323,19 +333,19 @@ func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
 
 	api.Reset()
 	secretword := "hello"
-	postToPlugin.Content = "!gstart 10m " + secretword
-	p.OnPost(postToPlugin)
+	postToPlugin.Content = contentCommandStart + " 10m " + secretword
+	content := "start 10m " + secretword
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	secretword = "hello"
 	postToPlugin.User = model.User{ID: "SOME USER ID", Name: allowedUser}
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -352,9 +362,9 @@ func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	postToPlugin.User = model.User{ID: "SOME USER ID", Name: notAllowedUser}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
@@ -364,7 +374,7 @@ func TestGiveawayPluginCreateAndEndGiveawayOnlyMods(t *testing.T) {
 		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
@@ -393,13 +403,14 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 
 	api.Reset()
 	secretword := "sonne"
-	postToPlugin.Content = "!gstart 5m " + secretword + " 2"
+	postToPlugin.Content = contentCommandStart + " 5m " + secretword + " 2"
+	content := "start 5m " + secretword + " 2"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -440,13 +451,13 @@ func TestGiveawayPluginCreateAndEndGiveawayWithMultipleWinners(t *testing.T) {
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The winner(s) is/are <@" + "PARTICIPANT_1_ID" + ">, <@" + "PARTICIPANT_2_ID" + ">. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 3)
@@ -476,13 +487,14 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	api.Reset()
 	secretword := "sonne"
 	prize := "That awesome PRIZE"
-	postToPlugin.Content = "!gstart 5m " + secretword + " 1 " + prize
+	postToPlugin.Content = contentCommandStart + " 5m " + secretword + " 1 " + prize
+	content := "start 5m " + secretword + " 1 " + prize
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -499,13 +511,13 @@ func TestGiveawayPluginCreateAndEndGiveawayWithPrize(t *testing.T) {
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. You won 'That awesome PRIZE'. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
@@ -533,36 +545,37 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	}
 
 	api.Reset()
-	postToPlugin.Content = "!greroll"
+	postToPlugin.Content = contentCommandReroll
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No previous giveaway in that channel. Use !gstart command to start a new one.",
+		Content:   "No previous giveaway in that channel. Use `giveaway start` command to start a new one.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "reroll", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	secretword := "hello"
-	postToPlugin.Content = "!gstart 10m " + secretword
+	postToPlugin.Content = contentCommandStart + " 10m " + secretword
+	content := "start 10m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!greroll"
+	postToPlugin.Content = contentCommandReroll
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Cannot pick a new winner. There is currently a giveaway running in this channel.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "reroll", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -579,38 +592,39 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
 
 	api.Reset()
-	postToPlugin.Content = "!greroll"
+	postToPlugin.Content = contentCommandReroll
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The new winner is <@" + userPostToPlugin.User.ID + ">. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "reroll", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
 
 	api.Reset()
 	prize := "SOME AWESOME PRIZE"
-	postToPlugin.Content = "!gstart 10m " + secretword + " 1 " + prize
+	postToPlugin.Content = contentCommandStart + " 10m " + secretword + " 1 " + prize
+	content = "start 10m " + secretword + " 1 " + prize
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -627,60 +641,61 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The winner(s) is/are <@" + userPostToPlugin.User.ID + ">. You won '" + prize + "'. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
 
 	api.Reset()
-	postToPlugin.Content = "!greroll"
+	postToPlugin.Content = contentCommandReroll
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "The new winner is <@" + userPostToPlugin.User.ID + ">. You won '" + prize + "'. Congratulations!",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "reroll", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 	assert.Equal(randomizer.Argument, 1)
 
 	api.Reset()
 	secretword = "hello"
-	postToPlugin.Content = "!gstart 10m " + secretword
+	postToPlugin.Content = contentCommandStart + " 10m " + secretword
+	content = "start 10m " + secretword
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Giveaway started! Type " + secretword + " to participate.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!gend"
+	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Cannot pick a winner. There were no participants to the giveaway.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "end", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!greroll"
+	postToPlugin.Content = contentCommandReroll
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
 		Content:   "Cannot pick a new winner. There were no participants to the previous giveaway.",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(commandGiveaway, "reroll", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

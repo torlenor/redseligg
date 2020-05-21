@@ -1,8 +1,6 @@
 package customcommandsplugin
 
 import (
-	"strings"
-
 	"github.com/torlenor/redseligg/model"
 	"github.com/torlenor/redseligg/utils"
 )
@@ -14,29 +12,37 @@ func (p *CustomCommandsPlugin) OnRun() {
 		p.API.LogError(ErrNoValidStorage.Error())
 		return
 	}
+
+	commands, err := p.getCommands()
+	if err != nil {
+		p.API.LogError("Error getting commands for initial registration: " + err.Error())
+		return
+	}
+	for _, command := range commands.Commands {
+		p.API.RegisterCommand(p, command.Command)
+	}
+
+	p.API.RegisterCommand(p, "customcommand")
 }
 
-// OnPost implements the hook from the Bot
-func (p *CustomCommandsPlugin) OnPost(post model.Post) {
+// OnCommand implements the hook from the Bot
+func (p *CustomCommandsPlugin) OnCommand(cmd string, content string, post model.Post) {
 	if post.IsPrivate {
 		return
 	}
 
-	msg := strings.Trim(post.Content, " ")
-
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!customcommand ") {
-			p.onCommand(post)
+		if cmd == "customcommand" && len(content) > 0 {
+			p.onCommand(content, post)
 			return
-		} else if msg == "!customcommand" {
+		} else if cmd == "customcommand" {
 			p.returnHelp(post.ChannelID)
 			return
 		}
 	} else {
 		p.API.LogDebug("Not parsing as command, because User " + post.User.Name + " is not part of mods")
+		return
 	}
 
-	if strings.HasPrefix(msg, "!") {
-		p.onCustomCommand(post)
-	}
+	p.onCustomCommand(cmd, post)
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEchoPlugin_OnPost(t *testing.T) {
+func TestEchoPlugin_OnCommand(t *testing.T) {
 	assert := assert.New(t)
 
 	p := VersionPlugin{}
@@ -22,14 +22,10 @@ func TestEchoPlugin_OnPost(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "MESSAGE CONTENT",
+		Content:   "!version",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
-	api.Reset()
-	postToPlugin.Content = "!version"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
@@ -37,7 +33,7 @@ func TestEchoPlugin_OnPost(t *testing.T) {
 		Content:   api.GetVersion(),
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand("version", "", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 }

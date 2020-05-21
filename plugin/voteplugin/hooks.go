@@ -2,30 +2,40 @@ package voteplugin
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/torlenor/redseligg/model"
 	"github.com/torlenor/redseligg/utils"
 )
 
-// OnPost implements the hook from the Bot
-func (p *VotePlugin) OnPost(post model.Post) {
+// OnRun implements the hook from the Boot
+func (p *VotePlugin) OnRun() {
+	p.API.RegisterCommand(p, command)
+}
+
+// OnStop implements the hook from the Boot
+func (p *VotePlugin) OnStop() {
+	p.API.RegisterCommand(p, command)
+}
+
+// OnCommand implements the hook from the Bot
+func (p *VotePlugin) OnCommand(cmd string, content string, post model.Post) {
 	if post.IsPrivate {
 		return
 	}
 
-	msg := strings.Trim(post.Content, " ")
+	subcommand, arguments := utils.ExtractSubCommandAndArgsString(content)
+
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if strings.HasPrefix(msg, "!vote ") {
-			p.onCommandVoteStart(post)
+		if subcommand != "end" && subcommand != "help" && len(arguments) > 0 {
+			p.onCommandVoteStart(subcommand+" "+arguments, post)
 			return
-		} else if strings.HasPrefix(msg, "!voteend ") {
-			p.onCommandVoteEnd(post)
+		} else if subcommand == "end" && len(arguments) > 0 {
+			p.onCommandVoteEnd(arguments, post)
 			return
-		} else if msg == "!voteend" {
+		} else if subcommand == "end" {
 			p.returnVoteEndHelp(post.ChannelID)
 			return
-		} else if msg == "!vote" || msg == "!votehelp" {
+		} else if (len(subcommand) == 0 && len(arguments) == 0) || subcommand == "help" {
 			p.returnHelp(post.ChannelID)
 			return
 		}

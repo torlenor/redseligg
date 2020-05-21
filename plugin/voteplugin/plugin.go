@@ -10,6 +10,7 @@ import (
 
 const (
 	PLUGIN_TYPE = "vote"
+	command     = "vote"
 )
 
 // VotePlugin is a plugin to initiate a vote in the channel about arbitrary topics.

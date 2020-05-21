@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/logging"
 	"github.com/torlenor/redseligg/platform"
@@ -34,46 +35,49 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 		return nil, fmt.Errorf("Error creating storage backend for botID %s: %s", p, err)
 	}
 
+	logBotFactory.Tracef("Creating CommandDispatcher for botID %s", p)
+	dispatcher := commanddispatcher.New(config.GeneralConfig.CallPrefix)
+
 	switch p {
 	case "slack":
 		slackCfg, err := config.AsSlackConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating slack bot: %s", err)
+			return nil, fmt.Errorf("Error creating Slack bot: %s", err)
 		}
 
-		bot, err = slack.CreateSlackBot(slackCfg, storage, ws.NewClient())
+		bot, err = slack.CreateSlackBot(slackCfg, storage, dispatcher, ws.NewClient())
 		if err != nil {
-			return nil, fmt.Errorf("Error creating slack bot: %s", err)
+			return nil, fmt.Errorf("Error creating Slack bot: %s", err)
 		}
 	case "mattermost":
 		mmCfg, err := config.AsMattermostConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating mattermost bot: %s", err)
+			return nil, fmt.Errorf("Error creating Mattermost bot: %s", err)
 		}
 
-		bot, err = mattermost.CreateMattermostBot(mmCfg)
+		bot, err = mattermost.CreateMattermostBot(mmCfg, dispatcher)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating mattermost bot: %s", err)
+			return nil, fmt.Errorf("Error creating Mattermost bot: %s", err)
 		}
 	case "discord":
 		discordCfg, err := config.AsDiscordConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Discord bot: %s", err)
 		}
 
-		bot, err = discord.CreateDiscordBot(discordCfg, storage, ws.NewClient())
+		bot, err = discord.CreateDiscordBot(discordCfg, storage, dispatcher, ws.NewClient())
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Discord bot: %s", err)
 		}
 	case "matrix":
 		matrixCfg, err := config.AsMatrixConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Matrix bot: %s", err)
 		}
 
-		bot, err = matrix.CreateMatrixBot(matrixCfg)
+		bot, err = matrix.CreateMatrixBot(matrixCfg, dispatcher)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating discord bot: %s", err)
+			return nil, fmt.Errorf("Error creating Matrix bot: %s", err)
 		}
 	case "twitch":
 		twitchCfg, err := config.AsTwitchConfig()
@@ -81,7 +85,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}
 
-		bot, err = twitch.CreateTwitchBot(twitchCfg, storage, ws.NewClient())
+		bot, err = twitch.CreateTwitchBot(twitchCfg, storage, dispatcher, ws.NewClient())
 		if err != nil {
 			return nil, fmt.Errorf("Error creating Twitch bot: %s", err)
 		}

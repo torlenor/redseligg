@@ -2,12 +2,11 @@ package customcommandsplugin
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/torlenor/redseligg/model"
 )
 
-func (p *CustomCommandsPlugin) onCustomCommand(post model.Post) {
+func (p *CustomCommandsPlugin) onCustomCommand(cmd string, post model.Post) {
 	// TODO (#31): Do not fetch commands in CustomCommandPlugin every time
 	customCommands, err := p.getCommands()
 	if err != nil {
@@ -15,19 +14,17 @@ func (p *CustomCommandsPlugin) onCustomCommand(post model.Post) {
 		return
 	}
 
-	if len(post.Content) < 2 {
+	if len(cmd) < 1 {
 		p.API.LogWarn("'%s' cannot be a custom command: String too short")
 		return
 	}
-
-	command := post.Content[1:]
 
 	for _, c := range customCommands.Commands {
 		if c.ChannelID != post.ChannelID {
 			continue
 		}
 
-		if strings.HasPrefix(command, c.Command) {
+		if cmd == c.Command {
 			p.returnMessage(post.ChannelID, c.Text)
 		}
 	}

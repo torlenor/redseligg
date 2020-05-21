@@ -70,3 +70,51 @@ func TestStringSliceContains(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractSubCommandAndArgsString(t *testing.T) {
+	type args struct {
+		message string
+	}
+	tests := []struct {
+		name           string
+		args           args
+		wantSubcommand string
+		wantArgument   string
+	}{
+		{
+			name: "message with subcommand and args",
+			args: args{
+				message: "subcmd some arguments",
+			},
+			wantSubcommand: "subcmd",
+			wantArgument:   "some arguments",
+		},
+		{
+			name: "message with subcommand and no args",
+			args: args{
+				message: "subcmd",
+			},
+			wantSubcommand: "subcmd",
+			wantArgument:   "",
+		},
+		{
+			name: "empty message",
+			args: args{
+				message: "",
+			},
+			wantSubcommand: "",
+			wantArgument:   "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotSubcommand, gotArgument := ExtractSubCommandAndArgsString(tt.args.message)
+			if gotSubcommand != tt.wantSubcommand {
+				t.Errorf("ExtractSubCommandAndArgsString() gotSubcommand = %v, want %v", gotSubcommand, tt.wantSubcommand)
+			}
+			if gotArgument != tt.wantArgument {
+				t.Errorf("ExtractSubCommandAndArgsString() gotArgument = %v, want %v", gotArgument, tt.wantArgument)
+			}
+		})
+	}
+}

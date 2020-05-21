@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEchoPlugin_OnPost(t *testing.T) {
+func TestEchoPlugin_OnCommand(t *testing.T) {
 	assert := assert.New(t)
 
 	p := EchoPlugin{}
@@ -23,37 +23,30 @@ func TestEchoPlugin_OnPost(t *testing.T) {
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "MESSAGE CONTENT",
+		Content:   "!echo MESSAGE CONTENT",
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
 
-	api.Reset()
-	postToPlugin.Content = "!echo"
-	p.OnPost(postToPlugin)
-	assert.Equal(false, api.WasCreatePostCalled)
-
-	api.Reset()
-	postToPlugin.Content = "!echo MESSAGE CONTENT"
+	expectedCommand := "echo"
+	expectedContent := "some content"
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
 		Channel:   "SOME CHANNEL",
 		User:      model.User{ID: "SOME USER ID", Name: "USER 1"},
-		Content:   "MESSAGE CONTENT",
+		Content:   expectedContent,
 		IsPrivate: false,
 	}
-	p.OnPost(postToPlugin)
+	p.OnCommand(expectedCommand, expectedContent, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	p.SetOnlyOnWhisper(true)
-	p.OnPost(postToPlugin)
+	p.OnCommand(expectedCommand, expectedContent, postToPlugin)
 	assert.Equal(false, api.WasCreatePostCalled)
 
 	api.Reset()
 	postToPlugin.IsPrivate = true
-	p.OnPost(postToPlugin)
+	p.OnCommand(expectedCommand, expectedContent, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 }
