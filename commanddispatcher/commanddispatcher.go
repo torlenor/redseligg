@@ -1,6 +1,7 @@
 package commanddispatcher
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/torlenor/redseligg/logging"
@@ -75,4 +76,35 @@ func (c *CommandDispatcher) OnPost(post model.Post) {
 			r.OnCommand(cmd, content, post)
 		}
 	}
+}
+
+// IsHelp returns true and the help message if the post contains a help command
+func (c *CommandDispatcher) IsHelp(post model.Post) (bool, string) {
+	if len(post.Content) < 2 {
+		return false, ""
+	}
+	splitted := strings.Split(post.Content, " ")
+	if !strings.HasPrefix(splitted[0], c.callPrefix) {
+		return false, ""
+	}
+	cmd := splitted[0][len(c.callPrefix):]
+	if cmd == "help" {
+		return true, c.getHelpText()
+	}
+	return false, ""
+}
+
+// getHelpText returns a generic help message listing all available commands.
+func (c *CommandDispatcher) getHelpText() string {
+	helptext := fmt.Sprintf("The following commands are available: ")
+	first := true
+	for cmd := range c.receivers {
+		if !first {
+			helptext += ", "
+		}
+		helptext += fmt.Sprintf("%s%s", c.callPrefix, cmd)
+		first = false
+	}
+	helptext += "\nNote: Some of them are only available for mods."
+	return helptext
 }

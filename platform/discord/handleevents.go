@@ -45,7 +45,13 @@ func (b *Bot) dispatchMessage(msg messageCreate) {
 		plugin.OnPost(receiveMessage)
 	}
 
-	b.Dispatcher.OnPost(receiveMessage)
+	if ok, text := b.Dispatcher.IsHelp(receiveMessage); ok {
+		postMessage := receiveMessage
+		postMessage.Content = text
+		b.CreatePost(postMessage)
+	} else {
+		b.Dispatcher.OnPost(receiveMessage)
+	}
 }
 
 func (b *Bot) handleMessageCreate(data json.RawMessage) {

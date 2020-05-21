@@ -136,7 +136,14 @@ func (b *Bot) messageLoop() {
 				for _, plugin := range b.plugins {
 					plugin.OnPost(post)
 				}
-				b.Dispatcher.OnPost(post)
+
+				if ok, text := b.Dispatcher.IsHelp(post); ok {
+					postMessage := post
+					postMessage.Content = text
+					b.CreatePost(postMessage)
+				} else {
+					b.Dispatcher.OnPost(post)
+				}
 			} else {
 				log.Warnf("Params not long enough")
 			}
