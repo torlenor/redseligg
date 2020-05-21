@@ -57,12 +57,7 @@ func (b *Bot) handleMessageCreate(data json.RawMessage) {
 	}
 
 	log.Tracef("Received: MESSAGE_CREATE from User = %s, Content = %s, Timestamp = %s, ChannelID = %s", newMessageCreate.Author.Username, newMessageCreate.Content, newMessageCreate.Timestamp, newMessageCreate.ChannelID)
-
-	snowflakeID := newMessageCreate.Author.ID
-
-	if snowflakeID != b.ownSnowflakeID {
-		b.dispatchMessage(newMessageCreate)
-	}
+	b.dispatchMessage(newMessageCreate)
 }
 
 func (b *Bot) handleReady(data json.RawMessage) {
