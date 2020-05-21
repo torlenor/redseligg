@@ -31,11 +31,11 @@ func TestCreatingNewAPI(t *testing.T) {
 	assert := assert.New(t)
 
 	config := config.API{}
-	api, err := NewAPI(config, "")
+	_, err := NewAPI(config, "")
 	assert.Error(err)
 
 	config.Port = "1234"
-	api, err = NewAPI(config, "")
+	api, err := NewAPI(config, "")
 	assert.NoError(err)
 	assert.NotNil(api)
 }
@@ -67,12 +67,12 @@ func TestAttachModule(t *testing.T) {
 	mockRouter := &mockRouter{}
 
 	config := config.API{}
-	api, err := NewAPICustom(config, "", mockRouter)
+	_, err := NewAPICustom(config, "", mockRouter)
 	assert.Error(err)
 
 	config.Port = "1234"
 
-	api, err = NewAPICustom(config, "", mockRouter)
+	api, err := NewAPICustom(config, "", mockRouter)
 	assert.NoError(err)
 	assert.NotNil(api)
 
@@ -102,7 +102,7 @@ func TestAttachModule(t *testing.T) {
 	assert.Equal(cnt+1, len(mockRouter.routes))
 	assert.Equal(cnt+1, len(mockRouter.paths))
 	assert.Equal("/put", mockRouter.paths[cnt])
-	methods, err = mockRouter.routes[cnt].GetMethods()
+	methods, _ = mockRouter.routes[cnt].GetMethods()
 	assert.Equal(1, len(methods))
 	assert.Equal("PUT", methods[0])
 
@@ -111,8 +111,7 @@ func TestAttachModule(t *testing.T) {
 	assert.Equal(cnt+1, len(mockRouter.routes))
 	assert.Equal(cnt+1, len(mockRouter.paths))
 	assert.Equal("/delete", mockRouter.paths[cnt])
-	methods, err = mockRouter.routes[cnt].GetMethods()
+	methods, _ = mockRouter.routes[cnt].GetMethods()
 	assert.Equal(1, len(methods))
 	assert.Equal("DELETE", methods[0])
-
 }
