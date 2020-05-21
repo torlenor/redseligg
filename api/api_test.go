@@ -84,7 +84,7 @@ func TestAttachModule(t *testing.T) {
 	assert.Equal(cnt+1, len(mockRouter.routes))
 	assert.Equal(cnt+1, len(mockRouter.paths))
 	assert.Equal("/get", mockRouter.paths[0])
-	methods, err := mockRouter.routes[cnt].GetMethods()
+	methods, _ := mockRouter.routes[cnt].GetMethods()
 	assert.Equal(1, len(methods))
 	assert.Equal("GET", methods[0])
 
@@ -93,7 +93,7 @@ func TestAttachModule(t *testing.T) {
 	assert.Equal(cnt+1, len(mockRouter.routes))
 	assert.Equal(cnt+1, len(mockRouter.paths))
 	assert.Equal("/post", mockRouter.paths[1])
-	methods, err = mockRouter.routes[cnt].GetMethods()
+	methods, _ = mockRouter.routes[cnt].GetMethods()
 	assert.Equal(1, len(methods))
 	assert.Equal("POST", methods[0])
 

@@ -139,6 +139,9 @@ func (b *Bot) handleMessageReactionAdd(data json.RawMessage) {
 	}
 
 	emoji, err := getRedseliggEmojiFromDiscordEmoji(newMessageReactionAdd.Emoji.Name)
+	if err != nil {
+		log.Debugf("Could not map emoji %s, consider adding it to the mapping: %s", newMessageReactionAdd.Emoji.Name, err)
+	}
 
 	reaction := model.Reaction{
 		Message: model.MessageIdentifier{
@@ -166,6 +169,9 @@ func (b *Bot) handleMessageReactionRemove(data json.RawMessage) {
 	}
 
 	emoji, err := getRedseliggEmojiFromDiscordEmoji(newMessageReactionRemove.Emoji.Name)
+	if err != nil {
+		log.Debugf("Could not map emoji %s, consider adding it to the mapping: %s", newMessageReactionRemove.Emoji.Name, err)
+	}
 
 	reaction := model.Reaction{
 		Message: model.MessageIdentifier{
