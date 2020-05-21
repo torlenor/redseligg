@@ -41,7 +41,6 @@ func (p *CustomCommandsPlugin) OnCommand(cmd string, content string, post model.
 		}
 	} else {
 		p.API.LogDebug("Not parsing as command, because User " + post.User.Name + " is not part of mods")
-		return
 	}
 
 	p.onCustomCommand(cmd, post)
