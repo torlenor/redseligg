@@ -5,6 +5,7 @@ import (
 
 	"github.com/torlenor/redseligg/botconfig"
 	"github.com/torlenor/redseligg/commanddispatcher"
+	"github.com/torlenor/redseligg/storage"
 
 	"github.com/torlenor/redseligg/logging"
 	"github.com/torlenor/redseligg/platform"
@@ -34,7 +35,7 @@ type Bot struct {
 }
 
 // The createMatrixBotWithAPI creates a new instance of a MatrixBot using the api interface api
-func createMatrixBotWithAPI(api api, username string, password string, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
+func createMatrixBotWithAPI(api api, username string, password string, commandDispatcher *commanddispatcher.CommandDispatcher, storage storage.Storage) (*Bot, error) {
 	log.Printf("MatrixBot is CREATING itself")
 	b := Bot{
 		BotImpl: platform.BotImpl{
@@ -42,6 +43,7 @@ func createMatrixBotWithAPI(api api, username string, password string, commandDi
 				platform.FeatureMessagePost: true,
 			},
 			Dispatcher: commandDispatcher,
+			Storage:    storage,
 		},
 		api: api,
 	}
@@ -61,9 +63,9 @@ func createMatrixBotWithAPI(api api, username string, password string, commandDi
 }
 
 // CreateMatrixBot creates a new instance of a DiscordBot
-func CreateMatrixBot(cfg botconfig.MatrixConfig, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
+func CreateMatrixBot(cfg botconfig.MatrixConfig, storage storage.Storage, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
 	api := &matrixAPI{server: cfg.Server}
-	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password, commandDispatcher)
+	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password, commandDispatcher, storage)
 }
 
 // AddPlugin takes as argument a plugin and

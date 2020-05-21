@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/torlenor/redseligg/commanddispatcher"
+	"github.com/torlenor/redseligg/storage"
 )
 
 func TestSendRoomMessage(t *testing.T) {
@@ -11,8 +12,9 @@ func TestSendRoomMessage(t *testing.T) {
 	api.reset()
 
 	dispatcher := commanddispatcher.New("")
+	storage := &storage.MockStorage{}
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher, storage)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}
@@ -102,8 +104,9 @@ func TestSendWhisper(t *testing.T) {
 	api.reset()
 
 	dispatcher := commanddispatcher.New("")
+	storage := &storage.MockStorage{}
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher, storage)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}

@@ -36,8 +36,6 @@ type webSocketClient interface {
 type Bot struct {
 	platform.BotImpl
 
-	storage storage.Storage
-
 	plugins []plugin.Hooks
 
 	cfg botconfig.TwitchConfig
@@ -57,10 +55,10 @@ func CreateTwitchBot(cfg botconfig.TwitchConfig, storage storage.Storage, comman
 				platform.FeatureMessagePost: true,
 			},
 			Dispatcher: commandDispatcher,
+			Storage:    storage,
 		},
 
-		storage: storage,
-		cfg:     cfg,
+		cfg: cfg,
 
 		ws: ws,
 	}

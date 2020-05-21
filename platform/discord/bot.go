@@ -47,8 +47,6 @@ type api interface {
 type Bot struct {
 	platform.BotImpl
 
-	storage storage.Storage
-
 	api api
 
 	gatewayURL string
@@ -87,10 +85,10 @@ func CreateDiscordBotWithAPI(api api, storage storage.Storage, commandDispatcher
 				platform.FeatureReactionNotify: true,
 			},
 			Dispatcher: commandDispatcher,
+			Storage:    storage,
 		},
 
-		api:     api,
-		storage: storage,
+		api: api,
 
 		token: cfg.Token,
 		ws:    ws,

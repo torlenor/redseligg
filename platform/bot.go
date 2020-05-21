@@ -5,6 +5,7 @@ import (
 
 	"github.com/torlenor/redseligg/commanddispatcher"
 	"github.com/torlenor/redseligg/plugin"
+	"github.com/torlenor/redseligg/storage"
 )
 
 // All currently supported features a platform can support
@@ -54,12 +55,16 @@ type BotImpl struct {
 	ProvidedFeatures map[string]bool
 
 	Dispatcher *commanddispatcher.CommandDispatcher
+	Storage    storage.Storage
 }
 
 // HasFeature returns true if the bot serving the API implements the feature.
 func (b *BotImpl) HasFeature(feature string) bool {
 	return b.ProvidedFeatures[feature]
 }
+
+// GetStorage returns the storage or nil if none is provided by the platform
+func (b *BotImpl) GetStorage() storage.Storage { return b.Storage }
 
 // RegisterCommand registers a custom slash or ! command, depending on what the bot supports.
 func (b *BotImpl) RegisterCommand(p plugin.Hooks, command string) error {

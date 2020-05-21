@@ -4,14 +4,10 @@ import (
 	"fmt"
 
 	"github.com/torlenor/redseligg/model"
-	"github.com/torlenor/redseligg/storage"
 	"github.com/torlenor/redseligg/utils"
 )
 
 var version string
-
-// GetStorage returns the storage or nil if none is provided by the platform
-func (b *Bot) GetStorage() storage.Storage { return b.storage }
 
 // GetUsers a list of users based on search options.
 func (b *Bot) GetUsers() ([]model.User, error) { return nil, nil }

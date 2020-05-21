@@ -55,7 +55,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating Mattermost bot: %s", err)
 		}
 
-		bot, err = mattermost.CreateMattermostBot(mmCfg, dispatcher)
+		bot, err = mattermost.CreateMattermostBot(mmCfg, storage, dispatcher)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating Mattermost bot: %s", err)
 		}
@@ -75,7 +75,7 @@ func (b *BotFactory) CreateBot(p string, config botconfig.BotConfig) (platform.B
 			return nil, fmt.Errorf("Error creating Matrix bot: %s", err)
 		}
 
-		bot, err = matrix.CreateMatrixBot(matrixCfg, dispatcher)
+		bot, err = matrix.CreateMatrixBot(matrixCfg, storage, dispatcher)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating Matrix bot: %s", err)
 		}
