@@ -1,12 +1,18 @@
 package matrix
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/torlenor/redseligg/commanddispatcher"
+)
 
 func TestSendRoomMessage(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	dispatcher := commanddispatcher.New("")
+
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}
@@ -95,7 +101,9 @@ func TestSendWhisper(t *testing.T) {
 	api := &mockAPI{server: "TEST_SERVER", authToken: "TEST_TOKEN"}
 	api.reset()
 
-	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS")
+	dispatcher := commanddispatcher.New("")
+
+	bot, err := createMatrixBotWithAPI(api, "TEST_USER", "TEST_PASS", dispatcher)
 	if bot == nil || err != nil {
 		t.Fatalf("Could not create Matrix Bot")
 	}

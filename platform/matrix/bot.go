@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/logging"
 	"github.com/torlenor/redseligg/platform"
@@ -19,6 +20,8 @@ type Bot struct {
 	platform.BotImpl
 	api api
 
+	dispatcher *commanddispatcher.CommandDispatcher
+
 	pollingDone chan bool
 
 	pollingInterval time.Duration
@@ -33,9 +36,12 @@ type Bot struct {
 }
 
 // The createMatrixBotWithAPI creates a new instance of a MatrixBot using the api interface api
-func createMatrixBotWithAPI(api api, username string, password string) (*Bot, error) {
+func createMatrixBotWithAPI(api api, username string, password string, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
 	log.Printf("MatrixBot is CREATING itself")
-	b := Bot{api: api}
+	b := Bot{
+		api:        api,
+		dispatcher: commandDispatcher,
+	}
 
 	err := b.api.login(username, password)
 	if err != nil {
@@ -52,9 +58,9 @@ func createMatrixBotWithAPI(api api, username string, password string) (*Bot, er
 }
 
 // CreateMatrixBot creates a new instance of a DiscordBot
-func CreateMatrixBot(cfg botconfig.MatrixConfig) (*Bot, error) {
+func CreateMatrixBot(cfg botconfig.MatrixConfig, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
 	api := &matrixAPI{server: cfg.Server}
-	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password)
+	return createMatrixBotWithAPI(api, cfg.Username, cfg.Password, commandDispatcher)
 }
 
 // AddPlugin takes as argument a plugin and

@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"github.com/torlenor/redseligg/botconfig"
+	"github.com/torlenor/redseligg/commanddispatcher"
 
 	"github.com/torlenor/redseligg/logging"
 	"github.com/torlenor/redseligg/platform"
@@ -31,7 +32,8 @@ type webSocketClient interface {
 type Bot struct {
 	platform.BotImpl
 
-	storage storage.Storage
+	dispatcher *commanddispatcher.CommandDispatcher
+	storage    storage.Storage
 
 	config botconfig.SlackConfig
 	log    *logrus.Entry
@@ -56,7 +58,7 @@ type Bot struct {
 }
 
 // CreateSlackBot creates a new instance of a SlackBot
-func CreateSlackBot(cfg botconfig.SlackConfig, storage storage.Storage, ws webSocketClient) (*Bot, error) {
+func CreateSlackBot(cfg botconfig.SlackConfig, storage storage.Storage, commandDispatcher *commanddispatcher.CommandDispatcher, ws webSocketClient) (*Bot, error) {
 	log := logging.Get("SlackBot")
 	log.Printf("SlackBot is CREATING itself")
 
@@ -73,7 +75,8 @@ func CreateSlackBot(cfg botconfig.SlackConfig, storage storage.Storage, ws webSo
 		config: cfg,
 		log:    log,
 
-		storage: storage,
+		dispatcher: commandDispatcher,
+		storage:    storage,
 
 		ws: ws,
 

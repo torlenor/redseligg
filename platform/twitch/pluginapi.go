@@ -24,7 +24,10 @@ func (b *Bot) RegisterCommand(p plugin.Hooks, command string) error {
 }
 
 // UnRegisterCommand unregisters a command previously registered via RegisterCommand.
-func (b *Bot) UnRegisterCommand(command string) error { return nil }
+func (b *Bot) UnRegisterCommand(command string) error {
+	b.UnRegisterCommand(command)
+	return nil
+}
 
 // GetUsers a list of users based on search options.
 func (b *Bot) GetUsers() ([]model.User, error) { return nil, nil }
