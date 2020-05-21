@@ -53,7 +53,7 @@ func TestStringSliceContains(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "regular slice, containting entry",
+			name: "regular slice, containing entry",
 			args: args{s: []string{"something", "something else"}, e: "something"},
 			want: true,
 		},
