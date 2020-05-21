@@ -456,7 +456,7 @@ To add a custom command type
 
 Example:
 ```
-!customcommand hello Hi there!
+!customcommand add hello Hi there!
 ```
 
 When a user then types `!hello` in chat the plugin will answer with `Hi there!`.
