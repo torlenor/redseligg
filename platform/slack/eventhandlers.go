@@ -69,7 +69,14 @@ func (b *Bot) handleEventMessage(data []byte) {
 		for _, plugin := range b.plugins {
 			plugin.OnPost(receiveMessage)
 		}
-		b.Dispatcher.OnPost(receiveMessage)
+
+		if ok, text := b.Dispatcher.IsHelp(receiveMessage); ok {
+			postMessage := receiveMessage
+			postMessage.Content = text
+			b.CreatePost(postMessage)
+		} else {
+			b.Dispatcher.OnPost(receiveMessage)
+		}
 	} else {
 		b.log.Debugf("Received message::message_deleted event on Channel ID %s", message.Channel)
 	}

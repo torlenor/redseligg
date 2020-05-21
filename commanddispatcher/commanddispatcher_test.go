@@ -1,6 +1,7 @@
 package commanddispatcher
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -68,6 +69,8 @@ func TestCommandDispatcher(t *testing.T) {
 	assert.Equal(expectedCommand, receiver.lastReceivedCmd)
 	assert.Equal(expectedContent, receiver.lastReceivedContent)
 	assert.Equal(expectedPost, receiver.lastReceivedPost)
+
+	assert.Equal(fmt.Sprintf("The following commands are available: ~%s\nNote: Some of them are only available for mods.", expectedCommand), dispatcher.getHelpText())
 
 	dispatcher.Unregister(expectedCommand)
 	assert.Equal(0, len(dispatcher.receivers))
