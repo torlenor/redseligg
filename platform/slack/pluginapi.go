@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/torlenor/redseligg/model"
-	"github.com/torlenor/redseligg/plugin"
 	"github.com/torlenor/redseligg/storage"
 	"github.com/torlenor/redseligg/utils"
 )
@@ -13,18 +12,6 @@ var version string
 
 // GetStorage returns the storage or nil if none is provided by the platform
 func (b *Bot) GetStorage() storage.Storage { return b.storage }
-
-// RegisterCommand registers a custom slash or ! command, depending on what the bot supports.
-func (b *Bot) RegisterCommand(p plugin.Hooks, command string) error {
-	b.dispatcher.Register(command, p)
-	return nil
-}
-
-// UnRegisterCommand unregisters a command previously registered via RegisterCommand.
-func (b *Bot) UnRegisterCommand(command string) error {
-	b.UnRegisterCommand(command)
-	return nil
-}
 
 // GetUsers a list of users based on search options.
 func (b *Bot) GetUsers() ([]model.User, error) { return nil, nil }

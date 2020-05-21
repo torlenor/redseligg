@@ -47,8 +47,7 @@ type api interface {
 type Bot struct {
 	platform.BotImpl
 
-	dispatcher *commanddispatcher.CommandDispatcher
-	storage    storage.Storage
+	storage storage.Storage
 
 	api api
 
@@ -87,11 +86,11 @@ func CreateDiscordBotWithAPI(api api, storage storage.Storage, commandDispatcher
 				platform.FeatureMessageDelete:  true,
 				platform.FeatureReactionNotify: true,
 			},
+			Dispatcher: commandDispatcher,
 		},
 
-		api:        api,
-		dispatcher: commandDispatcher,
-		storage:    storage,
+		api:     api,
+		storage: storage,
 
 		token: cfg.Token,
 		ws:    ws,

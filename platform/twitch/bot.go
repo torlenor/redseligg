@@ -36,8 +36,7 @@ type webSocketClient interface {
 type Bot struct {
 	platform.BotImpl
 
-	dispatcher *commanddispatcher.CommandDispatcher
-	storage    storage.Storage
+	storage storage.Storage
 
 	plugins []plugin.Hooks
 
@@ -57,11 +56,11 @@ func CreateTwitchBot(cfg botconfig.TwitchConfig, storage storage.Storage, comman
 			ProvidedFeatures: map[string]bool{
 				platform.FeatureMessagePost: true,
 			},
+			Dispatcher: commandDispatcher,
 		},
 
-		dispatcher: commandDispatcher,
-		storage:    storage,
-		cfg:        cfg,
+		storage: storage,
+		cfg:     cfg,
 
 		ws: ws,
 	}
@@ -139,7 +138,7 @@ func (b *Bot) messageLoop() {
 				for _, plugin := range b.plugins {
 					plugin.OnPost(post)
 				}
-				b.dispatcher.OnPost(post)
+				b.Dispatcher.OnPost(post)
 			} else {
 				log.Warnf("Params not long enough")
 			}

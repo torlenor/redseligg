@@ -3,9 +3,11 @@ package platform
 import (
 	"context"
 
+	"github.com/torlenor/redseligg/commanddispatcher"
 	"github.com/torlenor/redseligg/plugin"
 )
 
+// All currently supported features a platform can support
 const (
 	FeatureMessagePost    string = "FEATURE_MESSAGE_POST"
 	FeatureMessageUpdate  string = "FEATURE_MESSAGE_UPDATE"
@@ -50,9 +52,23 @@ type BotInfo struct {
 // Embed this struct to get a default implementation of the plugin API for the bot.
 type BotImpl struct {
 	ProvidedFeatures map[string]bool
+
+	Dispatcher *commanddispatcher.CommandDispatcher
 }
 
 // HasFeature returns true if the bot serving the API implements the feature.
 func (b *BotImpl) HasFeature(feature string) bool {
 	return b.ProvidedFeatures[feature]
+}
+
+// RegisterCommand registers a custom slash or ! command, depending on what the bot supports.
+func (b *BotImpl) RegisterCommand(p plugin.Hooks, command string) error {
+	b.Dispatcher.Register(command, p)
+	return nil
+}
+
+// UnRegisterCommand unregisters a command previously registered via RegisterCommand.
+func (b *BotImpl) UnRegisterCommand(command string) error {
+	b.Dispatcher.Unregister(command)
+	return nil
 }

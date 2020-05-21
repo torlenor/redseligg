@@ -45,7 +45,7 @@ func (b *Bot) dispatchMessage(msg messageCreate) {
 		plugin.OnPost(receiveMessage)
 	}
 
-	b.dispatcher.OnPost(receiveMessage)
+	b.Dispatcher.OnPost(receiveMessage)
 }
 
 func (b *Bot) handleMessageCreate(data json.RawMessage) {

@@ -35,8 +35,6 @@ type Bot struct {
 
 	config botconfig.MattermostConfig
 
-	dispatcher *commanddispatcher.CommandDispatcher
-
 	ws *websocket.Conn
 
 	token string
@@ -98,10 +96,15 @@ func CreateMattermostBot(cfg botconfig.MattermostConfig, commandDispatcher *comm
 	log.Printf("MattermostBot is CREATING itself")
 
 	b := Bot{
+		BotImpl: platform.BotImpl{
+			ProvidedFeatures: map[string]bool{
+				platform.FeatureMessagePost: true,
+			},
+			Dispatcher: commandDispatcher,
+		},
+
 		config: cfg,
 		log:    log,
-
-		dispatcher: commandDispatcher,
 
 		lastWsSeqNumber: 0,
 

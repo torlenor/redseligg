@@ -58,5 +58,5 @@ func (b *Bot) handleEventPosted(data []byte) {
 	for _, plugin := range b.plugins {
 		plugin.OnPost(receiveMessage)
 	}
-
+	b.Dispatcher.OnPost(receiveMessage)
 }

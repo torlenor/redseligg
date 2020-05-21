@@ -32,8 +32,7 @@ type webSocketClient interface {
 type Bot struct {
 	platform.BotImpl
 
-	dispatcher *commanddispatcher.CommandDispatcher
-	storage    storage.Storage
+	storage storage.Storage
 
 	config botconfig.SlackConfig
 	log    *logrus.Entry
@@ -70,13 +69,13 @@ func CreateSlackBot(cfg botconfig.SlackConfig, storage storage.Storage, commandD
 				platform.FeatureMessageDelete:  true,
 				platform.FeatureReactionNotify: true,
 			},
+			Dispatcher: commandDispatcher,
 		},
 
 		config: cfg,
 		log:    log,
 
-		dispatcher: commandDispatcher,
-		storage:    storage,
+		storage: storage,
 
 		ws: ws,
 

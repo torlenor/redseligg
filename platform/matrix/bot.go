@@ -20,8 +20,6 @@ type Bot struct {
 	platform.BotImpl
 	api api
 
-	dispatcher *commanddispatcher.CommandDispatcher
-
 	pollingDone chan bool
 
 	pollingInterval time.Duration
@@ -39,8 +37,13 @@ type Bot struct {
 func createMatrixBotWithAPI(api api, username string, password string, commandDispatcher *commanddispatcher.CommandDispatcher) (*Bot, error) {
 	log.Printf("MatrixBot is CREATING itself")
 	b := Bot{
-		api:        api,
-		dispatcher: commandDispatcher,
+		BotImpl: platform.BotImpl{
+			ProvidedFeatures: map[string]bool{
+				platform.FeatureMessagePost: true,
+			},
+			Dispatcher: commandDispatcher,
+		},
+		api: api,
 	}
 
 	err := b.api.login(username, password)
