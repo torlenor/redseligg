@@ -245,7 +245,7 @@ When `onlymods` is set to `true`, only the users which are listed in `mods` are 
 To start a giveaway in the current channel type
 
 ```
-!gstart <time> <secretword> [winners] [prize]
+!giveaway start <time> <secretword> [winners] [prize]
 ```
 
 * `<time>` is the time the giveaway should run. It should include s/m/h to indicate seconds/minutes/hours.
@@ -256,16 +256,16 @@ To start a giveaway in the current channel type
 Example:
 
 ```
-!gstart 1m hello 2 Bananas
+!giveaway start 1m hello 2 Bananas
 ```
 
 #### Ending a giveaway
 
-To stop a currently running giveaway type `!gend`.
+To stop a currently running giveaway type `!giveaway end`.
 
 #### Rerolling the winner
 
-Type `!greroll` to pick a new winner from the last ended giveaway.
+Type `!giveaway reroll` to pick a new winner from the last ended giveaway.
 
 ### HTTPPingPlugin
 

@@ -8,12 +8,11 @@ import (
 	"github.com/torlenor/redseligg/utils"
 )
 
+var command = "giveaway"
+
 // OnRun implements the hook from the bot
 func (p *GiveawayPlugin) OnRun() {
-	p.API.RegisterCommand(p, "gstart")
-	p.API.RegisterCommand(p, "gend")
-	p.API.RegisterCommand(p, "greroll")
-	p.API.RegisterCommand(p, "ghelp")
+	p.API.RegisterCommand(p, command)
 
 	p.ticker = time.NewTicker(1000 * time.Millisecond)
 	p.tickerDoneChan = make(chan bool)
@@ -40,6 +39,8 @@ func (p *GiveawayPlugin) OnStop() {
 		p.ticker.Stop()
 		p.tickerDoneChan <- true
 	}
+
+	p.API.UnRegisterCommand(command)
 }
 
 // OnPost implements the hook from the Bot
@@ -62,18 +63,19 @@ func (p *GiveawayPlugin) OnCommand(cmd string, content string, post model.Post) 
 		return
 	}
 
+	subcommand, arguments := utils.ExtractSubCommandAndArgsString(content)
+
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		// TODO: Giveaway plugin should use !giveaway as base command and then start, end, reroll as sub commands
-		if cmd == "gstart" && len(content) > 0 {
-			p.onCommandGStart(content, post)
+		if subcommand == "start" && len(arguments) > 0 {
+			p.onCommandGStart(arguments, post)
 			return
-		} else if cmd == "gend" {
+		} else if subcommand == "end" {
 			p.onCommandGEnd(post)
 			return
-		} else if cmd == "greroll" {
+		} else if subcommand == "reroll" {
 			p.onCommandGReroll(post)
 			return
-		} else if (cmd == "gstart" && len(content) == 0) || cmd == "ghelp" {
+		} else if (subcommand == "start" && len(arguments) == 0) || subcommand == "help" {
 			p.returnHelp(post.ChannelID)
 			return
 		}

@@ -29,3 +29,15 @@ func StringSliceContains(s []string, e string) bool {
 	}
 	return false
 }
+
+// ExtractSubCommandAndArgsString returns the string splitted in the first word and the rest.
+func ExtractSubCommandAndArgsString(message string) (subcommand string, argument string) {
+	splitted := strings.Split(message, " ")
+	if len(splitted) > 0 {
+		subcommand = splitted[0]
+	}
+	if len(splitted) > 1 {
+		argument = strings.Join(splitted[1:], " ")
+	}
+	return subcommand, argument
+}

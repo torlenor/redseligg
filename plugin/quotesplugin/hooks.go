@@ -1,8 +1,6 @@
 package quotesplugin
 
 import (
-	"strings"
-
 	"github.com/torlenor/redseligg/model"
 	"github.com/torlenor/redseligg/utils"
 )
@@ -23,15 +21,7 @@ func (p *QuotesPlugin) OnCommand(cmd string, content string, post model.Post) {
 		return
 	}
 
-	splitted := strings.Split(content, " ")
-	var subcommand string
-	var argument string
-	if len(splitted) > 0 {
-		subcommand = splitted[0]
-	}
-	if len(splitted) > 1 {
-		argument = strings.Join(splitted[1:], " ")
-	}
+	subcommand, argument := utils.ExtractSubCommandAndArgsString(content)
 
 	if subcommand != "add" && subcommand != "remove" && subcommand != "help" {
 		// In case of raw quote command the subcommand is the actual argument to fetch
