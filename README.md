@@ -310,9 +310,9 @@ Provide the custom options in square brackets after the message, e.g.,
 
 #### Ending a vote
 
-Type '!voteend message' to end a vote. No additional choices will be counted. For example to end the vote started above type
+Type `!vote end message` to end a vote. No additional choices will be counted. For example to end the vote started above type
 ```
-!voteend What is the best color?
+!vote end What is the best color?
 ```
 
 #### Deleting a vote

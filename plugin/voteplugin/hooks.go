@@ -9,10 +9,12 @@ import (
 
 // OnRun implements the hook from the Boot
 func (p *VotePlugin) OnRun() {
-	// TODO: Use only one vote command instead of three separate ones
-	p.API.RegisterCommand(p, "vote")
-	p.API.RegisterCommand(p, "voteend")
-	p.API.RegisterCommand(p, "votehelp")
+	p.API.RegisterCommand(p, command)
+}
+
+// OnStop implements the hook from the Boot
+func (p *VotePlugin) OnStop() {
+	p.API.RegisterCommand(p, command)
 }
 
 // OnCommand implements the hook from the Bot
@@ -21,17 +23,19 @@ func (p *VotePlugin) OnCommand(cmd string, content string, post model.Post) {
 		return
 	}
 
+	subcommand, arguments := utils.ExtractSubCommandAndArgsString(content)
+
 	if !p.cfg.OnlyMods || utils.StringSliceContains(p.cfg.Mods, post.User.Name) {
-		if cmd == "vote" && len(content) > 0 {
-			p.onCommandVoteStart(content, post)
+		if subcommand != "end" && subcommand != "help" && len(arguments) > 0 {
+			p.onCommandVoteStart(subcommand+" "+arguments, post)
 			return
-		} else if cmd == "voteend" && len(content) > 0 {
-			p.onCommandVoteEnd(content, post)
+		} else if subcommand == "end" && len(arguments) > 0 {
+			p.onCommandVoteEnd(arguments, post)
 			return
-		} else if cmd == "voteend" {
+		} else if subcommand == "end" {
 			p.returnVoteEndHelp(post.ChannelID)
 			return
-		} else if (cmd == "vote" && len(content) == 0) || cmd == "votehelp" {
+		} else if (len(subcommand) == 0 && len(arguments) == 0) || subcommand == "help" {
 			p.returnHelp(post.ChannelID)
 			return
 		}

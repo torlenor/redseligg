@@ -22,8 +22,8 @@ var providedFeatures = map[string]bool{
 }
 
 var commandVote = "vote"
-var commandVoteEnd = "voteend"
-var commandVoteHelp = "votehelp"
+var contentCommandVoteEnd = "!vote end"
+var contentCommandVoteHelp = "!vote help"
 
 func TestCreateVotePlugin(t *testing.T) {
 	assert := assert.New(t)
@@ -93,8 +93,9 @@ func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!votehelp"
-	p.OnCommand(commandVoteHelp, content, postToPlugin)
+	postToPlugin.Content = contentCommandVoteHelp
+	content = "help"
+	p.OnCommand(commandVote, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -169,14 +170,14 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 	}
 
 	api.Reset()
-	content := "something else"
-	postToPlugin.Content = "!voteend " + content
+	content := "end something else"
+	postToPlugin.Content = "!vote end " + content
 	expectedPostFromPlugin := model.Post{
 		ChannelID: expectedChannel,
 		Content:   "No vote running with that description in this channel. Use the vote command to start a new one.",
 		IsPrivate: false,
 	}
-	p.OnCommand(commandVoteEnd, content, postToPlugin)
+	p.OnCommand(commandVote, content, postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
@@ -193,7 +194,7 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!voteend " + voteText
+	postToPlugin.Content = "!vote end " + voteText
 	expectedPostFromPlugin = model.Post{
 		ChannelID: expectedChannel,
 		Content:   "\n*" + voteText + "*\n:one:: Yes\n:two:: No\nThis vote has ended, thanks for participating!",
@@ -203,7 +204,7 @@ func TestVotePlugin_CreateAndEndSimpleVote(t *testing.T) {
 		ID:      expectedMessageID,
 		Channel: expectedChannel,
 	}
-	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
+	p.OnCommand(commandVote, "end "+voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -284,9 +285,9 @@ func TestVotePlugin_SimpleVoteCounting(t *testing.T) {
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
 
 	api.Reset()
-	postToPlugin.Content = "!voteend " + voteText
+	postToPlugin.Content = "!vote end " + voteText
 	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: Yes\n:two:: No - 1\nThis vote has ended, thanks for participating!"
-	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
+	p.OnCommand(commandVote, "end "+voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -359,7 +360,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 
 	// If the vote has ended, we shall be allowed to create it again
 	api.Reset()
-	postToPlugin.Content = "!voteend " + voteText
+	postToPlugin.Content = "!vote end " + voteText
 	postToPlugin.ChannelID = expectedChannel
 	api.PostResponse.PostedMessageIdent.Channel = expectedChannel
 	api.PostResponse.PostedMessageIdent.ID = expectedMessageID
@@ -372,7 +373,7 @@ func TestVotePlugin_DoNotAllowCreationOfTheSameVoteTwice(t *testing.T) {
 		ID:      expectedMessageID,
 		Channel: expectedChannel,
 	}
-	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
+	p.OnCommand(commandVote, "end "+voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -429,7 +430,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	postToPlugin.Content = "!voteend " + voteText
+	postToPlugin.Content = "!vote end " + voteText
 	expectedPostFromPlugin = model.Post{
 		ChannelID: expectedChannel,
 		Content:   "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + "\nThis vote has ended, thanks for participating!",
@@ -439,7 +440,7 @@ func TestVotePlugin_CreateAndEndCustomVote(t *testing.T) {
 		ID:      expectedMessageID,
 		Channel: expectedChannel,
 	}
-	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
+	p.OnCommand(commandVote, "end "+voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
@@ -554,9 +555,9 @@ func TestVotePlugin_CustomVoteCounting(t *testing.T) {
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)
 
 	api.Reset()
-	postToPlugin.Content = "!voteend " + voteText
+	postToPlugin.Content = "!vote end " + voteText
 	expectedPostFromPlugin.Content = "\n*" + voteText + "*\n:one:: " + customOptions[0] + "\n:two:: " + customOptions[1] + "\n:three:: " + customOptions[2] + " - 1\nThis vote has ended, thanks for participating!"
-	p.OnCommand(commandVoteEnd, voteText, postToPlugin)
+	p.OnCommand(commandVote, "end "+voteText, postToPlugin)
 	assert.Equal(true, api.WasUpdatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastUpdatePostPost)
 	assert.Equal(expectedMessageIDFromPlugin, api.LastUpdatePostMessageID)

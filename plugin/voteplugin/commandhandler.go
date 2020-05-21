@@ -9,8 +9,8 @@ import (
 
 const (
 	// TODO: Add API call to get callPrefix for commands
-	helpText        = "Type 'vote What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
-	voteEndHelpText = "To end a vote type voteend description text of the vote."
+	helpText        = "Type '" + command + " What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
+	voteEndHelpText = "To end a vote type `" + command + " end description text of the vote`."
 )
 
 func (p *VotePlugin) returnHelp(channelID string) {
