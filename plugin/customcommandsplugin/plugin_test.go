@@ -104,7 +104,7 @@ func TestCustomCommandsPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!" + command
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   helpText,
+		Content:   fmt.Sprintf(helpText, api.GetCallPrefix(), p.API.GetCallPrefix()),
 		IsPrivate: false,
 	}
 	p.OnCommand(command, "", postToPlugin)
@@ -113,14 +113,14 @@ func TestCustomCommandsPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 
 	api.Reset()
 	postToPlugin.Content = "!customcommand add"
-	expectedPostFromPlugin.Content = helpTextAdd
+	expectedPostFromPlugin.Content = fmt.Sprintf(helpTextAdd, api.GetCallPrefix(), p.API.GetCallPrefix())
 	p.OnCommand(command, "add", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
 	postToPlugin.Content = "!customcommand remove"
-	expectedPostFromPlugin.Content = helpTextRemove
+	expectedPostFromPlugin.Content = fmt.Sprintf(helpTextRemove, api.GetCallPrefix(), p.API.GetCallPrefix())
 	p.OnCommand(command, "remove", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)

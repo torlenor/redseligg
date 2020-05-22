@@ -140,7 +140,7 @@ func splitCommand(text string) (c string, customCommand string, msg string, err 
 	return
 }
 
-// onCommand handles a !customcommand command.
+// onCommand handles a customcommand command.
 func (p *CustomCommandsPlugin) onCommand(content string, post model.Post) {
 	if content == "add" {
 		p.returnHelpAdd(post.ChannelID)
@@ -152,7 +152,7 @@ func (p *CustomCommandsPlugin) onCommand(content string, post model.Post) {
 
 	c, customCommand, message, err := splitCommand(content)
 	if err != nil {
-		p.API.LogError(fmt.Sprintf("Error parsing !customcommand command '%s': %s", post.Content, err))
+		p.API.LogError(fmt.Sprintf("Error parsing %scustomcommand command '%s': %s", p.API.GetCallPrefix(), content, err))
 		p.returnHelp(post.ChannelID)
 		return
 	}
