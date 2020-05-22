@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	// TODO (#41): Add API call to get callPrefix for commands
 	helpText        = "Type '%s" + command + " What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
 	helpTextVoteEnd = "To end a vote type `%s" + command + " end description text of the vote`."
 )
