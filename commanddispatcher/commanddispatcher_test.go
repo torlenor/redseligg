@@ -75,3 +75,115 @@ func TestCommandDispatcher(t *testing.T) {
 	dispatcher.Unregister(expectedCommand)
 	assert.Equal(0, len(dispatcher.receivers))
 }
+
+func TestCommandDispatcher_GetCallPrefix(t *testing.T) {
+	type fields struct {
+		callPrefix string
+		receivers  map[string]receiver
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "prefix !",
+			fields: fields{callPrefix: "!"},
+			want:   "!",
+		},
+		{
+			name:   "prefix abc",
+			fields: fields{callPrefix: "abc"},
+			want:   "abc",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &CommandDispatcher{
+				callPrefix: tt.fields.callPrefix,
+				receivers:  tt.fields.receivers,
+			}
+			if got := c.GetCallPrefix(); got != tt.want {
+				t.Errorf("CommandDispatcher.GetCallPrefix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCommandDispatcher_IsHelp(t *testing.T) {
+	type fields struct {
+		callPrefix string
+		receivers  map[string]receiver
+	}
+	type args struct {
+		post model.Post
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+		want1  string
+	}{
+		{
+			name:   "Default call prefix: is help",
+			fields: fields{callPrefix: "!"},
+			args: args{
+				post: model.Post{Content: "!help"},
+			},
+			want:  true,
+			want1: "The following commands are available: \nNote: Some of them are only available for mods.",
+		},
+		{
+			name:   "Default call prefix: is not help",
+			fields: fields{callPrefix: "!"},
+			args: args{
+				post: model.Post{Content: "!nothelp"},
+			},
+			want:  false,
+			want1: "",
+		},
+		{
+			name:   "Default call prefix: also not help",
+			fields: fields{callPrefix: "!"},
+			args: args{
+				post: model.Post{Content: "!helpabcabc"},
+			},
+			want:  false,
+			want1: "",
+		},
+		{
+			name:   "Other call prefix: is help",
+			fields: fields{callPrefix: "abc"},
+			args: args{
+				post: model.Post{Content: "abchelp"},
+			},
+			want:  true,
+			want1: "The following commands are available: \nNote: Some of them are only available for mods.",
+		},
+		{
+			name:   "Other call prefix: is not help",
+			fields: fields{callPrefix: "abc"},
+			args: args{
+				post: model.Post{Content: "abcnothelp"},
+			},
+			want:  false,
+			want1: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &CommandDispatcher{
+				callPrefix: tt.fields.callPrefix,
+				receivers:  tt.fields.receivers,
+			}
+			got, got1 := c.IsHelp(tt.args.post)
+			if got != tt.want {
+				t.Errorf("CommandDispatcher.IsHelp() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("CommandDispatcher.IsHelp() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}

@@ -55,6 +55,9 @@ func (b *MockAPI) RegisterCommand(p Hooks, command string) error { return nil }
 // UnRegisterCommand unregisters a command previously registered via RegisterCommand.
 func (b *MockAPI) UnRegisterCommand(command string) error { return nil }
 
+// GetCallPrefix returns the current command call prefix.
+func (b *MockAPI) GetCallPrefix() string { return "!" }
+
 // GetUsers a list of all users the bot knows.
 func (b *MockAPI) GetUsers() ([]model.User, error) { return nil, nil }
 

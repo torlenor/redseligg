@@ -56,7 +56,7 @@ func (c *CommandDispatcher) Unregister(cmd string) {
 	delete(c.receivers, cmd)
 }
 
-// OnPost feeds a post to the CommandDispatcher which will then do its magic
+// OnPost feeds a post to the CommandDispatcher which will then do its magic.
 func (c *CommandDispatcher) OnPost(post model.Post) {
 	if len(post.Content) < 2 {
 		return
@@ -78,7 +78,7 @@ func (c *CommandDispatcher) OnPost(post model.Post) {
 	}
 }
 
-// IsHelp returns true and the help message if the post contains a help command
+// IsHelp returns true and the help message if the post contains a help command.
 func (c *CommandDispatcher) IsHelp(post model.Post) (bool, string) {
 	if len(post.Content) < 2 {
 		return false, ""
@@ -107,4 +107,9 @@ func (c *CommandDispatcher) getHelpText() string {
 	}
 	helptext += "\nNote: Some of them are only available for mods."
 	return helptext
+}
+
+// GetCallPrefix returns the current call prefix.
+func (c *CommandDispatcher) GetCallPrefix() string {
+	return c.callPrefix
 }

@@ -77,3 +77,8 @@ func (b *BotImpl) UnRegisterCommand(command string) error {
 	b.Dispatcher.Unregister(command)
 	return nil
 }
+
+// GetCallPrefix returns the current command call prefix.
+func (b *BotImpl) GetCallPrefix() string {
+	return b.Dispatcher.GetCallPrefix()
+}
