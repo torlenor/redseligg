@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.0.5](https://github.com/torlenor/redseligg/releases/tag/0.0.5) (TBD)
+## [0.0.5](https://github.com/torlenor/redseligg/releases/tag/0.0.5) (2020-05-22)
 
 **Implemented enhancements:**
 

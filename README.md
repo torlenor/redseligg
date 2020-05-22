@@ -197,6 +197,8 @@ To configure a SQLite3 storage, add a section of the form
 
 to the bot for which you want to enable the storage (in the example above for a bot called 'slack'). The plugins for this bot will automatically use that storage.
 
+Note: This is only supported in the pre-built binaries for Linux. Feel free to build it yourself if you want that support.
+
 ## Custom call prefix
 
 It is possible to specify a custom call prefix for the commands by adding a section
