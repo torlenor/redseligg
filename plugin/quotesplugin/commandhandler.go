@@ -16,16 +16,16 @@ var now = time.Now
 const (
 	identFieldList = "list"
 
-	helpText       = "Type `" + command + " add <your quote>` to add a new quote."
-	helpTextRemove = "Type `" + command + " remove <your quote>` or `" + command + " remove (ID)` to remove a quote."
+	helpText       = "Type `%s" + command + " add <your quote>` to add a new quote."
+	helpTextRemove = "Type `%s" + command + " remove <your quote>` or `%s" + command + " remove (ID)` to remove a quote."
 )
 
 func (p *QuotesPlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, helpText)
+	p.returnMessage(channelID, fmt.Sprintf(helpText, p.API.GetCallPrefix()))
 }
 
 func (p *QuotesPlugin) returnHelpRemove(channelID string) {
-	p.returnMessage(channelID, helpTextRemove)
+	p.returnMessage(channelID, fmt.Sprintf(helpTextRemove, p.API.GetCallPrefix(), p.API.GetCallPrefix()))
 }
 
 func (p *QuotesPlugin) returnMessage(channelID, msg string) {
@@ -170,7 +170,7 @@ func (p *QuotesPlugin) onCommandQuoteRemove(argument string, post model.Post) {
 func (p *QuotesPlugin) onCommandQuote(argument string, post model.Post) {
 	currentList := p.getQuotesList()
 	if len(currentList.UUIDs) == 0 {
-		p.returnMessage(post.ChannelID, "No quotes found. Use the command `"+command+" add <your quote>` to add a new one.")
+		p.returnMessage(post.ChannelID, fmt.Sprintf("No quotes found. Use the command `%s%s add <your quote>` to add a new one.", p.API.GetCallPrefix(), command))
 		return
 	}
 

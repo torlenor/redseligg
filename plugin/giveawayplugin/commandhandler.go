@@ -19,7 +19,7 @@ func parseTimeStringToDuration(timeStr string) (time.Duration, error) {
 }
 
 func (p *GiveawayPlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, "Type `"+command+" start <time> <secretword> [winners] [prize]` to start a new giveaway.")
+	p.returnMessage(channelID, fmt.Sprintf("Type `%s%s start <time> <secretword> [winners] [prize]` to start a new giveaway.", p.API.GetCallPrefix(), command))
 }
 
 func (p *GiveawayPlugin) returnMessage(channelID, msg string) {
@@ -87,7 +87,7 @@ func (p *GiveawayPlugin) onCommandGEnd(post model.Post) {
 		return
 	}
 
-	p.returnMessage(post.ChannelID, "No giveaway running. Use giveaway start command to start a new one.")
+	p.returnMessage(post.ChannelID, fmt.Sprintf("No giveaway running. Use `%s%s start` command to start a new one.", p.API.GetCallPrefix(), command))
 }
 
 func (p *GiveawayPlugin) onCommandGReroll(post model.Post) {
@@ -126,5 +126,5 @@ func (p *GiveawayPlugin) onCommandGReroll(post model.Post) {
 		return
 	}
 
-	p.returnMessage(post.ChannelID, "No previous giveaway in that channel. Use `"+command+" start` command to start a new one.")
+	p.returnMessage(post.ChannelID, fmt.Sprintf("No previous giveaway in that channel. Use `%s%s start` command to start a new one.", p.API.GetCallPrefix(), command))
 }

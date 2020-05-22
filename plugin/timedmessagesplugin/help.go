@@ -1,23 +1,39 @@
 package timedmessagesplugin
 
-import "github.com/torlenor/redseligg/model"
+import (
+	"fmt"
 
-const (
-	helpText       = "Use !tm add to add and !tm remove to remove timed messages"
-	helpTextAdd    = "Type !tm add <interval> <message text> to add a timed message"
-	helpTextRemove = "Type !tm remove <interval> <message text> or !tm remove all <message text> to remove all messages matching the <message text>"
+	"github.com/torlenor/redseligg/model"
 )
 
+const (
+	helpText       = "Use `%stm add` to add or `%stm remove` to remove timed messages"
+	helpTextAdd    = "Type `%stm add <interval> <message text>` to add a timed message"
+	helpTextRemove = "Type `%stm remove <interval> <message text>` or `%stm remove all <message text>` to remove all messages matching the <message text>"
+)
+
+func (p *TimedMessagesPlugin) helpText() string {
+	return fmt.Sprintf(helpText, p.API.GetCallPrefix(), p.API.GetCallPrefix())
+}
+
+func (p *TimedMessagesPlugin) helpTextAdd() string {
+	return fmt.Sprintf(helpTextAdd, p.API.GetCallPrefix())
+}
+
+func (p *TimedMessagesPlugin) helpTextRemove() string {
+	return fmt.Sprintf(helpTextRemove, p.API.GetCallPrefix(), p.API.GetCallPrefix())
+}
+
 func (p *TimedMessagesPlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, helpText)
+	p.returnMessage(channelID, p.helpText())
 }
 
 func (p *TimedMessagesPlugin) returnHelpAdd(channelID string) {
-	p.returnMessage(channelID, helpTextAdd)
+	p.returnMessage(channelID, p.helpTextAdd())
 }
 
 func (p *TimedMessagesPlugin) returnHelpRemove(channelID string) {
-	p.returnMessage(channelID, helpTextRemove)
+	p.returnMessage(channelID, p.helpTextRemove())
 }
 
 func (p *TimedMessagesPlugin) returnMessage(channelID, msg string) {
