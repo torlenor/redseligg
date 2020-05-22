@@ -77,7 +77,7 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!" + commandAdd
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   helpText,
+		Content:   fmt.Sprintf(helpText, api.GetCallPrefix()),
 		IsPrivate: false,
 	}
 	p.OnCommand(commandQuote, "add", postToPlugin)
@@ -94,7 +94,7 @@ func TestQuotesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	postToPlugin.Content = "!" + commandRemove
 	expectedPostFromPlugin = model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   helpTextRemove,
+		Content:   fmt.Sprintf(helpTextRemove, api.GetCallPrefix(), api.GetCallPrefix()),
 		IsPrivate: false,
 	}
 	p.OnCommand(commandQuote, "remove", postToPlugin)
@@ -269,7 +269,7 @@ func TestQuotesPlugin_GetQuote(t *testing.T) {
 
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No quotes found. Use the command `" + command + " add <your quote>` to add a new one.",
+		Content:   "No quotes found. Use the command `!" + command + " add <your quote>` to add a new one.",
 		IsPrivate: false,
 	}
 	p.OnCommand(commandQuote, "", postToPlugin)

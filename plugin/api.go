@@ -23,6 +23,9 @@ type API interface {
 	// UnRegisterCommand unregisters a command previously registered via RegisterCommand.
 	UnRegisterCommand(command string) error
 
+	// GetCallPrefix returns the current command call prefix.
+	GetCallPrefix() string
+
 	// GetUsers a list of all users the bot knows.
 	GetUsers() ([]model.User, error)
 

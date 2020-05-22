@@ -65,7 +65,7 @@ func TestGiveawayPluginHelpTextAndInvalidCommands(t *testing.T) {
 		IsPrivate: false,
 	}
 
-	expectedHelpMessage := "Type `giveaway start <time> <secretword> [winners] [prize]` to start a new giveaway."
+	expectedHelpMessage := "Type `!giveaway start <time> <secretword> [winners] [prize]` to start a new giveaway."
 
 	api.Reset()
 	postToPlugin.Content = contentCommandHelp
@@ -159,7 +159,7 @@ func TestGiveawayPluginCreateAndEndGiveaway(t *testing.T) {
 	postToPlugin.Content = contentCommandEnd
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No giveaway running. Use giveaway start command to start a new one.",
+		Content:   "No giveaway running. Use `!giveaway start` command to start a new one.",
 		IsPrivate: false,
 	}
 	p.OnCommand(commandGiveaway, "end", postToPlugin)
@@ -548,7 +548,7 @@ func TestGiveawayPluginCreateAndEndGiveawayAndReroll(t *testing.T) {
 	postToPlugin.Content = contentCommandReroll
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   "No previous giveaway in that channel. Use `giveaway start` command to start a new one.",
+		Content:   "No previous giveaway in that channel. Use `!giveaway start` command to start a new one.",
 		IsPrivate: false,
 	}
 	p.OnCommand(commandGiveaway, "reroll", postToPlugin)

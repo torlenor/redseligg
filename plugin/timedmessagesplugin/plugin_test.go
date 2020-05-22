@@ -104,7 +104,7 @@ func TestTimedMessagesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	api.Reset()
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   helpText,
+		Content:   p.helpText(),
 		IsPrivate: false,
 	}
 	p.OnCommand(command, "", postToPlugin)
@@ -112,13 +112,13 @@ func TestTimedMessagesPlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	expectedPostFromPlugin.Content = helpTextAdd
+	expectedPostFromPlugin.Content = p.helpTextAdd()
 	p.OnCommand(command, "add", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)
 
 	api.Reset()
-	expectedPostFromPlugin.Content = helpTextRemove
+	expectedPostFromPlugin.Content = p.helpTextRemove()
 	p.OnCommand(command, "remove", postToPlugin)
 	assert.Equal(true, api.WasCreatePostCalled)
 	assert.Equal(expectedPostFromPlugin, api.LastCreatePostPost)

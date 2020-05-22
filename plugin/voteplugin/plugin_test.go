@@ -85,7 +85,7 @@ func TestVotePlugin_HelpTextAndInvalidCommands(t *testing.T) {
 	content := ""
 	expectedPostFromPlugin := model.Post{
 		ChannelID: "CHANNEL ID",
-		Content:   helpText,
+		Content:   p.helpText(),
 		IsPrivate: false,
 	}
 	p.OnCommand(commandVote, content, postToPlugin)

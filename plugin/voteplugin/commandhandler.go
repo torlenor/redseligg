@@ -1,6 +1,7 @@
 package voteplugin
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -9,16 +10,24 @@ import (
 
 const (
 	// TODO (#41): Add API call to get callPrefix for commands
-	helpText        = "Type '" + command + " What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
-	voteEndHelpText = "To end a vote type `" + command + " end description text of the vote`."
+	helpText        = "Type '%s" + command + " What is the best color? [Red, Green, Blue]' to start a new vote.\nYou can omit the custom options in the [...] to initiate a simple Yes/No vote."
+	helpTextVoteEnd = "To end a vote type `%s" + command + " end description text of the vote`."
 )
 
+func (p *VotePlugin) helpText() string {
+	return fmt.Sprintf(helpText, p.API.GetCallPrefix())
+}
+
+func (p *VotePlugin) helpTextVoteEnd() string {
+	return fmt.Sprintf(helpTextVoteEnd, p.API.GetCallPrefix())
+}
+
 func (p *VotePlugin) returnHelp(channelID string) {
-	p.returnMessage(channelID, helpText)
+	p.returnMessage(channelID, p.helpText())
 }
 
 func (p *VotePlugin) returnVoteEndHelp(channelID string) {
-	p.returnMessage(channelID, voteEndHelpText)
+	p.returnMessage(channelID, p.helpTextVoteEnd())
 }
 
 func (p *VotePlugin) returnMessage(channelID, msg string) {
