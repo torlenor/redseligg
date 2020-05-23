@@ -14,9 +14,10 @@ import (
 	"github.com/torlenor/redseligg/logging"
 )
 
+var tableArchivePluginMessage = "archive_plugin_message"
+var tableCustomCommandsPluginCommands = "custom_commands_plugin_commands"
 var tableQuotesPluginQuote = "quotes_plugin_quote"
 var tableTimedMessagesPluginMessage = "timed_messages_plugin_message"
-var tableCustomCommandsPluginCommands = "custom_commands_plugin_commands"
 
 // SQLiteStorage is a SQLite implementation of a storage.
 type SQLiteStorage struct {

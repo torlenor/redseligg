@@ -85,3 +85,25 @@ func (b *SQLiteStorage) StoreCustomCommandsPluginCommands(botID, pluginID, ident
 
 	return nil
 }
+
+// StoreArchivePluginMessage stores data for ArchivePlugin
+func (b *SQLiteStorage) StoreArchivePluginMessage(botID, pluginID, identifier string, data storagemodels.ArchivePluginMessage) error {
+	insertSQL := fmt.Sprintf(`INSERT INTO %s(bot_id, plugin_id, identifier, timestamp, channel_id, channel, user_id, user_name, content, private) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, tableArchivePluginMessage)
+	statement, err := b.db.Prepare(insertSQL)
+	if err != nil {
+		return fmt.Errorf("Could not prepare sql statement: %s", err)
+	}
+	_, err = statement.Exec(botID, pluginID, identifier,
+		data.TImestamp,
+		data.ChannelID,
+		data.Channel,
+		data.UserID,
+		data.UserName,
+		data.Content,
+		data.IsPrivate)
+	if err != nil {
+		return fmt.Errorf("Could not insert data: %s", err)
+	}
+
+	return nil
+}

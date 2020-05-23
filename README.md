@@ -217,15 +217,82 @@ In the future it is planed to support external Plugins via gRPC.
 
 Currently these Plugins are part of Redseligg:
 
-### EchoPlugin
+| Name | Type | Description |
+|---|---|---|
+| Archive | archive  | The Archive plugin stores all messages with their timestamps in the storage. |
+| CustomCommandsPlugin | customcommands | Allows to add custom commands which will return text. |
+| Echo | echo | The Echo plugin echos back all messages it received to the sender of the message. |
+| Giveaway | giveaway  | The Giveaway plugin lets you hold giveaways in your channel and let the bot pick a winner. |
+| HTTPPing | httpping | The HTTPPing plugin will try to contact a web server and reports back the request duration or an error if the URL was not reachable. |
+| Quotes | quotes | Lets users/viewers or mods add quotes and randomly fetch one. |
+| Roll | roll | Sends back a random number in a custom range. |
+| Timed Messages | timedmessages | Posts messages automatically at a given interval. |
+| Version | version | Returns the version of redseligg. |
+| Vote | vote | Initiate a vote in the channel about arbitrary topics. |
 
-The EchoPlugin echos back all messages it received to the sender of the message. It listens to messages which start with `!echo ` followed by text.
+The type column is the string that you have to use as "type" in the configuration for that particular plugin to activate/add it to the bot.
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "echo"
+```
+
+Below you find the configuration options and detailed descriptions for the various plugins.
+
+### Archive
+
+The Archive plugin stores all messages with their timestamps in the storage.
+
+### CustomCommands
+
+Allow mods to add custom commands which will return text.
+
+#### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "customcommands"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to add or removed custom commands. Per default everybody is allowed.
+
+#### Adding a custom command
+
+To add a custom command type
+
+```
+!customcommand add <customCommand> <your message>
+```
+
+Example:
+```
+!customcommand add hello Hi there!
+```
+
+When a user then types `!hello` in chat the plugin will answer with `Hi there!`.
+
+#### Removing a custom command
+
+Use
+```
+!customcommand remove <customCommand>
+```
+, e.g., `!tm remove hello`, to remove the custom command.
+
+### Echo
+
+The Echo plugin echos back all messages it received to the sender of the message. It listens to messages which start with `!echo ` followed by text.
 
 #### Configuration Options
 
 - **onlywhispers**: When set to true the EchoPlugin only echos in whispers (when supported by the used Bot)
 
-### GiveawayPlugin
+### Giveaway
 
 Lets you hold giveaways in your channel and let the bot pick a winner.
 
@@ -269,19 +336,129 @@ To stop a currently running giveaway type `!giveaway end`.
 
 Type `!giveaway reroll` to pick a new winner from the last ended giveaway.
 
-### HTTPPingPlugin
+### HTTPPing
 
-The HTTPPingPlugin listens to messages starting with `!httpping ` followed by an URL. If the URL is valid it will try to contact the server and reports back the request duration or an error if the URL was not reachable.
+The HTTPPing plugin listens to messages starting with `!httpping ` followed by an URL. If the URL is valid it will try to contact the server and reports back the request duration or an error if the URL was not reachable.
 
-### RandomPlugin
+### Quotes
+
+Lets users/viewers or mods add quotes and randomly fetch one.
+
+#### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "quotes"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to perform certain actions. Per default everybody is allowed.
+
+#### Adding a quote
+
+To add a quote type
+
+```
+!quote add <your quote>
+```
+
+Example:
+```
+!quote add This is awesome!
+```
+
+#### Getting a quote
+
+```
+!quote
+```
+will return a random quote.
+
+```
+!quote 2
+```
+will return the 2nd quote in the list.
+
+The output will be similar to
+
+```
+123. "This is awesome!" - 2020-4-22, added by Somebody
+```
+
+#### Removing a quote
+
+Use 
+
+```
+!quote remove ID
+```
+
+to remove a quote.
+
+Example:
+
+```
+!quote remove 123
+```
+
+**Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
+
+### Roll
 
 This is a classic "Roll/Random" plugin which sends back a random number in the range [0,100] when it receives the `!roll` command. When it receives `!roll {PositiveNumber}` instead, it returns a random number in the range [0, {PositiveNumber}].
 
-### VersionPlugin
+### Timed Messages
 
-The VersionPlugin answers to `!version` with the version of the bot.
+Posts messages automatically at a given interval.
 
-### Vote Plugin
+#### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "timedmessages"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to add or removed timed messages. Per default everybody is allowed.
+
+#### Adding a timed message
+
+To add a timed message type
+
+```
+!tm add <interval> <your message>
+```
+
+Example:
+```
+!tm add 1m This is awesome!
+```
+
+#### Removing a timed message
+
+Use
+```
+!tm remove <interval> <your message>
+```
+, e.g., `!tm remove 1m This is awesome!`, to remove one message with a specific interval and text.
+
+or use
+```
+!tm remove all <your message>
+```
+, e.g., `!tm remove all This is awesome!`, to remove all message with a specific text, regardless of their interval.
+
+### Version
+
+The Version plugin answers to `!version` with the version of the bot.
+
+### Vote
 
 Initiate a vote in the channel about arbitrary topics.
 
@@ -305,7 +482,7 @@ Type `!vote message` to start the vote. The vote is limited to the channel where
 React with the emoji assigned to the options you want to vote for.
 
 #### Custom voting options
-Provide the custom options in square brackets after the message, e.g., 
+Provide the custom options in square brackets after the message, e.g.,
 ```
 !vote What is the best color? [Red, Green, Blue]
 ```
@@ -320,153 +497,3 @@ Type `!vote end message` to end a vote. No additional choices will be counted. F
 #### Deleting a vote
 
 Just delete the vote message.
-
-## Quotes Plugin
-
-Lets users/viewers or mods add quotes and randomly fetch one.
-
-### Configuration options
-
-Example:
-```toml
-[bots.some_bot.plugins.1]
-    type = "quotes"
-    [bots.some_bot.plugins.1.config]
-        mods = ["user"]
-        onlymods = true
-```
-
-When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to perform certain actions. Per default everybody is allowed.
-
-### Adding a quote
-
-To add a quote type
-
-```
-!quote add <your quote>
-```
-
-Example:
-```
-!quote add This is awesome!
-```
-
-### Getting a quote
-
-```
-!quote
-```
-will return a random quote.
-
-```
-!quote 2
-```
-will return the 2nd quote in the list.
-
-The output will be similar to
-
-```
-123. "This is awesome!" - 2020-4-22, added by Somebody
-```
-
-### Removing a quote
-
-Use 
-
-```
-!quote remove ID
-```
-
-to remove a quote.
-
-Example:
-
-```
-!quote remove 123
-```
-
-**Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
-
-## Timed Messages Plugin
-
-Post messages automatically at a given interval.
-
-### Configuration options
-
-Example:
-```toml
-[bots.some_bot.plugins.1]
-    type = "timedmessages"
-    [bots.some_bot.plugins.1.config]
-        mods = ["user"]
-        onlymods = true
-```
-
-When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to add or removed timed messages. Per default everybody is allowed.
-
-### Adding a timed message
-
-To add a timed message type
-
-```
-!tm add <interval> <your message>
-```
-
-Example:
-```
-!tm add 1m This is awesome!
-```
-
-### Removing a timed message
-
-Use
-```
-!tm remove <interval> <your message>
-```
-, e.g., `!tm remove 1m This is awesome!`, to remove one message with a specific interval and text.
-
-or use
-```
-!tm remove all <your message>
-```
-, e.g., `!tm remove all This is awesome!`, to remove all message with a specific text, regardless of their interval.
-
-## Custom Commands Plugin
-
-Allow mods to add custom commands which will return text.
-
-### Configuration options
-
-Example:
-```toml
-[bots.some_bot.plugins.1]
-    type = "customcommands"
-    [bots.some_bot.plugins.1.config]
-        mods = ["user"]
-        onlymods = true
-```
-
-When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to add or removed custom commands. Per default everybody is allowed.
-
-### Adding a custom command
-
-To add a custom command type
-
-```
-!customcommand add <customCommand> <your message>
-```
-
-Example:
-```
-!customcommand add hello Hi there!
-```
-
-When a user then types `!hello` in chat the plugin will answer with `Hi there!`.
-
-### Removing a custom command
-
-Use
-```
-!customcommand remove <customCommand>
-```
-, e.g., `!tm remove hello`, to remove the custom command.

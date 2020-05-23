@@ -2,6 +2,14 @@ package mongostorage
 
 import "github.com/torlenor/redseligg/storagemodels"
 
+type archivePluginMessageData struct {
+	BotID      string `bson:"bot_id"`
+	PluginID   string `bson:"plugin_id"`
+	Identifier string `bson:"identifier"`
+
+	Data storagemodels.ArchivePluginMessage `bson:"data"`
+}
+
 type quotesPluginQuoteData struct {
 	BotID      string `bson:"bot_id"`
 	PluginID   string `bson:"plugin_id"`
