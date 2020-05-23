@@ -220,7 +220,7 @@ Currently these Plugins are part of Redseligg:
 | Name | Type | Description |
 |---|---|---|
 | Archive | archive  | The Archive plugin stores all messages with their timestamps in the storage. |
-| CustomCommandsPlugin | customcommands | Allows to add custom commands which will return text. |
+| Custom Commands | customcommands | Allows to add custom commands which will return text. |
 | Echo | echo | The Echo plugin echos back all messages it received to the sender of the message. |
 | Giveaway | giveaway  | The Giveaway plugin lets you hold giveaways in your channel and let the bot pick a winner. |
 | HTTPPing | httpping | The HTTPPing plugin will try to contact a web server and reports back the request duration or an error if the URL was not reachable. |
