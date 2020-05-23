@@ -32,7 +32,7 @@ func (b *MongoStorage) StoreQuotesPluginQuotesList(botID, pluginID, identifier s
 	return nil
 }
 
-// StoreTimedMessagesPluginMessages stores data for TimedMessagesPlugin
+// StoreTimedMessagesPluginMessages stores data for TimedMessagesPlugin.
 func (b *MongoStorage) StoreTimedMessagesPluginMessages(botID, pluginID, identifier string, data storagemodels.TimedMessagesPluginMessages) error {
 	c := b.db.Collection(collectionPluginStorage)
 	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}
@@ -44,11 +44,25 @@ func (b *MongoStorage) StoreTimedMessagesPluginMessages(botID, pluginID, identif
 	return nil
 }
 
-// StoreCustomCommandsPluginCommands stores data for CustomCommandsPlugin
+// StoreCustomCommandsPluginCommands stores data for CustomCommandsPlugin.
 func (b *MongoStorage) StoreCustomCommandsPluginCommands(botID, pluginID, identifier string, data storagemodels.CustomCommandsPluginCommands) error {
 	c := b.db.Collection(collectionPluginStorage)
 	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}
 	_, err := c.ReplaceOne(context.Background(), filter, customCommandsPluginCommandsData{BotID: botID, PluginID: pluginID, Identifier: identifier, Data: data}, options.Replace().SetUpsert(true))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// StoreArchivePluginMessage stores data for ArchivePlugin.
+func (b *MongoStorage) StoreArchivePluginMessage(botID, pluginID, identifier string, data storagemodels.ArchivePluginMessage) error {
+	c := b.db.Collection(collectionPluginStorage)
+	filter := bson.M{fieldBotID: botID, fieldPluginID: pluginID, fieldIdentifier: identifier}
+	_, err := c.ReplaceOne(context.Background(), filter,
+		archivePluginMessageData{BotID: botID, PluginID: pluginID, Identifier: identifier, Data: data},
+		options.Replace().SetUpsert(true))
 	if err != nil {
 		return err
 	}

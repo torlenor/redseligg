@@ -2,6 +2,40 @@ package sqlitestorage
 
 import "fmt"
 
+func (s *SQLiteStorage) createTableArchivePluginMessage() error {
+	_, tableExists := s.db.Query("select * from " + tableArchivePluginMessage + ";")
+	if tableExists == nil {
+		s.log.Debugf("Table %s already exists. Skipping creation", tableArchivePluginMessage)
+		return nil
+	}
+
+	creatTableSQL := fmt.Sprintf(`CREATE TABLE %s (
+		"id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"bot_id" TEXT,
+		"plugin_id" TEXT,
+		"identifier" TEXT,
+		"timestamp" DATETIME,
+		"channel_id" TEXT,
+		"channel" TEXT,
+		"user_id" TEXT,
+		"user_name" TEXT,
+		"content" TEXT,
+		"private" BOOL
+	  );`, tableArchivePluginMessage)
+
+	s.log.Printf("Creating %s table...", tableArchivePluginMessage)
+	statement, err := s.db.Prepare(creatTableSQL)
+	if err != nil {
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+	s.log.Printf("%s table created", tableArchivePluginMessage)
+	return nil
+}
+
 func (s *SQLiteStorage) createTableQuotesPluginQuote() error {
 	_, tableExists := s.db.Query("select * from " + tableQuotesPluginQuote + ";")
 	if tableExists == nil {
@@ -96,7 +130,12 @@ func (s *SQLiteStorage) createTableCustomCommandsPluginCommands() error {
 }
 
 func (s *SQLiteStorage) createTables() error {
-	err := s.createTableQuotesPluginQuote()
+	err := s.createTableArchivePluginMessage()
+	if err != nil {
+		return err
+	}
+
+	err = s.createTableQuotesPluginQuote()
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/torlenor/redseligg/botconfig"
 
 	"github.com/torlenor/redseligg/platform"
+	"github.com/torlenor/redseligg/plugin/archiveplugin"
 	"github.com/torlenor/redseligg/plugin/customcommandsplugin"
 	"github.com/torlenor/redseligg/plugin/echoplugin"
 	"github.com/torlenor/redseligg/plugin/giveawayplugin"
@@ -26,6 +27,8 @@ func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botcon
 	var p platform.BotPlugin
 
 	switch pluginConfig.Type {
+	case "archive":
+		p = &archiveplugin.ArchivePlugin{}
 	case "customcommands":
 		rp, err := customcommandsplugin.New(pluginConfig)
 		if err != nil {
