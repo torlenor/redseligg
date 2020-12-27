@@ -13,6 +13,7 @@ import (
 	"github.com/torlenor/redseligg/plugin/httppingplugin"
 	"github.com/torlenor/redseligg/plugin/quotesplugin"
 	"github.com/torlenor/redseligg/plugin/rollplugin"
+	"github.com/torlenor/redseligg/plugin/rssplugin"
 	"github.com/torlenor/redseligg/plugin/timedmessagesplugin"
 	"github.com/torlenor/redseligg/plugin/versionplugin"
 	"github.com/torlenor/redseligg/plugin/voteplugin"
@@ -49,6 +50,12 @@ func (b *PluginFactory) CreatePlugin(botID, pluginID string, pluginConfig botcon
 			return nil, err
 		}
 		p = &rp
+	case "rss":
+		rp, err := rssplugin.New(pluginConfig)
+		if err != nil {
+			return nil, err
+		}
+		p = rp
 	case "httpping":
 		p = &httppingplugin.HTTPPingPlugin{}
 	case "quotes":

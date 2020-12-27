@@ -16,7 +16,6 @@
     token = "INSERT_DISCORD_TOKEN_HERE" # Used for signing into Discord as a bot user, see https://discordapp.com/developers/applications/
     id = "INSERT_DISCORD_CLIENT_ID_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
     secret = "INSERT_DISCORD_SECRET_HERE" # Used for OAUTH2 to join servers, see https://discordapp.com/developers/applications/
-    oauth2_callback = "http://localhost:8080" # Used for OAUTH2 and has to match the configured callback, see https://discordapp.com/developers/applications/
 
     [bots.discord.plugins.echo]
     enabled = false # Set to true to enable Echo plugin

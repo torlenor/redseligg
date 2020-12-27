@@ -129,12 +129,41 @@ func (s *SQLiteStorage) createTableCustomCommandsPluginCommands() error {
 	return nil
 }
 
+func (s *SQLiteStorage) createTableRssPluginSubscription() error {
+	_, tableExists := s.db.Query("select * from " + tableRssPluginSubscription + ";")
+	if tableExists == nil {
+		s.log.Debugf("Table %s already exists. Skipping creation", tableRssPluginSubscription)
+		return nil
+	}
+
+	creatTableSQL := fmt.Sprintf(`CREATE TABLE %s (
+		"id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"bot_id" TEXT,
+		"plugin_id" TEXT,
+		"identifier" TEXT,
+		"link" TEXT,
+		"channel_id" TEXT,
+		"last_posted_pub_date" DATETIME
+	  );`, tableRssPluginSubscription)
+
+	s.log.Printf("Creating %s table...", tableRssPluginSubscription)
+	statement, err := s.db.Prepare(creatTableSQL)
+	if err != nil {
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+	s.log.Printf("%s table created", tableRssPluginSubscription)
+	return nil
+}
+
 func (s *SQLiteStorage) createTables() error {
 	err := s.createTableArchivePluginMessage()
 	if err != nil {
 		return err
 	}
-
 	err = s.createTableQuotesPluginQuote()
 	if err != nil {
 		return err
@@ -144,6 +173,10 @@ func (s *SQLiteStorage) createTables() error {
 		return err
 	}
 	err = s.createTableCustomCommandsPluginCommands()
+	if err != nil {
+		return err
+	}
+	err = s.createTableRssPluginSubscription()
 	if err != nil {
 		return err
 	}

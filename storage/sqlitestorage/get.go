@@ -118,3 +118,32 @@ func (b *SQLiteStorage) GetCustomCommandsPluginCommands(botID, pluginID, identif
 
 	return commands, nil
 }
+
+// GetRssPluginSubscriptions returns a RssPluginSubscriptions.
+func (b *SQLiteStorage) GetRssPluginSubscriptions(botID, pluginID string) (storagemodels.RssPluginSubscriptions, error) {
+	row, err := b.db.Query(
+		fmt.Sprintf(`SELECT * FROM %s WHERE bot_id="%s" AND plugin_id="%s"`,
+			tableRssPluginSubscription,
+			botID,
+			pluginID))
+	if err != nil {
+		return storagemodels.RssPluginSubscriptions{}, err
+	}
+	defer row.Close()
+
+	subscriptions := storagemodels.RssPluginSubscriptions{}
+	for row.Next() {
+		var id int
+		var gotBotID string
+		var gotPluginID string
+		subscription := storagemodels.RssPluginSubscription{}
+		err := row.Scan(&id, &gotBotID, &gotPluginID, &subscription.Identifier, &subscription.Link, &subscription.ChannelID, &subscription.LastPostedPubDate)
+		if err != nil {
+			b.log.Errorf("Error parsing SQLite select: %s", err)
+			continue
+		}
+		subscriptions.Subscriptions = append(subscriptions.Subscriptions, subscription)
+	}
+
+	return subscriptions, nil
+}

@@ -410,6 +410,60 @@ Example:
 
 This is a classic "Roll/Random" plugin which sends back a random number in the range [0,100] when it receives the `!roll` command. When it receives `!roll {PositiveNumber}` instead, it returns a random number in the range [0, {PositiveNumber}].
 
+### RSS
+
+Subscribe to RSS feeds.
+
+#### Configuration options
+
+Example:
+```toml
+[bots.some_bot.plugins.1]
+    type = "rss"
+    [bots.some_bot.plugins.1.config]
+        mods = ["user"]
+        onlymods = true
+```
+
+When `onlymods` is set to `true`, only the users which are listed in `mods` are allowed to perform certain actions. Per default everybody is allowed.
+
+#### Adding a subscription
+
+To add a RSS subscription for the current channel type
+
+```
+!rss add <link>
+```
+
+Example:
+```
+!rss add http://some.link/news.xml
+```
+
+#### Getting a list of all subscriptions
+
+```
+!rss list
+```
+
+#### Removing a subscription
+
+Use 
+
+```
+!rss remove <link>
+```
+
+to remove a quote.
+
+Example:
+
+```
+!rss remove http://some.link/news.xml
+```
+
+**Note:** When `onlymods` is set to `true` in configuration, only mods are allowed to list all quotes.
+
 ### Timed Messages
 
 Posts messages automatically at a given interval.

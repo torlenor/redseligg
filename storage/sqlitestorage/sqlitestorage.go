@@ -18,6 +18,7 @@ var tableArchivePluginMessage = "archive_plugin_message"
 var tableCustomCommandsPluginCommands = "custom_commands_plugin_commands"
 var tableQuotesPluginQuote = "quotes_plugin_quote"
 var tableTimedMessagesPluginMessage = "timed_messages_plugin_message"
+var tableRssPluginSubscription = "rss_plugin_subscription"
 
 // SQLiteStorage is a SQLite implementation of a storage.
 type SQLiteStorage struct {

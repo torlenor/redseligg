@@ -107,3 +107,18 @@ func (b *SQLiteStorage) StoreArchivePluginMessage(botID, pluginID, identifier st
 
 	return nil
 }
+
+// StoreRssPluginSubscription takes a RssPluginSubscription and stores it.
+func (b *SQLiteStorage) StoreRssPluginSubscription(botID, pluginID, identifier string, data storagemodels.RssPluginSubscription) error {
+	insertSQL := fmt.Sprintf(`INSERT INTO %s(bot_id, plugin_id, identifier, link, channel_id, last_posted_pub_date) VALUES (?, ?, ?, ?, ?, ?)`, tableRssPluginSubscription)
+	statement, err := b.db.Prepare(insertSQL)
+	if err != nil {
+		return fmt.Errorf("Could not prepare sql statement: %s", err)
+	}
+	_, err = statement.Exec(botID, pluginID, identifier, data.Link, data.ChannelID, data.LastPostedPubDate)
+	if err != nil {
+		return fmt.Errorf("Could not insert data: %s", err)
+	}
+
+	return nil
+}
