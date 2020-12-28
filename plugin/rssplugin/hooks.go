@@ -27,6 +27,8 @@ func (p *RssPlugin) checkRssSubscriptions(t time.Time) {
 	}
 
 	for _, m := range subscriptions.Subscriptions {
+		newLastPostedPubDate := time.Now()
+		wasPosted := false
 		feed, err := parseRssFeedFromURL(m.Link)
 		if err != nil {
 			p.API.LogError(fmt.Sprintf("Unable to fetch RSS subscription for '%s' in channel %s: %s", m.Link, m.ChannelID, err))
@@ -37,10 +39,13 @@ func (p *RssPlugin) checkRssSubscriptions(t time.Time) {
 				p.API.CreatePost(model.Post{
 					ChannelID: m.ChannelID,
 					// TODO: Based on additional optional arguments when subscribing more than just the title of the RSS feed item should be posted
-					Content: item.Title,
+					Content: feed.Title + ": " + item.Title + "\n" + "<" + item.Link + ">",
 				})
+				wasPosted = true
 			}
-			m.LastPostedPubDate = time.Now()
+		}
+		if wasPosted {
+			m.LastPostedPubDate = newLastPostedPubDate
 			p.updateRssPluginSubscription(m)
 		}
 	}

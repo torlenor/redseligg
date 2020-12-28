@@ -59,8 +59,9 @@ func (p *RssPlugin) updateRssPluginSubscription(data storagemodels.RssPluginSubs
 
 func (p *RssPlugin) addRssSubscription(channelID, link string) error {
 	err := p.storeRssPluginSubscription(storagemodels.RssPluginSubscription{
-		Link:      link,
-		ChannelID: channelID,
+		Link:              link,
+		ChannelID:         channelID,
+		LastPostedPubDate: time.Now(),
 	})
 	if err != nil {
 		return fmt.Errorf("Could not add RSS subscription for link '%s' in channel '%s': %s", link, channelID, err)
@@ -135,9 +136,20 @@ func (p *RssPlugin) returnSubscriptionsList(channelID string) {
 	}
 
 	subscriptionsText := "RSS subscriptions for this channel:\n"
-	for i, s := range subscriptions.Subscriptions {
+	cnt := 0
+	lines := []string{}
+	for _, s := range subscriptions.Subscriptions {
 		if s.ChannelID == channelID {
-			subscriptionsText += fmt.Sprintf("%d. %s", i+1, s.Link)
+			cnt++
+			// subscriptionsText += fmt.Sprintf("%d. %s\n", cnt, s.Link)
+			lines = append(lines, fmt.Sprintf("%d. %s", cnt, s.Link))
+		}
+	}
+
+	for i, line := range lines {
+		subscriptionsText += line
+		if i < (len(lines) - 1) {
+			subscriptionsText += "\n"
 		}
 	}
 
