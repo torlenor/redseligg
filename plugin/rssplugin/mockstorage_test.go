@@ -64,7 +64,7 @@ func (b *MockStorage) DeleteRssPluginSubscription(botID, pluginID, identifier st
 
 // UpdateRssPluginSubscription takes a RssPluginSubscription and updates it.
 func (b *MockStorage) UpdateRssPluginSubscription(botID, pluginID, identifier string, data storagemodels.RssPluginSubscription) error {
-	// TODO: Test UpdateRssPluginSubscription behavior of RssPlugin
+	// TODO (#63): Test UpdateRssPluginSubscription behavior of RssPlugin
 
 	return nil
 }
