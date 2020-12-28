@@ -226,6 +226,7 @@ Currently these Plugins are part of Redseligg:
 | HTTPPing | httpping | The HTTPPing plugin will try to contact a web server and reports back the request duration or an error if the URL was not reachable. |
 | Quotes | quotes | Lets users/viewers or mods add quotes and randomly fetch one. |
 | Roll | roll | Sends back a random number in a custom range. |
+| RSS | rss | Subscribe to RSS feeds. |
 | Timed Messages | timedmessages | Posts messages automatically at a given interval. |
 | Version | version | Returns the version of redseligg. |
 | Vote | vote | Initiate a vote in the channel about arbitrary topics. |

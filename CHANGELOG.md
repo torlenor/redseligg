@@ -11,6 +11,7 @@
 **New plugins:**
 
 - Archive plugin: Stores all messages with their timestamps in the storage.
+- RSS Plugin: Subscribe to RSS feeds.
 
 ## [0.0.5](https://github.com/torlenor/redseligg/releases/tag/0.0.5) (2020-05-22)
 
