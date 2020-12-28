@@ -52,6 +52,11 @@
       [bots.slack.plugins.9.config]
         mods = ["user1", "user2"]
         onlymods = true
+    [bots.slack.plugins.10]
+      type = "rss"
+      [bots.slack.plugins.10.config]
+        mods = ["user1", "user2"]
+        onlymods = true
 
   [bots.mm]
     type = "mattermost"
