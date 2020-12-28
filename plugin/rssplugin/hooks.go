@@ -38,7 +38,7 @@ func (p *RssPlugin) checkRssSubscriptions(t time.Time) {
 			if item.PublishedParsed.Sub(m.LastPostedPubDate) > 0 {
 				p.API.CreatePost(model.Post{
 					ChannelID: m.ChannelID,
-					// TODO: Based on additional optional arguments when subscribing more than just the title of the RSS feed item should be posted
+					// TODO (#61): Based on additional optional arguments when subscribing more than just the title of the RSS feed item should be posted
 					Content: feed.Title + ": " + item.Title + "\n" + "<" + item.Link + ">",
 				})
 				wasPosted = true
