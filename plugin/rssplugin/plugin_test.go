@@ -19,6 +19,8 @@ var providedFeatures = map[string]bool{
 	platform.FeatureMessagePost: true,
 }
 
+// TODO (#64): Add additional unit tests for RSS plugin
+
 var command = "rss"
 
 func TestCreateRssPlugin(t *testing.T) {
