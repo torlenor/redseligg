@@ -414,6 +414,8 @@ This is a classic "Roll/Random" plugin which sends back a random number in the r
 
 Subscribe to RSS feeds.
 
+Note: Because of a much needed refactoring of the MongoDB storage backend, this plugin currently only works with SQLite as storage backend.
+
 #### Configuration options
 
 Example:
